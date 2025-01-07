@@ -1,5 +1,5 @@
 import User from '../models/user.model.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { generateToken } from '../utils/token.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
@@ -23,8 +23,7 @@ export const registerUser = asyncHandler(async (req, res) => {
   }
 
   // Hash password
-  const salt = await bcrypt.genSalt(10)
-  const hashedPassword = await bcrypt.hash(password, salt)
+  const hashedPassword = await bcrypt.hash(password, 10)
 
   // Create new user
   const user = await User.create({
