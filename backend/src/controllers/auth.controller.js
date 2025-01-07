@@ -1,17 +1,21 @@
-import asyncHandler from "../utils/asyncHandler";
-import { getGithubAcessToken, getGithubUser } from "../utils/auth/githubAuth";
-import { generateToken } from "../utils/token";
+import asyncHandler from "../utils/asyncHandler.js";
+import { getGithubAcessToken, getGithubUser } from "../utils/auth/githubAuth.js";
+import { generateToken } from "../utils/token.js";
 
 // @desc  Handle Github OAuth Callback
 // @route POST /api/auth/github
 // @access Public
 export const githubCallback = asyncHandler(async (req, res) => {
     try {
-        const code = req.body;
+        const {code} = req.body;
+        console.log('in github callback', code)
+        if(!code) {
+            throw new Error('Github OAuth code not found!')
+        }
 
-        const access_token = getGithubAcessToken(code)
+        const access_token = await getGithubAcessToken(code)
 
-        const user = getGithubUser(access_token)
+        const user = await getGithubUser(access_token)
 
         if(user && user.isVerified) {
             const token = generateToken(user._id)
@@ -20,18 +24,19 @@ export const githubCallback = asyncHandler(async (req, res) => {
               httpOnly: true,
               secure: true
             }
-        
+            console.log("Successfull: ", token)
             return res
               .status(201)
               .cookie("token", token, options)
-              .json(new ApiResponse(201, "User logged in successfully.", user))
+              .redirect(process.env.FRONTEND_HOME)
           } else {
-            res.status(401)
+            res.status(501)
             throw new Error('Error Authenticating Github pro')
           }
 
     } catch (error) {
-        throw new Error('Error ')
+        res.status(501)
+        throw new Error(error.message)
     }
     
 })

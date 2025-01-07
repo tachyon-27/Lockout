@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
 import Layout from './Layout'
-import { Home, Login, Register } from './pages'
+import { Home, Login, Register, authGithub } from './pages'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -11,6 +11,7 @@ const router = createBrowserRouter(
       <Route path='' element = { <Home /> } />
       <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register />} />
+      <Route path='/auth/github/callback' element={<authGithub />} />
     </Route>
   )
 )
