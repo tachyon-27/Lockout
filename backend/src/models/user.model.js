@@ -15,8 +15,14 @@ const userSchema = mongoose.Schema({
     },
     isVerified: {
         type: Boolean,
-        default: false,
+        default: false
     },
+    verifyCode: {
+        type: Number
+    },
+    verifyCodeExpiry: {
+        type: Date
+    }
 },
 {
     timestamps: true,
