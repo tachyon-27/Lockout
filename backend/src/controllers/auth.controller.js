@@ -13,10 +13,22 @@ export const githubCallback = asyncHandler(async (req, res) => {
 
         const user = getGithubUser(access_token)
 
-        res.json({
-            user,
-            token: generateToken(user._id),
-        })
+        if(user && user.isVerified) {
+            const token = generateToken(user._id)
+        
+            const options = {
+              httpOnly: true,
+              secure: true
+            }
+        
+            return res
+              .status(201)
+              .cookie("token", token, options)
+              .json(new ApiResponse(201, "User logged in successfully.", user))
+          } else {
+            res.status(401)
+            throw new Error('Error Authenticating Github pro')
+          }
 
     } catch (error) {
         throw new Error('Error ')
