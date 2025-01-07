@@ -1,8 +1,0 @@
-modules = ["nodejs-20", "web"]
-run = "temp"
-
-[nix]
-channel = "stable-24_05"
-
-[deployment]
-run = ["sh", "-c", "temp"]
