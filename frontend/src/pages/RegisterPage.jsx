@@ -2,6 +2,13 @@ import { Link } from "react-router-dom";
 import { BackgroundLines } from "../components/ui/background-lines";
 
 const Register = () => {
+
+    const githubOauthURL = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_REDIRECT_URI}&scope=user`
+
+    const github = () => {
+        window.location.href = githubOauthURL;
+    }
+
     return (
         <>
             < BackgroundLines className={"h-[200vh]"} >
@@ -119,6 +126,7 @@ const Register = () => {
                             <button
                                 aria-label="Log in with GitHub"
                                 className="p-3 bg-transparent rounded-sm ml-2"
+                                onClick={github}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
