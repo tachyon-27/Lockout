@@ -1,12 +1,34 @@
 import { Link } from "react-router-dom";
 import { BackgroundLines } from "../components/ui/background-lines";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { signUpSchema } from "../schemas/signupSchema";
+import { useState } from "react";
+import axios from "axios"
 
 const Register = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const {register, handleSubmit} = useForm({
+        zodResolver: zodResolver(signUpSchema)
+    })
 
     const githubOauthURL = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_REDIRECT_URI}&scope=user`
 
     const github = () => {
         window.location.href = githubOauthURL;
+    }
+
+    const submit = async (data) => {
+        setIsSubmitting(true)
+        try {
+            const res = await axios.post("/api/users/register", data)
+            if(!res.success) {
+                console.log(res.message)
+            }
+        } catch(error) {
+            console.log(error)
+        } finally {
+            setIsSubmitting(flse);
+        }
     }
 
     return (
@@ -19,7 +41,7 @@ const Register = () => {
 
                 {/* Form content */}
                 <div className="relative z-10 flex items-center justify-center min-h-screen text-white m-[5%]">
-                    <form className="flex flex-col gap-4 max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
+                    <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4 max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
                         <p className="text-2xl font-semibold tracking-wide flex items-center relative">
                             <span className="absolute w-4 h-4 rounded-full bg-blue-400 left-0 animate-ping"></span>
                             <span className="absolute w-4 h-4 rounded-full bg-blue-500 left-0"></span>
@@ -36,6 +58,7 @@ const Register = () => {
                                     className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
                                     placeholder="Firstname"
                                     required
+                                    {...register("firstname")}
                                 />
                                 <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
                                     Firstname
@@ -48,6 +71,7 @@ const Register = () => {
                                     className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
                                     placeholder="Lastname"
                                     required
+                                    {...register("lastname")}
                                 />
                                 <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
                                     Lastname
@@ -61,6 +85,7 @@ const Register = () => {
                                 className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 placeholder="Email"
                                 required
+                                {...register("email")}
                             />
                             <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
                                 Email
@@ -73,6 +98,7 @@ const Register = () => {
                                 className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 placeholder="Password"
                                 required
+                                {...register("password")}
                             />
                             <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
                                 Password
