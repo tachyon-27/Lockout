@@ -10,12 +10,15 @@ const userSchema = mongoose.Schema({
         unique: true
     },
     password: {
-        type: String,
-        required: [true, 'Please add an email'],
+        type: String
     },
     isVerified: {
         type: Boolean,
         default: false
+    },
+    githubAccessToken: {
+        type: String,
+        default: null
     },
     verifyCode: {
         type: Number
