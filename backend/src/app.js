@@ -29,7 +29,13 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 import userRouter from "./routes/user.route.js";
+import authRouter from "./routes/user.route.js";
 app.use("/api/user", userRouter);
+app.use("/api/auth", authRouter);
+
+app.use((req, res, next) => {
+  res.status(404).json({ message: "Route not found" });
+});
 
 app.use(errorHandler);
 
