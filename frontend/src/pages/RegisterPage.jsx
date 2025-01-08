@@ -1,11 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BackgroundLines } from "../components/ui/background-lines";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema } from "../schemas/signupSchema";
 import { useState } from "react";
 import axios from "axios"
+import { useDispatch } from 'react-redux'
+import { sendVerificationEmail } from "../helpers/sendVerificationEmail";
+import { verifyOTP } from "../features/authSlice";
 
 const Register = () => {
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
     const [isSubmitting, setIsSubmitting] = useState(false);
     const {register, handleSubmit} = useForm({
         zodResolver: zodResolver(signUpSchema)
@@ -23,7 +28,12 @@ const Register = () => {
             const res = await axios.post("/api/users/register", data)
             if(!res.success) {
                 console.log(res.message)
+                return
             }
+
+            sendVerificationEmail(data.email, data.firstname, res.data.verifyCode)
+            dispatch(verifyOTP(res.data))
+            navigate('/verify')
         } catch(error) {
             console.log(error)
         } finally {
