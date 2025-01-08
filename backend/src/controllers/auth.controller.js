@@ -38,5 +38,29 @@ export const githubCallback = asyncHandler(async (req, res) => {
         res.status(501)
         throw new Error(error.message)
     }
-    
+})
+
+export const verifyEmail = asyncHandler(async (req, res)=> {
+  try {
+    const {user, otp} = res.body;
+
+    if(!user) {
+      res.status(401)
+      throw new Error("Unauthorized request")
+    }
+
+    if(user.isVerified) {
+      res.status(401)
+      throw new Error("User already verified")
+    }
+
+    if(!otp) {
+      res.status(401)
+      throw new Error("OTP is required")
+    }
+
+  } catch (error) {
+    res.status(501)
+    throw new Error(error.message)
+  }
 })
