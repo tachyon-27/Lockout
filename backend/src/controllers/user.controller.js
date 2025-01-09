@@ -69,34 +69,38 @@ export const registerUser = asyncHandler(async (req, res) => {
 // @route POST /api/user/login
 // @access Public
 export const loginUser = asyncHandler(async (req, res) => {
-  const {email, password} = req.body;
-
-  // If any of the fields are missing
-  if(!email || !password) {
-    res.status(400);
-    throw new Error('Please add all fields')
-  }
-
-  // Check if user exists
-  const user = await User.findOne({email});
-
-  if(user && user.isVerified && (await bcrypt.compare(password, user.password))) {
-    const token = generateToken(user._id)
-
-    const options = {
-      httpOnly: true,
-      secure: true
-    }
-
-    return res
-      .status(201)
-      .cookie("token", token, options)
-      .json(new ApiResponse(201, "User logged in successfully.", user))
-  } else {
-    res.status(401)
-    throw new Error('Invalid email or password')
-  }
+  try {
+    const {email, password} = req.body;
   
+    // If any of the fields are missing
+    if(!email || !password) {
+      res.status(400);
+      throw new Error('Please add all fields')
+    }
+  
+    // Check if user exists
+    const user = await User.findOne({email});
+  
+    if(user && user.isVerified && (await bcrypt.compare(password, user.password))) {
+      const token = generateToken(user._id)
+  
+      const options = {
+        httpOnly: true,
+        secure: true
+      }
+  
+      return res
+        .status(201)
+        .cookie("token", token, options)
+        .json(new ApiResponse(201, "User logged in successfully.", user))
+    } else {
+      res.status(401)
+      throw new Error('Invalid email or password ')
+    }
+  } catch (error) {
+    res.status(401)
+    throw new Error(error)
+  }
 })
 
 // @desc  Logout User

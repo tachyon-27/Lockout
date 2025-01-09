@@ -4,6 +4,9 @@ import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
 import Layout from './Layout'
 import { Home, Login, Register, authGithub } from './pages'
+import { Provider } from 'react-redux'
+import store from './app/store'
+import Verify from './pages/VerifyOTP'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
 const router = createBrowserRouter(
@@ -12,14 +15,16 @@ const router = createBrowserRouter(
       <Route path='' element = { <Home /> } />
       <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register />} />
+      <Route path='/verify/:what' element={<Verify />} />
       <Route path='/auth/github/callback' element={<authGithub />} />
     </Route>
   )
 )
 
 createRoot(document.getElementById('root')).render(
-  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-    <RouterProvider router={router} />
-  </GoogleOAuthProvider>
-  ,
+  <Provider store={store}>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <RouterProvider router={router} />
+    </GoogleOAuthProvider>,
+  </Provider>
 )

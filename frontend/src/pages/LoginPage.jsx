@@ -4,7 +4,6 @@ import { useGoogleLogin } from '@react-oauth/google';
 
 
 const Login = () => {
-
     const githubOauthURL = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_REDIRECT_URI}&scope=user`
 
     const githubLogin = () => {
