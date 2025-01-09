@@ -6,7 +6,7 @@ dotenv.config({
     path: "../.env",
 });
 
-const port = process.env.BACKEND_PORT;
+const port = process.env.VITE_BACKEND_PORT;
 connectDB()
     .then(() => {
         app.listen(port, () => {

@@ -1,13 +1,51 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BackgroundLines } from "../components/ui/background-lines";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { signUpSchema } from "../schemas/signupSchema";
+import { useState } from "react";
+import axios from "axios"
+import { useDispatch } from 'react-redux'
+import { sendVerificationEmail } from "../helpers/sendVerificationEmail";
+import { verifyOTP } from "../features/authSlice";
+import { useForm } from 'react-hook-form';
+import {  Loader2 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 
 const Register = () => {
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const {register, handleSubmit} = useForm({
+        zodResolver: zodResolver(signUpSchema)
+    })
 
     const githubOauthURL = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_REDIRECT_URI}&scope=user`
 
     const githubLogin = () => {
         window.location.href = githubOauthURL;
+    }
+
+    const submit = async (data) => {
+        setIsSubmitting(true)
+        try {
+            if(data.password != data.confirmPassword) {
+                console.log("Password does not match")
+                return;
+            }
+            const res = await axios.post("/api/users/register", data)
+            if(!res.success) {
+                console.log(res.message)
+                return
+            }
+
+            sendVerificationEmail(data.email, data.name, res.data.verifyCode)
+            dispatch(verifyOTP(res.data._id))
+            navigate('/verify/email')
+        } catch(error) {
+            console.log(error)
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     const googleLogin = useGoogleLogin({
@@ -39,16 +77,12 @@ const Register = () => {
     })
 
     return (
-        <>
-            < BackgroundLines className={"h-[200vh]"} >
+        <BackgroundLines className={"h-[200vh]"} >
             <div
-                className="relative flex justify-center items-center min-h-screen bg-cover bg-center bg-no-repeat"
-                
+                className="relative flex justify-center items-center min-h-screen bg-cover bg-center bg-no-repeat"   
             >
-
-                {/* Form content */}
                 <div className="relative z-10 flex items-center justify-center min-h-screen text-white m-[5%]">
-                    <form className="flex flex-col gap-4 max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
+                    <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4 max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
                         <p className="text-2xl font-semibold tracking-wide flex items-center relative">
                             <span className="absolute w-4 h-4 rounded-full bg-blue-400 left-0 animate-ping"></span>
                             <span className="absolute w-4 h-4 rounded-full bg-blue-500 left-0"></span>
@@ -58,31 +92,18 @@ const Register = () => {
                             Signup now and get full access to our app.
                         </p>
 
-                        <div className="flex gap-4">
-                            <label className="relative w-full">
-                                <input
-                                    type="text"
-                                    className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                    placeholder="Firstname"
-                                    required
-                                />
-                                <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
-                                    Firstname
-                                </span>
-                            </label>
-
-                            <label className="relative w-full">
-                                <input
-                                    type="text"
-                                    className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                    placeholder="Lastname"
-                                    required
-                                />
-                                <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
-                                    Lastname
-                                </span>
-                            </label>
-                        </div>
+                        <label className="relative w-full">
+                            <input
+                                type="text"
+                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                placeholder="Name"
+                                required
+                                {...register("name")}
+                            />
+                            <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
+                                Name
+                            </span>
+                        </label>
 
                         <label className="relative w-full">
                             <input
@@ -90,6 +111,7 @@ const Register = () => {
                                 className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 placeholder="Email"
                                 required
+                                {...register("email")}
                             />
                             <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
                                 Email
@@ -102,6 +124,7 @@ const Register = () => {
                                 className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 placeholder="Password"
                                 required
+                                {...register("password")}
                             />
                             <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
                                 Password
@@ -114,6 +137,7 @@ const Register = () => {
                                 className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 placeholder="Confirm password"
                                 required
+                                {...register("confirmPassword")}
                             />
                             <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
                                 Confirm Password
@@ -167,8 +191,19 @@ const Register = () => {
                                 </svg>
                             </button>
                         </div>
-                        <button className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition">
-                            Submit
+                        <button 
+                            type="submit"
+                            disabled = {isSubmitting}
+                            className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition"
+                        >       
+                        {isSubmitting ? (
+                            <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Please wait
+                            </>
+                        ) : (
+                            'Sign Up'
+                        )}
                         </button>
                         <p className="text-center text-sm text-gray-400">
                             Already have an account?{" "}
@@ -182,8 +217,7 @@ const Register = () => {
                     </form>
                 </div>
             </div>
-            </BackgroundLines>
-        </>
+        </BackgroundLines>
     );
 };
 
