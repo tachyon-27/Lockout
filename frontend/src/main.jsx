@@ -4,6 +4,7 @@ import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
 import Layout from './Layout'
 import { Home, Login, Register, authGithub } from './pages'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -17,7 +18,8 @@ const router = createBrowserRouter(
 )
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
     <RouterProvider router={router} />
-  </StrictMode>,
+  </GoogleOAuthProvider>
+  ,
 )
