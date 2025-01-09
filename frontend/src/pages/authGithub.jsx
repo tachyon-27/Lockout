@@ -13,7 +13,7 @@ const authGithub = () => {
         try {
           setLoading(true); 
 
-          const response = await fetch("http://localhost:5000/api/auth/github", {
+          const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/auth/github`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
