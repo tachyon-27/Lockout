@@ -19,7 +19,6 @@ const userSchema = mongoose.Schema({
     },
     githubAccessToken: {
         type: String,
-        default: null
     },
     isGoogle: {
         type: Boolean,
