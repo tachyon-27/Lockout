@@ -12,7 +12,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: `http://localhost:${import.meta.env.VITE_BACKEND_PORT}`,
+        target: `http://localhost:${process.env.VITE_BACKEND_PORT}`,
       },
     },
   },
