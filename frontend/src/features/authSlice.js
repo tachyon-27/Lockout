@@ -1,8 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-    status: false,
-    user: null
+    verifyOTP: false,
+    forgotPassword: false,
+    _id: null
 }
 
 const authSlice = createSlice({
@@ -10,20 +11,21 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         verifyOTP: (state, action) => {
-            state.status = false;
-            state.user = action.payload
+            state.verifyOTP = true
+            state._id = action.payload
         },
-        login: (state, action) => {
-            state.status = true;
-            state.user = action.payload
+        forgotPassword: (state, action) => {
+            state.forgotPassword = true
+            state._id = action.payload
         },
-        logout: (state) => {
-            state.status = false;
-            state.user = null;
+        reset: (state) => {
+            state.forgotPassword = false
+            state.verifyOTP = false
+            state._id = null
         }
     }
 })
 
-export const {login, logout, verifyOTP} = authSlice.actions
+export const {verifyOTP, forgotPassword, reset} = authSlice.actions
 
 export default authSlice.reducer

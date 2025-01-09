@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { BackgroundLines } from '../components/ui/background-lines';
 
 const Login = () => {
-
     const githubOauthURL = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_REDIRECT_URI}&scope=user`
 
     const github = () => {
