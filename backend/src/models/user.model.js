@@ -21,6 +21,10 @@ const userSchema = mongoose.Schema({
         type: String,
         default: null
     },
+    isGoogle: {
+        type: Boolean,
+        default: false
+    },
     verifyCode: {
         type: Number
     },
