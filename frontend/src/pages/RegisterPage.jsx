@@ -8,16 +8,29 @@ import { useDispatch } from 'react-redux'
 import { sendVerificationEmail } from "../helpers/sendVerificationEmail";
 import { verifyOTP } from "../features/authSlice";
 import { useForm } from 'react-hook-form';
-import {  Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Register = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const {register, handleSubmit} = useForm({
+    const { register, handleSubmit } = useForm({
         zodResolver: zodResolver(signUpSchema)
     })
+
+    const [showPassword, setShowPassword] = useState(false);
+
+    const togglePassword = () => {
+        setShowPassword((prev) => !prev);
+    }
+    
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const toggleConfirmPassword = () => {
+        setShowConfirmPassword((prev) => !prev);
+    }
 
     const githubOauthURL = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_REDIRECT_URI}&scope=user`
 
@@ -28,12 +41,12 @@ const Register = () => {
     const submit = async (data) => {
         setIsSubmitting(true)
         try {
-            if(data.password != data.confirmPassword) {
+            if (data.password != data.confirmPassword) {
                 console.log("Password does not match")
                 return;
             }
             const res = await axios.post("/api/users/register", data)
-            if(!res.success) {
+            if (!res.success) {
                 console.log(res.message)
                 return
             }
@@ -41,7 +54,7 @@ const Register = () => {
             sendVerificationEmail(data.email, data.name, res.data.verifyCode)
             dispatch(verifyOTP(res.data._id))
             navigate('/verify/email')
-        } catch(error) {
+        } catch (error) {
             console.log(error)
         } finally {
             setIsSubmitting(false);
@@ -56,12 +69,12 @@ const Register = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({token: tokenResponse.access_token}),
+                    body: JSON.stringify({ token: tokenResponse.access_token }),
                 })
 
                 const data = await response.json()
 
-                if(data.success) {
+                if (data.success) {
                     console.log('Authentication is Successfull');
                 } else {
                     console.error('Login Failed', data.message);
@@ -79,10 +92,10 @@ const Register = () => {
     return (
         <BackgroundLines className={"h-[200vh]"} >
             <div
-                className="relative flex justify-center items-center min-h-screen bg-cover bg-center bg-no-repeat"   
+                className="relative flex justify-center items-center min-h-screen bg-cover bg-center bg-no-repeat"
             >
                 <div className="relative z-10 flex items-center justify-center min-h-screen text-white m-[5%]">
-                    <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4 max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
+                    <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4 min-w-[50vh] max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
                         <p className="text-2xl font-semibold tracking-wide flex items-center relative">
                             <span className="absolute w-4 h-4 rounded-full bg-blue-400 left-0 animate-ping"></span>
                             <span className="absolute w-4 h-4 rounded-full bg-blue-500 left-0"></span>
@@ -92,57 +105,97 @@ const Register = () => {
                             Signup now and get full access to our app.
                         </p>
 
-                        <label className="relative w-full">
+                        <div className="relative w-full">
                             <input
                                 type="text"
-                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                placeholder="Name"
+                                id="name"
+                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                placeholder=" "
                                 required
                                 {...register("name")}
                             />
-                            <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
+                            <label
+                                htmlFor="name"
+                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
+                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 
+                                peer-focus:top-0 peer-focus:opacity-0 peer-focus:text-xs peer-focus:text-blue-400 
+                                peer-valid:top-0 peer-valid:opacity-0 peer-valid:text-xs peer-valid:text-blue-400"
+                            >
                                 Name
-                            </span>
-                        </label>
+                            </label>
+                        </div>
 
-                        <label className="relative w-full">
+                        <div className="relative w-full">
                             <input
-                                type="email"
-                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                placeholder="Email"
+                                type="text"
+                                id="email"
+                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                placeholder=" "  // Empty placeholder to allow label styling
                                 required
-                                {...register("email")}
+                                {...register("email")} // Assuming you're using react-hook-form
                             />
-                            <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
+                            <label
+                                htmlFor="email"
+                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
+                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400
+                                peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-400 peer-focus:opacity-0
+                                peer-valid:top-0 peer-valid:text-xs peer-valid:text-blue-400 peer-valid:opacity-0"
+                            >
                                 Email
-                            </span>
-                        </label>
+                            </label>
+                        </div>
 
-                        <label className="relative w-full">
+
+                        <div className="relative w-full">
                             <input
-                                type="password"
-                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                placeholder="Password"
+                                type={showPassword ? 'text' : 'password'}
+                                id="password"
+                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                placeholder=" "
                                 required
                                 {...register("password")}
                             />
-                            <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
+                            <label
+                                htmlFor="password"
+                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
+                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 
+                                peer-focus:top-0 peer-focus:opacity-0 peer-focus:text-xs peer-focus:text-blue-400 
+                                peer-valid:top-0 peer-valid:opacity-0 peer-valid:text-xs peer-valid:text-blue-400"
+                            >
                                 Password
-                            </span>
-                        </label>
+                            </label>
+                            <button
+                                type="button"
+                                onClick={togglePassword}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                            >
+                                {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Show different icons based on state */}
+                            </button>
+                        </div>
 
-                        <label className="relative w-full">
+                        <div className="relative w-full">
                             <input
-                                type="password"
-                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                placeholder="Confirm password"
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                id='cpassword'
+                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                placeholder=" "
                                 required
                                 {...register("confirmPassword")}
                             />
-                            <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
+                            <label
+                                htmlFor="cpassword"
+                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
+                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 
+                                peer-focus:top-0 peer-focus:opacity-0 peer-focus:text-xs peer-focus:text-blue-400 
+                                peer-valid:top-0 peer-valid:opacity-0 peer-valid:text-xs peer-valid:text-blue-400"
+                            >
                                 Confirm Password
-                            </span>
-                        </label>
+                            </label>
+                            <button type="button" onClick={toggleConfirmPassword} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                {showConfirmPassword ? <FaEyeSlash /> : <FaEye /> }
+                            </button>
+                            
+                        </div>
                         <div className="flex items-center pt-4">
                             <div className="flex-1 h-px bg-gray-700"></div>
                             <p className="px-3 text-sm text-gray-400">
@@ -150,7 +203,7 @@ const Register = () => {
                             </p>
                             <div className="flex-1 h-px bg-gray-700"></div>
                         </div>
-                        <div className="flex justify-center mt-4">
+                        <div className="flex justify-center mt-2">
                             <button
                                 aria-label="Log in with Google"
                                 className="p-3 bg-transparent rounded-sm"
@@ -191,19 +244,19 @@ const Register = () => {
                                 </svg>
                             </button>
                         </div>
-                        <button 
+                        <button
                             type="submit"
-                            disabled = {isSubmitting}
+                            disabled={isSubmitting}
                             className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition"
-                        >       
-                        {isSubmitting ? (
-                            <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Please wait
-                            </>
-                        ) : (
-                            'Sign Up'
-                        )}
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Please wait
+                                </>
+                            ) : (
+                                'Sign Up'
+                            )}
                         </button>
                         <p className="text-center text-sm text-gray-400">
                             Already have an account?{" "}

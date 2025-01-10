@@ -60,29 +60,43 @@ const Login = () => {
                             Welcome back! Login to access your account.
                         </p>
 
-                        <label className="relative w-full">
+                        <div className="relative w-full">
                             <input
-                                type="email"
-                                className="w-[100%] bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                type="text"
+                                id='email'
+                                className="w-[100%] bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
                                 placeholder="Email"
                                 required
                             />
-                            <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
+                            <label
+                                htmlFor="email"
+                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
+                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 
+                                peer-focus:top-0 peer-focus:opacity-0 peer-focus:text-xs peer-focus:text-blue-400 
+                                peer-valid:top-0 peer-valid:opacity-0 peer-valid:text-xs peer-valid:text-blue-400"
+                            >
                                 Email
-                            </span>
-                        </label>
+                            </label>
+                        </div>
 
-                        <label className="relative w-full">
+                        <div className="relative w-full">
                             <input
                                 type="password"
-                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                placeholder="Password"
+                                id="password"
+                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                placeholder=" "
                                 required
                             />
-                            <span className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all pointer-events-none">
+                            <label
+                                htmlFor="password"
+                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
+                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 
+                                peer-focus:top-0 peer-focus:opacity-0 peer-focus:text-xs peer-focus:text-blue-400 
+                                peer-valid:top-0 peer-valid:opacity-0 peer-valid:text-xs peer-valid:text-blue-400"
+                            >
                                 Password
-                            </span>
-                        </label>
+                            </label>
+                        </div>
 
                         <Link to='#' className='hover:underline text-sm text-gray-400'>Forgot password?</Link>
 
@@ -96,7 +110,7 @@ const Login = () => {
                             </p>
                             <div className="flex-1 h-px bg-gray-700"></div>
                         </div>
-                        <div className="flex justify-center mt-4">
+                        <div className="flex justify-center mt-1">
                             <button
                                 aria-label="Log in with Google"
                                 className="p-3 bg-transparent rounded-sm"
