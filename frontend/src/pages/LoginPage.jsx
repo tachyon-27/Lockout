@@ -1,9 +1,18 @@
 import { Link } from 'react-router-dom';
 import { BackgroundLines } from '../components/ui/background-lines';
 import { useGoogleLogin } from '@react-oauth/google';
+import { useState } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 
 const Login = () => {
+
+    const [showPassword, setShowPassword] = useState(false);
+
+    const togglePassword = () => {
+        setShowPassword((prev) => !prev);
+    }
+
     const githubOauthURL = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_REDIRECT_URI}&scope=user`
 
     const githubLogin = () => {
@@ -81,7 +90,7 @@ const Login = () => {
 
                         <div className="relative w-full">
                             <input
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 id="password"
                                 className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
                                 placeholder=" "
@@ -96,6 +105,9 @@ const Login = () => {
                             >
                                 Password
                             </label>
+                            <button type="button" onClick={togglePassword} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                {showPassword ? <FaEyeSlash /> : <FaEye /> }
+                            </button>
                         </div>
 
                         <Link to='#' className='hover:underline text-sm text-gray-400'>Forgot password?</Link>
