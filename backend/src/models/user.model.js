@@ -20,6 +20,10 @@ const userSchema = mongoose.Schema({
     githubAccessToken: {
         type: String,
     },
+    isGoogle: {
+        type: Boolean,
+        default: false
+    },
     verifyCode: {
         type: Number
     },

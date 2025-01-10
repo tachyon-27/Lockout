@@ -1,12 +1,42 @@
 import { Link } from 'react-router-dom';
 import { BackgroundLines } from '../components/ui/background-lines';
+import { useGoogleLogin } from '@react-oauth/google';
+
 
 const Login = () => {
     const githubOauthURL = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_REDIRECT_URI}&scope=user`
 
-    const github = () => {
+    const githubLogin = () => {
         window.location.href = githubOauthURL;
     }
+
+    const googleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/auth/google`, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({token: tokenResponse.access_token}),
+                })
+
+                const data = await response.json()
+
+                if(data.success) {
+                    console.log('Authentication is Successfull');
+                } else {
+                    console.error('Login Failed', data.message);
+                }
+
+            } catch (error) {
+                console.log('Error during login', error);
+            }
+        },
+        onError: () => {
+            console.log('Google Login Failed')
+        }
+    })
 
     return (
         <>
@@ -70,6 +100,7 @@ const Login = () => {
                             <button
                                 aria-label="Log in with Google"
                                 className="p-3 bg-transparent rounded-sm"
+                                onClick={googleLogin}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +126,7 @@ const Login = () => {
                             <button
                                 aria-label="Log in with GitHub"
                                 className="p-3 bg-transparent rounded-sm ml-2"
-                                onClick={github}
+                                onClick={githubLogin}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
