@@ -12,9 +12,7 @@ dotenv.config({
 export default defineConfig({
   server: {
     proxy: {
-      '/api': {
-        target: `http://localhost:${process.env.VITE_BACKEND_PORT}`,
-      },
+      '/api': `http://localhost:${process.env.VITE_BACKEND_PORT}`
     },
   },
   plugins: [react()],

@@ -11,6 +11,10 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
+    "@radix-ui/react-label": "^2.1.1",
+    "@radix-ui/react-slot": "^1.1.1",
+    "@radix-ui/react-toast": "^1.2.4",
+    "@react-email/components": "^0.0.32",
     "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.5.0",
     "axios": "^1.7.9",

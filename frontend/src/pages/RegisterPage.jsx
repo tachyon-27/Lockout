@@ -8,26 +8,37 @@ import { useDispatch } from 'react-redux'
 import { sendVerificationEmail } from "../helpers/sendVerificationEmail";
 import { verifyOTP } from "../features/authSlice";
 import { useForm } from 'react-hook-form';
-import { Loader2 } from 'lucide-react';
+import { DessertIcon, Loader2 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useToast } from "@/hooks/use-toast"
+import {
+  Form,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+
 
 const Register = () => {
+    const { toast } = useToast()
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { register, handleSubmit } = useForm({
-        zodResolver: zodResolver(signUpSchema)
+    const form = useForm({
+        resolver: zodResolver(signUpSchema)
     })
 
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const togglePassword = () => {
         setShowPassword((prev) => !prev);
     }
     
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
     const toggleConfirmPassword = () => {
         setShowConfirmPassword((prev) => !prev);
     }
@@ -37,30 +48,7 @@ const Register = () => {
     const githubLogin = () => {
         window.location.href = githubOauthURL;
     }
-
-    const submit = async (data) => {
-        setIsSubmitting(true)
-        try {
-            if (data.password != data.confirmPassword) {
-                console.log("Password does not match")
-                return;
-            }
-            const res = await axios.post("/api/users/register", data)
-            if (!res.success) {
-                console.log(res.message)
-                return
-            }
-
-            sendVerificationEmail(data.email, data.name, res.data.verifyCode)
-            dispatch(verifyOTP(res.data._id))
-            navigate('/verify/email')
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setIsSubmitting(false);
-        }
-    }
-
+    
     const googleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
@@ -89,13 +77,38 @@ const Register = () => {
         }
     })
 
+    const submit = async (data) => {
+        setIsSubmitting(true)
+        try {
+            const res = await axios.post("/api/user/register", data)
+            if (!res.data.success) {
+                console.log(res.message)
+                return
+            }
+
+            const emailRes = sendVerificationEmail(data.email, data.name, res.data.data.verifyCode)
+            if(!emailRes.success) {
+                toast({
+                    title: "Error while sending email.",
+                    dessertIcon: emailRes.message
+                })
+                console.log(emailRes.message)
+                return;
+            }
+            dispatch(verifyOTP(res.data.data._id))
+            navigate('/verify/email')
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
     return (
-        <BackgroundLines className={"h-[200vh]"} >
-            <div
-                className="relative flex justify-center items-center min-h-screen bg-cover bg-center bg-no-repeat"
-            >
-                <div className="relative z-10 flex items-center justify-center min-h-screen text-white m-[5%]">
-                    <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4 min-w-[50vh] max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
+        <BackgroundLines className="relative flex justify-center items-center min-h-[120vh]" >
+            <div className="relative z-10 flex items-center justify-center min-h-screen text-white mx-auto my-9">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(submit)} className="flex flex-col gap-4 min-w-[50vh] max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
                         <p className="text-2xl font-semibold tracking-wide flex items-center relative">
                             <span className="absolute w-4 h-4 rounded-full bg-blue-400 left-0 animate-ping"></span>
                             <span className="absolute w-4 h-4 rounded-full bg-blue-500 left-0"></span>
@@ -105,97 +118,97 @@ const Register = () => {
                             Signup now and get full access to our app.
                         </p>
 
-                        <div className="relative w-full">
-                            <input
-                                type="text"
-                                id="name"
-                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
-                                placeholder=" "
-                                required
-                                {...register("name")}
-                            />
-                            <label
-                                htmlFor="name"
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
-                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 
-                                peer-focus:top-0 peer-focus:opacity-0 peer-focus:text-xs peer-focus:text-blue-400 
-                                peer-valid:top-0 peer-valid:opacity-0 peer-valid:text-xs peer-valid:text-blue-400"
-                            >
-                                Name
-                            </label>
-                        </div>
+                        <FormField 
+                            name="name"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem className="relative w-full">
+                                    <FormLabel> Name </FormLabel>
+                                    <Input
+                                        {...field}
+                                        className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                        placeholder="Name"
+                                        required
+                                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                        <div className="relative w-full">
-                            <input
-                                type="text"
-                                id="email"
-                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
-                                placeholder=" "  // Empty placeholder to allow label styling
-                                required
-                                {...register("email")} // Assuming you're using react-hook-form
-                            />
-                            <label
-                                htmlFor="email"
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
-                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400
-                                peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-400 peer-focus:opacity-0
-                                peer-valid:top-0 peer-valid:text-xs peer-valid:text-blue-400 peer-valid:opacity-0"
-                            >
-                                Email
-                            </label>
-                        </div>
+                        <FormField 
+                            name="email"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem className="relative w-full">
+                                    <FormLabel> Email </FormLabel>
+                                    <Input
+                                        {...field}
+                                        name="name"
+                                        className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                        placeholder="Email"
+                                        type="email"
+                                        required
+                                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
+                        <FormField 
+                            name="password"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem className="relative w-full">
+                                    <FormLabel> Password </FormLabel>
+                                    <div className="relative">
+                                        <Input
+                                            {...field}
+                                            type={showPassword ? 'text' : 'password'}
+                                            className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                            placeholder="Password"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={togglePassword}
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                                            >
+                                            {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Show different icons based on state */}
+                                        </button>
+                                    </div>
 
-                        <div className="relative w-full">
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                id="password"
-                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
-                                placeholder=" "
-                                required
-                                {...register("password")}
-                            />
-                            <label
-                                htmlFor="password"
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
-                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 
-                                peer-focus:top-0 peer-focus:opacity-0 peer-focus:text-xs peer-focus:text-blue-400 
-                                peer-valid:top-0 peer-valid:opacity-0 peer-valid:text-xs peer-valid:text-blue-400"
-                            >
-                                Password
-                            </label>
-                            <button
-                                type="button"
-                                onClick={togglePassword}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                            >
-                                {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Show different icons based on state */}
-                            </button>
-                        </div>
-
-                        <div className="relative w-full">
-                            <input
-                                type={showConfirmPassword ? 'text' : 'password'}
-                                id='cpassword'
-                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
-                                placeholder=" "
-                                required
-                                {...register("confirmPassword")}
-                            />
-                            <label
-                                htmlFor="cpassword"
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
-                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 
-                                peer-focus:top-0 peer-focus:opacity-0 peer-focus:text-xs peer-focus:text-blue-400 
-                                peer-valid:top-0 peer-valid:opacity-0 peer-valid:text-xs peer-valid:text-blue-400"
-                            >
-                                Confirm Password
-                            </label>
-                            <button type="button" onClick={toggleConfirmPassword} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                                {showConfirmPassword ? <FaEyeSlash /> : <FaEye /> }
-                            </button>
+                                    <FormDescription>
+                                        Password must be of atleat 8 characters and it must contain all of capital letter, small letter, number and special character.
+                                    </FormDescription>
                             
-                        </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField 
+                            name="confirmPassword"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem className="relative w-full">
+                                    <FormLabel> Confirm Password </FormLabel>
+                                    <div className="relative">
+                                        <input
+                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600t focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                            placeholder="Confirm Password"
+                                            {...field}
+                                            required
+                                        />
+                                        <button type="button" onClick={toggleConfirmPassword} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                            {showConfirmPassword ? <FaEyeSlash /> : <FaEye /> }
+                                        </button>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
                         <div className="flex items-center pt-4">
                             <div className="flex-1 h-px bg-gray-700"></div>
                             <p className="px-3 text-sm text-gray-400">
@@ -250,10 +263,10 @@ const Register = () => {
                             className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition"
                         >
                             {isSubmitting ? (
-                                <>
+                                <div className="flex items-center justify-center">
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Please wait
-                                </>
+                                </div>
                             ) : (
                                 'Sign Up'
                             )}
@@ -267,8 +280,8 @@ const Register = () => {
                                 Signin
                             </Link>
                         </p>
-                    </form>
-                </div>
+                    </form>     
+                </Form>
             </div>
         </BackgroundLines>
     );
