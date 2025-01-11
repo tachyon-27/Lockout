@@ -7,7 +7,6 @@ import {
     Row,
     Section,
     Text,
-    Button,
   } from '@react-email/components';
 
   export default function VerificationEmail({ name, otp }) {
