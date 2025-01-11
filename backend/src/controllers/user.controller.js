@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { generateToken } from '../utils/token.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
+import { resend } from '../utils/resend.js';
 
 // @desc  Register new User
 // @route POST /api/user/register
@@ -30,6 +31,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     else {
       const hashedPassword = await bcrypt.hash(password, 10)
       userExists.password = hashedPassword
+      userExists.name = name
       userExists.verifyCode = verifyCode
       userExists.verifyCodeExpiry = expiryDate
       await userExists.save()
@@ -116,4 +118,38 @@ export const logoutUser = asyncHandler(async (req, res) => {
     .status(200)
     .clearCookie("token", options)
     .json(new ApiResponse(200, "User Logged Out"))
+})
+
+export const sendEmail = asyncHandler(async (req, res) => {
+    try {
+      const {email, content} = req.body
+    
+      if(!email || !content) {
+        throw new Error("All fields are required.")
+      }
+      const { error} = await resend.emails.send({
+        from: 'Test <onboarding@resend.dev>',
+        to: email,
+        subject: 'Verification code',
+        html: content
+      });
+
+      if(error) {
+          return res.json({
+              success: false,
+              message: error.message
+          })
+      }
+
+      return res.json({
+          success: true,
+          message: "Verification email sent successfully to " + email
+      })
+  } catch(emailError) {
+      console.log("Error while sending verification email ", emailError)
+      return res.json({
+          success: false,
+          message: "Failed to send verification email."
+      }) 
+  }
 })
