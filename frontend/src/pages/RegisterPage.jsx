@@ -44,7 +44,7 @@ const Register = () => {
         setShowConfirmPassword((prev) => !prev);
     }
 
-    const githubOauthURL = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_REDIRECT_URI}&scope=user`
+    const githubOauthURL = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_REDIRECT_URI}&scope=user:user:email`
 
     const githubLogin = () => {
         window.location.href = githubOauthURL;

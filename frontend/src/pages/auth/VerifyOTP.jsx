@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
-import { BackgroundLines } from '../components/ui/background-lines';
+import { BackgroundLines } from '../../components/ui/background-lines';
 import { useDispatch } from 'react-redux'
 import {
   InputOTP,

@@ -13,14 +13,15 @@ const googleClient = new OAuth2Client(process.env.VITE_GOOGLE_CLIENT_ID)
 export const githubCallback = asyncHandler(async (req, res) => {
     try {
         const {code} = req.body;
-        console.log('in github callback', code)
+        // console.log('in github callback', code)
         if(!code) {
             throw new Error('Github OAuth code not found!')
         }
 
         const access_token = await getGithubAcessToken(code)
-
+        // console.log('Not get token', access_token)
         const user = await getGithubUser(access_token)
+        console.log('Not get user', user)
 
         if(user && user.isVerified) {
             const token = generateToken(user._id)
@@ -30,10 +31,14 @@ export const githubCallback = asyncHandler(async (req, res) => {
               secure: true
             }
             console.log("Successfull: ", token)
+
+            res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+            res.setHeader('Access-Control-Allow-Credentials', 'true');
+
             return res
               .status(201)
               .cookie("token", token, options)
-              .redirect(process.env.FRONTEND_HOME)
+              .json(new ApiResponse('User Github Logged in!'))
           } else {
             res.status(501)
             throw new Error('Error Authenticating Github profile')
