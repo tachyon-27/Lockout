@@ -1,21 +1,37 @@
-import { Link, useParams } from 'react-router-dom';
 import { BackgroundLines } from '../components/ui/background-lines';
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp"
 import { useState } from 'react';
- 
+import axios from "axios"
+import { useToast } from "@/hooks/use-toast"
+import { reset } from '../../features/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 function Verify() {
-  const {what} = useParams()
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   const [otp, setOtp] = useState("")
+  const info = useSelector(state => state.auth)
+  const { toast } = useToast()
 
   const verify = () => {
+    if(info.verifyOTP) {
+     const res = axios.post('/api/auth/verify-email', {_id: info._id, otp})
+     
+     toast({
+        title: res.data.success ? "SUCCESS" : "FAILURE",
+        description: res.data.message
+     })
 
+     if(res.data.success) {
+        dispatch(reset())
+        navigate('/login')
+     }
+    }
   }
 
   const resend = () => {
@@ -52,7 +68,7 @@ function Verify() {
                 </InputOTP>
                 </div>
 
-                <button onClick={verify} className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition">
+                <button onClick={verify} className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition" disabled={otp.length() == 6}>
                     Verify
                 </button>
 
