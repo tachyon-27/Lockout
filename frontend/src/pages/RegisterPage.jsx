@@ -5,12 +5,12 @@ import { signUpSchema } from "../schemas/signupSchema";
 import { useState } from "react";
 import axios from "axios"
 import { useDispatch } from 'react-redux'
-import { sendVerificationEmail } from "../helpers/sendVerificationEmail";
 import { verifyOTP } from "../features/authSlice";
 import { useForm } from 'react-hook-form';
 import { DessertIcon, Loader2 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import ReactDOMServer from 'react-dom/server';
 import { useToast } from "@/hooks/use-toast"
 import {
   Form,
@@ -21,6 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import VerificationEmail from "../emails/VerificationEmail";
 
 
 const Register = () => {
@@ -82,23 +83,39 @@ const Register = () => {
         try {
             const res = await axios.post("/api/user/register", data)
             if (!res.data.success) {
-                console.log(res.message)
+                toast({
+                    title: "Sign-up failed",
+                    description: res.data.message
+                })
                 return
             }
+            const emailHtml = ReactDOMServer.renderToStaticMarkup(
+                <VerificationEmail name={data.name} otp={res.data.data.verifyCode} />
+              );
 
-            const emailRes = sendVerificationEmail(data.email, data.name, res.data.data.verifyCode)
-            if(!emailRes.success) {
+            const emailRes = await axios.post('/api/user/send-email', {email: data.email, content: emailHtml})
+
+            if(!emailRes.data.success) {
                 toast({
-                    title: "Error while sending email.",
-                    dessertIcon: emailRes.message
+                    title: "Invalid email.",
+                    description: emailRes.data.message
                 })
-                console.log(emailRes.message)
-                return;
+                console.log(emailRes.data.message)
             }
-            dispatch(verifyOTP(res.data.data._id))
-            navigate('/verify/email')
+            else {
+                toast({
+                    title: "Success",
+                    description: res.data.message
+                })
+                dispatch(verifyOTP(res.data.data._id))
+                navigate('/verify')
+            }
         } catch (error) {
             console.log(error)
+            toast({
+                title: "Sign-up failed",
+                description: error.message
+            })
         } finally {
             setIsSubmitting(false);
         }

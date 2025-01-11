@@ -2,10 +2,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
 import Layout from './Layout'
-import { Home, Login, Register, authGithub } from './pages'
+import { Home, Login, Register, AuthGithub, Verify } from './pages'
 import { Provider } from 'react-redux'
 import store from './app/store'
-import Verify from './pages/VerifyOTP'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { Toaster } from "@/components/ui/toaster"
 
@@ -15,8 +14,8 @@ const router = createBrowserRouter(
       <Route path='' element = { <Home /> } />
       <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register />} />
-      <Route path='/verify/:what' element={<Verify />} />
-      <Route path='/auth/github/callback' element={<authGithub />} />
+      <Route path='/verify' element={<Verify />} />
+      <Route path='/auth/github/callback' element={<AuthGithub />} />
     </Route>
   )
 )
