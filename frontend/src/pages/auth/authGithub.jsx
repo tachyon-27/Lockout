@@ -1,55 +1,68 @@
+import { useToast } from "@/hooks/use-toast";
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { RingLoader } from "react-spinners"; 
+
 
 const AuthGithub = () => {
   const [searchParams] = useSearchParams();
   const githubCode = searchParams.get("code"); 
-  const [loading, setLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { toast } = useToast()
 
   useEffect(() => {
     if (githubCode) {
       const authenticate = async () => {
         try {
-          setLoading(true); 
-
           const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/auth/github`, {
             method: "POST",
+            credentials:'include',
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ code: githubCode }),
           });
-
           if (response.ok) {
-            console.log("Authentication successful, redirected.");
+            toast({
+              title: 'Successfully Logged In'
+            })
+            navigate('/');
           } else {
-            console.error("Authentication failed.");
-            setIsError(true);
+            const { message } = await response.json()
+            toast({
+              title: 'Error Logging in!',
+              description: message,
+            })
+            navigate('/login');
           }
         } catch (error) {
-          console.error("Error during authentication:", error);
-          setIsError(true);
+          toast({
+            title: 'Error during Authorization!'
+          })
+          navigate('/login');
         } finally {
-          setLoading(false);
+          setLoading(true);
         }
       };
 
       authenticate();
+
     } else {
       console.warn("No code found in the URL!");
-      setIsError(true);
+      toast({
+        title: 'Error getting GithubCode!'
+      })
+      navigate('/login');
     }
-  }, [githubCode]);
+  }, [githubCode, toast, navigate]);
 
   return (
-    <div>
+    <div className="flex items-center justify-center min-h-screen">
       {loading ? (
-        <p>Loading...</p>
-      ) : isError ? (
-        <p>Authentication failed!</p>
+        <RingLoader size={100} color="#36D7B7" />
       ) : (
-        <p>Authentication successful!</p>
+        <p>Redirecting...</p>
       )}
     </div>
   );
