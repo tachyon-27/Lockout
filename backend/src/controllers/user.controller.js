@@ -96,8 +96,7 @@ export const loginUser = asyncHandler(async (req, res) => {
         .cookie("token", token, options)
         .json(new ApiResponse(201, "User logged in successfully.", user))
     } else {
-      res.status(401)
-      throw new Error('Invalid email or password ')
+      return res.json(new ApiResponse(401, 'Invalid email or password '))
     }
   } catch (error) {
     res.status(401)

@@ -69,13 +69,11 @@ export const verifyEmail = asyncHandler(async (req, res)=> {
 
     if(otp != user.verifyCode) {
       return res
-        .status(401)
         .json(new ApiResponse(401, "Incorrect OTP!"))
     }
 
     if(Date.now() > user.verifyCodeExpiry) {
       return res
-        .status(401)
         .json(new ApiResponse(401, "OTP is expired! Resend the OTP."))
     }
 
