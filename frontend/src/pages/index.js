@@ -11,5 +11,9 @@ export {
     Home,
     Login,
     Register,
-    authGithub,
+    AuthGithub,
+    Dashboard,
+    Verify,
+    ForgotPassword,
+    ResetPassword,
 }

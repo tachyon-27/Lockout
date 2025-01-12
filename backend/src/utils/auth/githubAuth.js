@@ -3,7 +3,6 @@ import User from "../../models/user.model.js";
 
 export const getGithubAcessToken = async (code) => {
     try {
-        console.log("Getting token")
         const response = await axios.post(
             'https://github.com/login/oauth/access_token',
             new URLSearchParams({
@@ -18,9 +17,7 @@ export const getGithubAcessToken = async (code) => {
                 },
             }
         );
-        // console.log(response.data);
         const { access_token } = response.data;
-        // console.log("token", access_token);
     
         return access_token;
     } catch (error) {
@@ -30,14 +27,12 @@ export const getGithubAcessToken = async (code) => {
 
 export const getGithubUser = async (access_token) => {
     try {
-        console.log("token", access_token);
         const response = await axios.get('https://api.github.com/user', {
             headers: {
                 'Authorization': `Bearer ${access_token}`,
                 'Accept': 'application/json',
             },
         })
-        console.log(response)
         const {name, email} = response.data
         if(!email) {
             throw new Error('Email not public on Github!')

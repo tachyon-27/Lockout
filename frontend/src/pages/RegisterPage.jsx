@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import VerificationEmail from "../emails/VerificationEmail";
+import { time } from "framer-motion";
 
 
 const Register = () => {
@@ -64,17 +65,32 @@ const Register = () => {
                 const data = await response.json()
 
                 if (data.success) {
-                    console.log('Authentication is Successfull');
+                    toast({
+                        title: 'Logged in Successfully!'
+                    })
+                    console.log('Google Authentication is Successfull');
+                    navigate('/')
                 } else {
                     console.error('Login Failed', data.message);
+                    toast({
+                        title: 'Login Failed',
+                        description: data.message,
+                    })
                 }
 
             } catch (error) {
                 console.log('Error during login', error);
+                toast({
+                    title: 'Error during login',
+                    description: error,
+                })
             }
         },
         onError: () => {
             console.log('Google Login Failed')
+            toast({
+                title: 'Google Authorization Failed',
+            })
         }
     })
 
