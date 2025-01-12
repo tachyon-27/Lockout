@@ -2,10 +2,9 @@ import User from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { getGithubAcessToken, getGithubUser } from "../utils/auth/githubAuth.js";
-import { getOrCreateGoogleUser } from "../utils/auth/googleAuth.js"; 
+import { getOrCreateGoogleUser, fetchUserInfo } from "../utils/auth/googleAuth.js"; 
 import { generateToken } from "../utils/token.js";
 import { OAuth2Client } from 'google-auth-library';
-const googleClient = new OAuth2Client(process.env.VITE_GOOGLE_CLIENT_ID)
 
 // @desc  Handle Github OAuth Callback
 // @route POST /api/auth/github
@@ -13,15 +12,12 @@ const googleClient = new OAuth2Client(process.env.VITE_GOOGLE_CLIENT_ID)
 export const githubCallback = asyncHandler(async (req, res) => {
     try {
         const {code} = req.body;
-        // console.log('in github callback', code)
         if(!code) {
             throw new Error('Github OAuth code not found!')
         }
 
         const access_token = await getGithubAcessToken(code)
-        // console.log('Not get token', access_token)
         const user = await getGithubUser(access_token)
-        console.log('Not get user', user)
 
         if(user && user.isVerified) {
             const token = generateToken(user._id)
@@ -30,7 +26,6 @@ export const githubCallback = asyncHandler(async (req, res) => {
               httpOnly: true,
               secure: true
             }
-            console.log("Successfull: ", token)
 
             res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
             res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -148,6 +143,8 @@ export const resetOTP = asyncHandler(async (req, res) => {
   }
 })
 
+const googleClient = new OAuth2Client(process.env.VITE_GOOGLE_CLIENT_ID)
+
 // @desc  Validate token and Get/Create user
 // @route POST /api/auth/google
 // @access Public
@@ -155,14 +152,9 @@ export const googleCallback = asyncHandler(async (req, res) => {
   const { token } = req.body;
 
   try {
-    const ticket = await googleClient.verifyIdToken({
-      idToken: token,
-      audience: process.env.VITE_GOOGLE_CLIENT_ID,
-    })
+    const userInfo = await fetchUserInfo(token)
 
-    const payload = ticket.getPayload()
-
-    const { email, name } = payload
+    const { email, name } = userInfo
 
     const user = await getOrCreateGoogleUser(email, name);
 
@@ -173,7 +165,7 @@ export const googleCallback = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: true
       }
-      console.log("Successfull: ", token)
+      .log("Successfull: ", token)
       return res
         .status(201)
         .cookie("token", token, options)

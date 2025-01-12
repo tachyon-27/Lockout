@@ -52,23 +52,38 @@ const Login = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({token: tokenResponse.access_token}),
+                    body: JSON.stringify({ token: tokenResponse.access_token }),
                 })
 
                 const data = await response.json()
 
-                if(data.success) {
-                    console.log('Authentication is Successfull');
+                if (data.success) {
+                    toast({
+                        title: 'Logged in Successfully!'
+                    })
+                    console.log('Google Authentication is Successfull');
+                    navigate('/')
                 } else {
                     console.error('Login Failed', data.message);
+                    toast({
+                        title: 'Login Failed',
+                        description: data.message,
+                    })
                 }
 
             } catch (error) {
                 console.log('Error during login', error);
+                toast({
+                    title: 'Error during login',
+                    description: error,
+                })
             }
         },
         onError: () => {
             console.log('Google Login Failed')
+            toast({
+                title: 'Google Authorization Failed',
+            })
         }
     })
 
