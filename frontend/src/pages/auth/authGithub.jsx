@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-const authGithub = () => {
+const AuthGithub = () => {
   const [searchParams] = useSearchParams();
   const githubCode = searchParams.get("code"); 
   const [loading, setLoading] = useState(false);
@@ -55,4 +55,4 @@ const authGithub = () => {
   );
 };
 
-export default authGithub;
+export default AuthGithub;

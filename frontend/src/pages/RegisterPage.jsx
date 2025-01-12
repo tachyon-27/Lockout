@@ -7,7 +7,7 @@ import axios from "axios"
 import { useDispatch } from 'react-redux'
 import { verifyOTP } from "../features/authSlice";
 import { useForm } from 'react-hook-form';
-import { DessertIcon, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import ReactDOMServer from 'react-dom/server';
@@ -107,14 +107,14 @@ const Register = () => {
                     title: "Success",
                     description: res.data.message
                 })
-                dispatch(verifyOTP(res.data.data._id))
+                await dispatch(verifyOTP(res.data.data._id))
                 navigate('/verify')
             }
         } catch (error) {
             console.log(error)
             toast({
                 title: "Sign-up failed",
-                description: error.message
+                description: error.response.data.message
             })
         } finally {
             setIsSubmitting(false);

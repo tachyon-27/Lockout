@@ -1,12 +1,37 @@
-import { Link } from 'react-router-dom';
-import { BackgroundLines } from '../components/ui/background-lines';
 import { useGoogleLogin } from '@react-oauth/google';
-import { useState } from 'react';
+import { Link, useNavigate } from "react-router-dom";
+import { BackgroundLines } from "../components/ui/background-lines";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from "react";
+import axios from "axios"
+import { useDispatch } from 'react-redux'
+import { useForm } from 'react-hook-form';
+import { Loader2 } from 'lucide-react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-
+import { useToast } from "@/hooks/use-toast"
+import {
+    Form,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { login } from '../features/userSlice';
+import { loginSchema } from '../schemas/loginSchema';
 
 const Login = () => {
-
+    const { toast } = useToast()
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const form = useForm({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: "",
+            password: ""
+        }
+    })
     const [showPassword, setShowPassword] = useState(false);
 
     const togglePassword = () => {
@@ -47,74 +72,93 @@ const Login = () => {
         }
     })
 
-    return (
-        <>
-            < BackgroundLines>
-            
-            <div
-                className="relative flex justify-center items-center min-h-screen bg-cover bg-center bg-no-repeat"
-                
-            >
-                
+    const submit = async (data) => {
+        setIsSubmitting(true)
+        console.log(data)
+        try {
+            const res = await axios.post('/api/user/login', data)
 
-                {/* Form content */}
-                <div className="relative z-10 flex items-center justify-center min-h-screen text-white">
-                    <form className="flex flex-col gap-4 max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700 w-full sm:w-auto">
+            toast({
+                title: res.data.message
+            })
+
+            if(res.data.success) {
+                dispatch(login(res.data.data))
+                navigate('/dashboard')
+            }
+        } catch(error) {
+            console.log(error)
+            toast({
+                title: "Error",
+                description: error.response.data.message || error.message
+            })
+        } finally {
+            setIsSubmitting(false)
+        }
+
+    }
+
+    return (
+        < BackgroundLines className="relative flex justify-center items-center min-h-[120vh]">
+            <div className="relative z-10 flex items-center justify-center min-h-screen text-white">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(submit)} className="flex flex-col gap-4 min-w-[50vh] max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
                         <p className="text-2xl font-semibold tracking-wide flex items-center relative">
                             <span className="absolute w-4 h-4 rounded-full bg-blue-400 left-0 animate-ping"></span>
                             <span className="absolute w-4 h-4 rounded-full bg-blue-500 left-0"></span>
                             <span className="pl-6">Login</span>
                         </p>
                         <p className="text-sm text-gray-400">
-                            Welcome back! Login to access your account.
+                        Welcome back! Login to access your account.
                         </p>
 
-                        <div className="relative w-full">
-                            <input
-                                type="text"
-                                id='email'
-                                className="w-[100%] bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
-                                placeholder="Email"
-                                required
-                            />
-                            <label
-                                htmlFor="email"
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
-                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 
-                                peer-focus:top-0 peer-focus:opacity-0 peer-focus:text-xs peer-focus:text-blue-400 
-                                peer-valid:top-0 peer-valid:opacity-0 peer-valid:text-xs peer-valid:text-blue-400"
-                            >
-                                Email
-                            </label>
-                        </div>
+                        <FormField 
+                            name="email"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem className="relative w-full">
+                                    <FormLabel> Email </FormLabel>
+                                    <Input
+                                        {...field}
+                                        name="name"
+                                        className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                        placeholder="Email"
+                                        type="email"
+                                        required
+                                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                        <div className="relative w-full">
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                id="password"
-                                className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
-                                placeholder=" "
-                                required
-                            />
-                            <label
-                                htmlFor="password"
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all 
-                                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 
-                                peer-focus:top-0 peer-focus:opacity-0 peer-focus:text-xs peer-focus:text-blue-400 
-                                peer-valid:top-0 peer-valid:opacity-0 peer-valid:text-xs peer-valid:text-blue-400"
-                            >
-                                Password
-                            </label>
-                            <button type="button" onClick={togglePassword} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                                {showPassword ? <FaEyeSlash /> : <FaEye /> }
-                            </button>
-                        </div>
+                        <FormField 
+                            name="password"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem className="relative w-full">
+                                    <FormLabel> Password </FormLabel>
+                                    <div className="relative">
+                                        <Input
+                                            {...field}
+                                            type={showPassword ? 'text' : 'password'}
+                                            className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                            placeholder="Password"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={togglePassword}
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                                            >
+                                            {showPassword ? <FaEyeSlash /> : <FaEye />} 
+                                        </button>
+                                    </div>
+                                    <Link to='/forgot-password' className='hover:underline text-sm text-gray-400'>Forgot password?</Link>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                        <Link to='#' className='hover:underline text-sm text-gray-400'>Forgot password?</Link>
-
-                        <button className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition">
-                            Login
-                        </button>
                         <div className="flex items-center pt-4">
                             <div className="flex-1 h-px bg-gray-700"></div>
                             <p className="px-3 text-sm text-gray-400">
@@ -122,7 +166,7 @@ const Login = () => {
                             </p>
                             <div className="flex-1 h-px bg-gray-700"></div>
                         </div>
-                        <div className="flex justify-center mt-1">
+                        <div className="flex justify-center mt-2">
                             <button
                                 aria-label="Log in with Google"
                                 className="p-3 bg-transparent rounded-sm"
@@ -163,18 +207,31 @@ const Login = () => {
                                 </svg>
                             </button>
                         </div>
-
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition"
+                        >
+                            {isSubmitting ? (
+                                <div className="flex items-center justify-center">
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Please wait
+                                </div>
+                            ) : (
+                                'Sign Up'
+                            )}
+                        </button>
+                        
                         <p className="text-center text-sm text-gray-400">
                             Don't have an account?{" "}
                             <Link to="/register" className="text-blue-400 hover:underline">
                                 Register
                             </Link>
                         </p>
-                    </form>
-                </div>
+                    </form>     
+                </Form>
             </div>
-            </BackgroundLines>
-        </>
+        </BackgroundLines>
     );
 };
 
