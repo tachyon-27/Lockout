@@ -29,6 +29,9 @@ const userSchema = mongoose.Schema({
     },
     verifyCodeExpiry: {
         type: Date
+    },
+    canChangePassword: {
+        type: Boolean
     }
 },
 {

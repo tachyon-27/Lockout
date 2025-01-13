@@ -55,13 +55,6 @@ export const registerUser = asyncHandler(async (req, res) => {
     userExists = user
   }
 
-  // const emailResponse = await sendVerificationEmail(email, name, verifyCode)
-
-  // if(!emailResponse.success) {
-  //   res.status(500)
-  //   throw new Error(emailResponse.message)
-  // }
-
   return res
     .status(201)
     .json(new ApiResponse(201, "User Registered Successfully. Please verify your email", userExists))
@@ -150,5 +143,113 @@ export const sendEmail = asyncHandler(async (req, res) => {
           success: false,
           message: "Failed to send verification email."
       }) 
+  }
+})
+
+export const getUser = asyncHandler(async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if(!email) {
+      throw new Error("Email is required!")
+    }
+
+    const user = await User.findOne({email})
+    if(!user || !user.isVerified) {
+      return res.jso(new ApiResponse(401, "User does not exist!"))
+    }
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, "User found.", user))
+  } catch (error) {
+    return res.json(new ApiResponse(501, "Error while fetching user"))
+  }
+})
+
+export const passwordOTP = asyncHandler(async (req, res) => {
+  try {
+    const {_id, otp} = req.body;
+
+    if(!_id || !otp) {
+      throw new Error("All fields are required!")
+    }
+
+    const user = await User.findById(_id)
+
+    if(!user || !user.isVerified) {
+      throw new Error("User does not exist!")
+    }
+
+    if(user.verifyCode != otp) {
+      return res.json(new ApiResponse(401, "Incorrect OTP!"))
+    }
+
+    if(Date.now() > user.verifyCodeExpiry) {
+      return res.json(new ApiResponse(401, "OTP is expired, request a new OTP."))
+    }
+
+    user.canChangePassword = true;
+    await user.save();
+
+    const newUser = await User.findByIdAndUpdate(
+      user._id,
+      {
+        $unset: {
+          verifyCode: 1,
+          verifyCodeExpiry: 1
+        }
+      },
+      {
+        new: true
+      }
+    )
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, "User authenticated successfully.", newUser))
+  } catch (error) {
+    return res.json(new ApiResponse(501, "Error while verifying OTP", error))
+  }
+})
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  try {
+    const {_id, password} = req.body;
+
+    if(!_id ||  !password) {
+      throw new Error("All fields are required!")
+    }
+
+    const user = await User.findById(_id)
+
+    if(!user || !user.isVerified) {
+      throw new Error("User does not exist!")
+    }
+
+    if(!user.canChangePassword) {
+      throw new Error("User not authenticated!")
+    }
+
+    user.password = await bcrypt.hash(password, 10)
+    await user.save()
+    
+    const newUser = await User.findByIdAndUpdate(
+      user._id,
+      {
+        $unset: {
+          canChangePassword: 1
+        }
+      },
+      {
+        new: true
+      }
+    )
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, "Password reset successfull.", newUser))
+  } catch(error) {
+    return res.json(new ApiResponse(501, "Error while resetting password", error))
   }
 })

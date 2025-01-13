@@ -182,7 +182,6 @@ export const googleCallback = asyncHandler(async (req, res) => {
         res.status(501)
         throw new Error('Error Authenticating Google profile')
       }
-
   } catch (error) {
     throw new Error(error);
   }
