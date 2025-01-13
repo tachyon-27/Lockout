@@ -11,6 +11,7 @@ import { Loader2 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import ReactDOMServer from 'react-dom/server';
+import VerificationEmail from "../emails/VerificationEmail";
 import { useToast } from "@/hooks/use-toast"
 import {
   Form,
@@ -21,9 +22,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import VerificationEmail from "../emails/VerificationEmail";
-import { time } from "framer-motion";
-
 
 const Register = () => {
     const { toast } = useToast()

@@ -197,7 +197,6 @@ export const passwordOTP = asyncHandler(async (req, res) => {
       {
         $unset: {
           verifyCode: 1,
-          verifyCodeExpiry: 1
         }
       },
       {
@@ -230,6 +229,10 @@ export const resetPassword = asyncHandler(async (req, res) => {
     if(!user.canChangePassword) {
       throw new Error("User not authenticated!")
     }
+    
+    if(Date.now() > user.verifyCodeExpiry) {
+      return res.json(new ApiResponse(401, "Session timed out, user re-authentication required."))
+    }
 
     user.password = await bcrypt.hash(password, 10)
     await user.save()
@@ -238,7 +241,8 @@ export const resetPassword = asyncHandler(async (req, res) => {
       user._id,
       {
         $unset: {
-          canChangePassword: 1
+          canChangePassword: 1,
+          verifyCodeExpiry: 1
         }
       },
       {
