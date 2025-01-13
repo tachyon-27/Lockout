@@ -160,7 +160,6 @@ export const googleCallback = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: true
       }
-      .log("Successfull: ", token)
       return res
         .status(201)
         .cookie("token", token, options)
