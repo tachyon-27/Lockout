@@ -112,11 +112,6 @@ export const resetOTP = asyncHandler(async (req, res) => {
       throw new Error("Unauthorized request")
     }
 
-    if(user.isVerified) {
-      res.status(401)
-      throw new Error("User already verified")
-    }
-
     const verifyCode = Math.floor(100000 + Math.random()*900000).toString()
     const expiryDate = new Date()
     expiryDate.setHours(expiryDate.getHours() + 1)
