@@ -55,8 +55,16 @@ export const registerUser = asyncHandler(async (req, res) => {
     userExists = user
   }
 
+  const token = generateToken(userExists._id, '1h')
+  
+  const options = {
+    httpOnly: true,
+    secure: true
+  }
+
   return res
     .status(201)
+    .cookie("token", token, options)
     .json(new ApiResponse(201, "User Registered Successfully. Please verify your email", userExists))
 })
 
@@ -159,23 +167,31 @@ export const getUser = asyncHandler(async (req, res) => {
       return res.jso(new ApiResponse(401, "User does not exist!"))
     }
 
+    const token = generateToken(user._id, '1h')
+
+    const options = {
+      httpOnly: true,
+      secure: true
+    }
+
     return res
       .status(201)
+      .cookie("token", token, options)
       .json(new ApiResponse(201, "User found.", user))
   } catch (error) {
-    return res.json(new ApiResponse(501, "Error while fetching user"))
+    return res.json(new ApiResponse(501, error.message || "Error while fetching user", error))
   }
 })
 
 export const passwordOTP = asyncHandler(async (req, res) => {
   try {
-    const {_id, otp} = req.body;
+    const { otp } = req.body;
 
-    if(!_id || !otp) {
+    if(!otp) {
       throw new Error("All fields are required!")
     }
 
-    const user = await User.findById(_id)
+    const user = req.user
 
     if(!user || !user.isVerified) {
       throw new Error("User does not exist!")
@@ -202,7 +218,7 @@ export const passwordOTP = asyncHandler(async (req, res) => {
       {
         new: true
       }
-    )
+    ).select("-password")
 
     return res
       .status(201)
@@ -214,13 +230,13 @@ export const passwordOTP = asyncHandler(async (req, res) => {
 
 export const resetPassword = asyncHandler(async (req, res) => {
   try {
-    const {_id, password} = req.body;
+    const { password } = req.body;
 
-    if(!_id ||  !password) {
+    if(  !password) {
       throw new Error("All fields are required!")
     }
 
-    const user = await User.findById(_id)
+    const user = req.user
 
     if(!user || !user.isVerified) {
       throw new Error("User does not exist!")
@@ -248,10 +264,15 @@ export const resetPassword = asyncHandler(async (req, res) => {
       {
         new: true
       }
-    )
-
+    ).select("-password")
+    const options = {
+      httpOnly: true,
+      secure: true
+    }
+  
     return res
       .status(201)
+      .clearCookie("token", options)
       .json(new ApiResponse(201, "Password reset successfull.", newUser))
   } catch(error) {
     return res.json(new ApiResponse(501, "Error while resetting password", error))

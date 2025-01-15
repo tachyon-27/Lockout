@@ -15,10 +15,10 @@ router.route("/register").post(registerUser);
 router.route("/login").post(loginUser);
 router.route("/send-email").post(sendEmail);
 router.route("/get-user").post(getUser)
-router.route("/password-otp").post(passwordOTP)
-router.route("/reset-password").post(resetPassword)
 
 // secured routes
 router.route("/logout").get(verifyJWT, logoutUser)
+router.route("/password-otp").post(verifyJWT, passwordOTP)
+router.route("/reset-password").post(verifyJWT, resetPassword)
 
 export default router;
