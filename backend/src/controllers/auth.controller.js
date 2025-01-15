@@ -48,9 +48,8 @@ export const githubCallback = asyncHandler(async (req, res) => {
 
 export const verifyEmail = asyncHandler(async (req, res)=> {
   try {
-    const {_id, otp} = req.body;
-
-    const user = await User.findById(_id);
+    const { otp } = req.body;
+    const user = req.user
 
     if(!user) {
       res.status(401)
@@ -91,10 +90,16 @@ export const verifyEmail = asyncHandler(async (req, res)=> {
       {
         new: true
       }
-    )
+    ).select("-password")
+
+    const options = {
+      httpOnly: true,
+      secure: true
+    }
 
     return res
       .status(201)
+      .clearCookie("token", options)
       .json(new ApiResponse(201, "User verified successfully", newUser))
   } catch (error) {
     res.status(501)
@@ -104,8 +109,7 @@ export const verifyEmail = asyncHandler(async (req, res)=> {
 
 export const resetOTP = asyncHandler(async (req, res) => {
   try {
-    const {_id} = req.body;
-    const user = await User.findById(_id);
+    const user = req.user
 
     if(!user) {
       res.status(401)
@@ -127,8 +131,8 @@ export const resetOTP = asyncHandler(async (req, res) => {
       {
         new: true
       }
-    )
-
+    ).select("-password")
+  
     return res
       .status(201)
       .json(new ApiResponse(201, "OTP is reset.", newUser))
