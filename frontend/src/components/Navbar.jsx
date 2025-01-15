@@ -3,7 +3,7 @@ import { FaSignInAlt, FaUserAlt } from 'react-icons/fa';
 
 const Navbar = () => {
     return (
-        <header className="bg-black text-white flex items-center justify-between p-4 z-50 absolute w-full">
+        <header className="bg-black text-white flex items-center justify-between p-4 z-50 w-full">
             <Link to='/' className="text-2xl sm:text-3xl font-bold">Lockout</Link>
             <nav className="hidden md:flex text-lg">
                 <ul className="flex space-x-4">
