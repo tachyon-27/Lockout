@@ -84,6 +84,10 @@ export const loginUser = asyncHandler(async (req, res) => {
     // Check if user exists
     const user = await User.findOne({email});
   
+    if(!user.password) {
+      res.json(new ApiResponse(401, "Password not set!"))
+    }
+
     if(user && user.isVerified && (await bcrypt.compare(password, user.password))) {
       const token = generateToken(user._id)
   
