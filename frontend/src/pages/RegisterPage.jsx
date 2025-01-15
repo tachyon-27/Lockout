@@ -4,8 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema } from "../schemas/signupSchema";
 import { useState } from "react";
 import axios from "axios"
-import { useDispatch } from 'react-redux'
-import { verifyOTP } from "../features/authSlice";
 import { useForm } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
@@ -25,7 +23,6 @@ import { Input } from "@/components/ui/input"
 
 const Register = () => {
     const { toast } = useToast()
-    const dispatch = useDispatch()
     const navigate = useNavigate()
     const [isSubmitting, setIsSubmitting] = useState(false);
     const form = useForm({
@@ -121,8 +118,7 @@ const Register = () => {
                     title: "Success",
                     description: res.data.message
                 })
-                await dispatch(verifyOTP(res.data.data._id))
-                navigate('/verify')
+                navigate('/verify/email')
             }
         } catch (error) {
             console.log(error)
