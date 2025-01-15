@@ -15,7 +15,7 @@ const router = createBrowserRouter(
       <Route path='' element = { <Home /> } />
       <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register />} />
-      <Route path='/verify' element={<Verify />} />
+      <Route path='/verify/:what' element={<Verify />} />
       <Route path='/auth/github/callback' element={<AuthGithub />} />
       <Route path='/forgot-password' element={<ForgotPassword />} />
       <Route path='/reset-password' element={<ResetPassword />} />

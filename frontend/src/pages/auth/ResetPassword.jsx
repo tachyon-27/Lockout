@@ -3,8 +3,6 @@ import { BackgroundLines } from "@/components/ui/background-lines";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from "react";
 import axios from "axios";
-import { useDispatch, useSelector } from 'react-redux';
-import { reset } from '../../features/authSlice';
 import { useForm } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -17,13 +15,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { passwordSchema } from "../../schemas/passwordSchema"; // Assuming passwordSchema handles validation
+import { passwordSchema } from "../../schemas/passwordSchema"; 
 
 const ResetPassword = () => {
   const { toast } = useToast();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const info = useSelector(state => state.auth);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm({
     resolver: zodResolver(passwordSchema),
@@ -44,7 +40,6 @@ const ResetPassword = () => {
     setIsSubmitting(true);
     try {
       const res = await axios.post("/api/user/reset-password", {
-        _id: info._id,
         password: data.password,
       });
       toast({
@@ -52,7 +47,6 @@ const ResetPassword = () => {
       });
 
       if (res.data.success) {
-        dispatch(reset());
         navigate('/login');
       }
     } catch (error) {

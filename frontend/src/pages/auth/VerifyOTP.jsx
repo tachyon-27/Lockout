@@ -1,10 +1,8 @@
 import { BackgroundLines } from '@/components/ui/background-lines';
-import { useDispatch, useSelector } from 'react-redux';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
-import { reset } from '../../features/authSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ReactDOMServer from 'react-dom/server';
 import VerificationEmail from "@/emails/VerificationEmail";
 import { useForm } from 'react-hook-form';
@@ -22,9 +20,8 @@ import {
 import { useState } from 'react';
 
 function Verify() {
+  const { what } = useParams()
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const info = useSelector(state => state.auth);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const form = useForm({
@@ -34,9 +31,8 @@ function Verify() {
   const verify = async (data) => {
     setIsSubmitting(true);
     try {
-      if (info.verifyOTP) {
+      if (what == "email") {
         const res = await axios.post('/api/auth/verify-email', {
-          _id: info._id,
           otp: data.otp,
         });
 
@@ -46,13 +42,11 @@ function Verify() {
         });
 
         if (res.data.success) {
-          dispatch(reset());
           navigate('/login');
         }
       } 
-      else if(info.forgotPassword) {
+      else if(what == "password") {
         const res = await axios.post('/api/user/password-otp', {
-          _id: info._id,
           otp: data.otp,
         });
 
@@ -77,7 +71,7 @@ function Verify() {
 
   const resend = async () => {
     try {
-      const res = await axios.post('/api/auth/reset-otp', { _id: info._id });
+      const res = await axios.post('/api/auth/reset-otp');
 
       const emailHtml = ReactDOMServer.renderToStaticMarkup(
         <VerificationEmail name={res.data.data.name} otp={res.data.data.verifyCode} />

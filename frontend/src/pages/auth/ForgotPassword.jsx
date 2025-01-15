@@ -3,7 +3,6 @@ import { BackgroundLines } from "@/components/ui/background-lines";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from "react";
 import axios from "axios"
-import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast"
@@ -18,11 +17,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { emailSchema } from '../../schemas/emailSchema';
-import { forgotPassword } from '../../features/authSlice';
 
 const ForgotPassword = () => {
     const { toast } = useToast()
-    const dispatch = useDispatch()
     const navigate = useNavigate()
     const [isSubmitting, setIsSubmitting] = useState(false);
     const form = useForm({
@@ -45,7 +42,7 @@ const ForgotPassword = () => {
               return;
             }
 
-            res = await axios.post('/api/auth/reset-otp', {_id: res.data.data._id})
+            res = await axios.post('/api/auth/reset-otp')
 
             const emailHtml = ReactDOMServer.renderToStaticMarkup(
               <VerificationEmail name={data.name} otp={res.data.data.verifyCode} />
@@ -59,8 +56,7 @@ const ForgotPassword = () => {
 
 
             if(emailRes.data.success) {
-                dispatch(forgotPassword(res.data.data._id))
-                navigate('/verify')
+                navigate('/verify/password')
             }
         } catch(error) {
             console.log(error)
