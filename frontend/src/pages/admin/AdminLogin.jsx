@@ -1,11 +1,11 @@
 import  { useState } from "react";
-import { Input } from "../components/ui/input.tsx";
+import { Input } from "@/components/ui/input.tsx";
 import { cn } from "@/lib/utils";
 import axios from "axios"
 import { useToast } from "@/hooks/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { loginSchema } from "../schemas/loginSchema.js";
+import { loginSchema } from "@/schemas/loginSchema.js";
 import {
   Form,
   FormField,
@@ -41,10 +41,6 @@ export default function AdminLogin() {
       toast({
         title: response.data.message,
       })
-
-      if (response.data.success) {
-        console.log(response)
-      }
 
     } catch (error) {
       console.log(error)
