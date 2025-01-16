@@ -7,20 +7,27 @@ import { Provider } from 'react-redux'
 import store from './app/store'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { Toaster } from "@/components/ui/toaster"
+import AdminLayout from './layout/AdminLayout'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path='/' element={ <Layout /> }>
-      <Route path='' element = { <Home /> } />
-      <Route path='/login' element={<Login />} />
-      <Route path='/register' element={<Register />} />
-      <Route path='/verify/:what' element={<Verify />} />
-      <Route path='/auth/github/callback' element={<AuthGithub />} />
-      <Route path='/forgot-password' element={<ForgotPassword />} />
-      <Route path='/reset-password' element={<ResetPassword />} />
-      <Route path='/dashboard' element={<Dashboard />} />
+    <>
+      <Route path='/' element={ <Layout /> }>
+        <Route path='' element = { <Home /> } />
+        <Route path='/login' element={<Login />} />
+        <Route path='/register' element={<Register />} />
+        <Route path='/verify/:what' element={<Verify />} />
+        <Route path='/auth/github/callback' element={<AuthGithub />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
+        <Route path='/reset-password' element={<ResetPassword />} />
+        <Route path='/dashboard' element={<Dashboard />} />
+      </Route>
       <Route path='/admin' element={<AdminLogin />} />
-    </Route>
+
+      <Route path='/admin/dashboard' element={ <AdminLayout /> } >
+        <Route path='' element = { <Home /> } />
+      </Route>
+    </>
   )
 )
 
