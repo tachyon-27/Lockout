@@ -1,13 +1,12 @@
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
-import Layout from './Layout'
-import { Home, Login, Register, AuthGithub, Verify, ForgotPassword, ResetPassword, Dashboard } from './pages'
+import Layout from './layout/Layout'
+import { Home, Login, Register, AuthGithub, Verify, ForgotPassword, ResetPassword, Dashboard, AdminLogin } from './pages'
 import { Provider } from 'react-redux'
 import store from './app/store'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { Toaster } from "@/components/ui/toaster"
-import AdminLogin from './pages/AdminLogin'
 
 const router = createBrowserRouter(
   createRoutesFromElements(

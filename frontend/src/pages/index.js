@@ -6,6 +6,7 @@ import Verify from './auth/VerifyOTP'
 import Dashboard from "./Dashboard";
 import ForgotPassword from "./auth/ForgotPassword";
 import ResetPassword from "./auth/ResetPassword";
+import AdminLogin from "./admin/AdminLogin";
 
 export {
     Home,
@@ -16,4 +17,5 @@ export {
     Verify,
     ForgotPassword,
     ResetPassword,
+    AdminLogin
 }
