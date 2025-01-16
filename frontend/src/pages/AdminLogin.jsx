@@ -1,14 +1,8 @@
-import React, { useState } from "react";
-import { Label } from "../components/ui/label.tsx";
+import  { useState } from "react";
 import { Input } from "../components/ui/input.tsx";
 import { cn } from "@/lib/utils";
 import axios from "axios"
 import { useToast } from "@/hooks/use-toast"
-import {
-  IconBrandGithub,
-  IconBrandGoogle,
-  IconBrandApple,
-} from "@tabler/icons-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { loginSchema } from "../schemas/loginSchema.js";
