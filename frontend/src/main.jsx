@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
 import Layout from './layout/Layout'
-import { Home, Login, Register, AuthGithub, Verify, ForgotPassword, ResetPassword, Dashboard, AdminLogin } from './pages'
+import { Home, Login, Register, AuthGithub, Verify, ForgotPassword, ResetPassword, Dashboard, AdminLogin, AddTournament } from './pages'
 import { Provider } from 'react-redux'
 import store from './app/store'
 import { GoogleOAuthProvider } from '@react-oauth/google'
@@ -20,6 +20,7 @@ const router = createBrowserRouter(
       <Route path='/reset-password' element={<ResetPassword />} />
       <Route path='/dashboard' element={<Dashboard />} />
       <Route path='/admin' element={<AdminLogin />} />
+      <Route path='/admin/add-tournament' element={<AddTournament />} />
     </Route>
   )
 )

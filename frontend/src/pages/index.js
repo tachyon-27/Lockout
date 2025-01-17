@@ -7,6 +7,7 @@ import Dashboard from "./Dashboard";
 import ForgotPassword from "./auth/ForgotPassword";
 import ResetPassword from "./auth/ResetPassword";
 import AdminLogin from "./admin/AdminLogin";
+import AddTournament from "./admin/AddTournament";
 
 export {
     Home,
@@ -17,5 +18,6 @@ export {
     Verify,
     ForgotPassword,
     ResetPassword,
-    AdminLogin
+    AdminLogin,
+    AddTournament,
 }
