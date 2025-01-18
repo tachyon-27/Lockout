@@ -166,7 +166,6 @@ const AddTournament = () => {
   )
 }
 
-export default AddTournament
 const LabelInputContainer = ({
   children,
   className,
@@ -177,3 +176,5 @@ const LabelInputContainer = ({
     </div>
   );
 };
+
+export default AddTournament

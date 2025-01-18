@@ -8,7 +8,7 @@ import {
   passwordOTP,
   resetPassword
 } from "../controllers/user.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyUser } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 router.route("/register").post(registerUser);
@@ -17,8 +17,8 @@ router.route("/send-email").post(sendEmail);
 router.route("/get-user").post(getUser)
 
 // secured routes
-router.route("/logout").get(verifyJWT, logoutUser)
-router.route("/password-otp").post(verifyJWT, passwordOTP)
-router.route("/reset-password").post(verifyJWT, resetPassword)
+router.route("/logout").get(verifyUser, logoutUser)
+router.route("/password-otp").post(verifyUser, passwordOTP)
+router.route("/reset-password").post(verifyUser, resetPassword)
 
 export default router;
