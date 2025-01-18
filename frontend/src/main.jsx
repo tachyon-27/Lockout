@@ -25,8 +25,8 @@ const router = createBrowserRouter(
       <Route path='/admin' element={<AdminLogin />} />
 
       <Route path='/admin/dashboard' element={ <AdminLayout /> } >
-        <Route path='' element = { <AddTournament /> } />
-        {/* <Route path='/add-tournament' element={<AddTournament />} /> */}
+        <Route path='' element = { <Home /> } />
+        <Route path='add-tournament' element={<AddTournament />} />
       </Route>
     </>
   )
