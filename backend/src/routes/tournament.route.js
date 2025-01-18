@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { addTournament } from "../controllers/tournament.controller";
-import { verifyAdmin } from "../middlewares/auth.middleware";
-import { upload } from "../middlewares/multer.middleware";
+import { addTournament } from "../controllers/tournament.controller.js";
+import { verifyAdmin } from "../middlewares/auth.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router()
 

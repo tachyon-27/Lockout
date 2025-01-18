@@ -1,19 +1,25 @@
 import dotenv from "dotenv";
-import connectDB from "./config/index.js";
-import { app } from "./app.js";
 
 dotenv.config({
-    path: "../.env",
+    path: "../.env", 
 });
 
-const port = process.env.VITE_BACKEND_PORT;
-connectDB()
-    .then(() => {
+
+import connectDB from "./config/index.js"; 
+const startServer = async () => {
+    try {
+        await connectDB();
+
+        const { app } = await import("./app.js");
+        const port = process.env.VITE_BACKEND_PORT || 3000; 
+
         app.listen(port, () => {
-            console.log(`Process is listening on port ${port}`);
+            console.log(`Server is running on port ${port}`);
         });
-    })
-    .catch((error) => {
-        console.log("MONGODB connection error: ", error);
+    } catch (error) { 
+        console.error(error);
         process.exit(1);
-    });
+    }
+};
+
+startServer();

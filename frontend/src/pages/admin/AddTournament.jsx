@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import  { useEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { Editor } from '@tinymce/tinymce-react';
 import { cn } from "@/lib/utils";
@@ -14,26 +14,29 @@ import {
 import { Button } from "@/components/ui/button"
 import { CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
+import axios from "axios";
+
 
 const AddTournament = () => {
   const form = useForm()
-
   const { toast } = useToast()
-
   const defaultValue = form.getValues("content")
+  const [popOverOpen, setPopOverOpen] = useState(false);
+  const popoverRef = useRef(null);
 
   const submit = async (data) => {
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("startDate", data.startDate);
-    formData.append("content", data.content);
-    if (data.image && data.image[0]) {
-      formData.append("image", data.image[0]);
+    formData.append("description", data.description);
+    formData.append("summary", data.summary);
+    if (data.coverImage && data.coverImage[0]) {
+      formData.append("coverImage", data.coverImage[0]);
     }
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URI}/api/admin/add-tournament`,
+        `/api/tournament/add-tournament`,
         formData,
         {
           headers: {
@@ -59,11 +62,6 @@ const AddTournament = () => {
     }
   };
 
-
-  const [popOverOpen, setPopOverOpen] = useState(false);
-
-  const popoverRef = useRef(null);
-
   // Close popover if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -82,7 +80,7 @@ const AddTournament = () => {
 
   return (
     <>
-      <form onSubmit={form.handleSubmit(submit)} className="grid grid-cols-1 lg:grid-cols-[69%_29%] gap-4 m-4 p-5">
+      <form onSubmit={form.handleSubmit(submit)} className="grid grid-cols-1 lg:grid-cols-[69%_29%] gap-4 m-4 p-5 text-white">
         <div className="p-6 rounded-lg shadow-md">
           <Controller
             name="title"
@@ -94,13 +92,14 @@ const AddTournament = () => {
                   {...field}
                   type="text"
                   placeholder='Title'
+                  className="bg-gray-600 border-none text-white placeholder:text-white"
                   required
-                />
+                  />
               </LabelInputContainer>
             )}
-          />
+            />
           <Controller
-            name="description"
+            name="summary"
             control={form.control}
             render={({ field }) => (
               <LabelInputContainer>
@@ -109,11 +108,12 @@ const AddTournament = () => {
                   {...field}
                   type="text"
                   placeholder='Description'
+                  className="bg-gray-600 border-none text-white placeholder:text-white"
                   required
-                />
+                  />
               </LabelInputContainer>
             )}
-          />
+            />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-[49%_49%] md:gap-3 lg:grid-cols-1 p-6 rounded-lg shadow-md">
 
@@ -126,12 +126,15 @@ const AddTournament = () => {
                 <Label className="text-white">Start Date</Label>
                 <Popover open={popOverOpen}>
                   <PopoverTrigger asChild>
-                    <div>
+                    <div
+                    className="bg-gray-600 border-none text-white placeholder:text-white rounded-md"
+                    >
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
+                          !field.value && "text-muted-foreground",
+                          "bg-gray-600 border-none text-white placeholder:text-white hover:bg-gry-600 rounded-md"
                         )}
                         onClick={() => setPopOverOpen(true)}
                       >
@@ -151,12 +154,15 @@ const AddTournament = () => {
                     <Calendar
                       mode="single"
                       selected={field.value}
+                      className={cn(
+                        "bg-gray-700 text-white border-none"
+                      )}
                       onSelect={(date) => {
                         field.onChange(date);
                         setPopOverOpen(false);
                       }}
                       disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
+                        date < new Date("1900-01-01")
                       }
                       initialFocus
                     />
@@ -171,7 +177,7 @@ const AddTournament = () => {
 
 
           <Controller
-            name="image"
+            name="coverImage"
             control={form.control}
             render={({ field: { onChange } }) => (
               <LabelInputContainer>
@@ -180,6 +186,7 @@ const AddTournament = () => {
                   type="file"
                   accept="image/*"
                   onChange={(e) => onChange(e.target.files)}
+                  className="bg-gray-600 border-none text-white placeholder:text-white"
                   required
                 />
               </LabelInputContainer>
@@ -190,7 +197,7 @@ const AddTournament = () => {
         <div className="grid grid-cols-1 p-6 rounded-lg shadow-md lg:col-span-2 gap-y-2">
           <Label className="text-white text-lg">Content</Label>
           <Controller
-            name="content"
+            name="description"
             control={form.control}
             render={({ field: { onChange } }) => (
               <Editor
@@ -200,6 +207,8 @@ const AddTournament = () => {
                   initialValue: defaultValue,
                   height: 500,
                   menubar: true,
+                  skin: 'oxide-dark',
+                  content_css: 'dark',
                   plugins: [
                     "image",
                     "advlist",

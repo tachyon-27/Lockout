@@ -8,6 +8,7 @@ import ForgotPassword from "./auth/ForgotPassword";
 import ResetPassword from "./auth/ResetPassword";
 import AdminLogin from "./admin/AdminLogin";
 import AddTournament from "./admin/AddTournament";
+import ViewTournament from "./tournament/ViewTournament";
 
 export {
     Home,
@@ -20,4 +21,5 @@ export {
     ResetPassword,
     AdminLogin,
     AddTournament,
+    ViewTournament,
 }
