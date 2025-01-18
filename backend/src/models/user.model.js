@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+
 const userSchema = mongoose.Schema({
     name: {
         type: String,
@@ -21,8 +22,7 @@ const userSchema = mongoose.Schema({
         type: String,
     },
     isGoogle: {
-        type: Boolean,
-        default: false
+        type: Boolean
     },
     verifyCode: {
         type: Number
@@ -31,6 +31,9 @@ const userSchema = mongoose.Schema({
         type: Date
     },
     canChangePassword: {
+        type: Boolean
+    },
+    isAdmin: {
         type: Boolean
     }
 },

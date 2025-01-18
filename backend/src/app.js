@@ -31,9 +31,12 @@ app.use(cookieParser());
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import adminRouter from "./routes/admin.route.js";
+import tournamentRouter from "./routes/tournament.route.js"
+
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/tournament", tournamentRouter)
 
 app.use((req, res, next) => {
   res.status(404).json({ message: "Route not found" });
