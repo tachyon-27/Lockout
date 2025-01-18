@@ -2,12 +2,13 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
 import Layout from './layout/Layout'
-import { Home, Login, Register, AuthGithub, Verify, ForgotPassword, ResetPassword, Dashboard, AdminLogin, AddTournament } from './pages'
+import { Home, Login, Register, AuthGithub, Verify, ForgotPassword, ResetPassword, Dashboard, AdminLogin, AddTournament, ViewTournament } from './pages'
 import { Provider } from 'react-redux'
 import store from './app/store'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { Toaster } from "@/components/ui/toaster"
 import AdminLayout from './layout/AdminLayout'
+import TournamentLayout from './layout/TournamentLayout'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -21,6 +22,9 @@ const router = createBrowserRouter(
         <Route path='/forgot-password' element={<ForgotPassword />} />
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route path='/dashboard' element={<Dashboard />} />
+        <Route path='/tournament' element={ <TournamentLayout />}>
+          <Route path='view' element={ <ViewTournament /> } />
+        </Route>
       </Route>
       <Route path='/admin' element={<AdminLogin />} />
 

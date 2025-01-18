@@ -14,9 +14,12 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function AdminLogin() {
+  const { toast } = useToast()
+  const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -26,13 +29,11 @@ export default function AdminLogin() {
     }
   })
 
-  const [showPassword, setShowPassword] = useState(false);
 
   const togglePassword = () => {
     setShowPassword((prev) => !prev);
   }
 
-  const { toast } = useToast()
 
   const submit = async (data) => {
     try {
@@ -41,6 +42,10 @@ export default function AdminLogin() {
       toast({
         title: response.data.message,
       })
+
+      if(response.data.success) {
+        navigate('/admin/dashboard')
+      }
 
     } catch (error) {
       console.log(error)

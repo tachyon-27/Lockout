@@ -1,7 +1,7 @@
 import asyncHandler from "../utils/asyncHandler.js";
-import bcrypt from 'bcryptjs'
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { generateToken } from "../utils/token.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import Tournament from "../models/tournament.model.js";
 
 export const addTournament = asyncHandler(async (req, res) => {
     try {        
@@ -14,25 +14,24 @@ export const addTournament = asyncHandler(async (req, res) => {
             throw new Error('Please Add all fields!');
         }
 
-        const coverImageLocalPath = req.files?.coverImage[0].path
-
+        const coverImageLocalPath = req.file.path
         if(!coverImageLocalPath) {
             res.status(400);
             throw new Error('Cover Image is required!');
         }
         
         const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-
-        const tournament = tournament.create({
+        
+        const tournament = await Tournament.create({
             title,
             summary,
             startDate,
             description,
-            coverImage
+            coverImage: coverImage.url
         })
-
-        return res.
-            status(201).
+        
+        return res
+            .status(201)
             .json(new ApiResponse(201, "Tournament Added Successfully!", tournament))
     
     } catch (error) {

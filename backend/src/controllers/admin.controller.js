@@ -24,8 +24,8 @@ export const loginAdmin = asyncHandler(async (req, res) => {
         }
     
         if( (await bcrypt.compare(password, user.password))) {    
-            const token = generateToken(user._id, expiresIn='1d');
-    
+            const token = generateToken(user._id);
+            
             const options = {
                 httpOnly: true,
                 secure: true,
