@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { Editor } from '@tinymce/tinymce-react';
 import { cn } from "@/lib/utils";
 import { Label } from '@/components/ui/label.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { format } from "date-fns"
+import { useToast } from "@/hooks/use-toast"
 import {
   Popover,
   PopoverContent,
@@ -15,49 +16,112 @@ import { CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 
 const AddTournament = () => {
-  const form = useForm({
-    defaultValues: {
-      content: "",
-      title: "",
-      startDate: "",
-    }
-  })
+  const form = useForm()
+
+  const { toast } = useToast()
 
   const defaultValue = form.getValues("content")
 
   const submit = async (data) => {
-    console.log(data);
-  }
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("startDate", data.startDate);
+    formData.append("content", data.content);
+    if (data.image && data.image[0]) {
+      formData.append("image", data.image[0]);
+    }
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URI}/api/admin/add-tournament`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast({
+        title: "Event added Successfully!",
+        description: "The event has been successfully created.",
+      });
+
+      console.log("Response from server:", response.data);
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || error.message || "Something went wrong!";
+      toast({
+        title: "Could Not Add Event!",
+        description: errorMessage,
+      });
+      console.error("Error while submitting:", error);
+    }
+  };
+
 
   const [popOverOpen, setPopOverOpen] = useState(false);
+
+  const popoverRef = useRef(null);
+
+  // Close popover if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target)) {
+        setPopOverOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
 
   return (
     <>
       <form onSubmit={form.handleSubmit(submit)} className="grid grid-cols-1 lg:grid-cols-[69%_29%] gap-4 m-4 p-5">
-        <div className="bg-blue-500 p-6 rounded-lg shadow-md">
+        <div className="p-6 rounded-lg shadow-md">
           <Controller
             name="title"
             control={form.control}
             render={({ field }) => (
               <LabelInputContainer>
-                <Label>Title</Label>
+                <Label className="text-white">Title</Label>
                 <Input
                   {...field}
                   type="text"
                   placeholder='Title'
-                  className="h-auto"
+                  required
+                />
+              </LabelInputContainer>
+            )}
+          />
+          <Controller
+            name="description"
+            control={form.control}
+            render={({ field }) => (
+              <LabelInputContainer>
+                <Label className="text-white mt-2">Summary (To Be displayed to user)</Label>
+                <Input
+                  {...field}
+                  type="text"
+                  placeholder='Description'
                   required
                 />
               </LabelInputContainer>
             )}
           />
         </div>
-        <div className="p-6 rounded-lg shadow-md">
+        <div className="grid grid-cols-1 md:grid-cols-[49%_49%] md:gap-3 lg:grid-cols-1 p-6 rounded-lg shadow-md">
 
           <Controller
             control={form.control}
             name="startDate"
-            render={({ field }) => (
+            rules={{ required: "Start Date is required" }} // Add the required validation rule
+            render={({ field, fieldState }) => (
               <div className="flex flex-col w-full gap-2 mb-2">
                 <Label className="text-white">Start Date</Label>
                 <Popover open={popOverOpen}>
@@ -80,7 +144,10 @@ const AddTournament = () => {
                       </Button>
                     </div>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full sm:w-auto p-0" align="start">
+                  <PopoverContent
+                    ref={popoverRef}
+                    className="w-full sm:w-auto p-0"
+                    align="start">
                     <Calendar
                       mode="single"
                       selected={field.value}
@@ -95,6 +162,9 @@ const AddTournament = () => {
                     />
                   </PopoverContent>
                 </Popover>
+                {fieldState?.invalid && fieldState?.error?.type === "required" && (
+                  <p className="text-red-500 text-sm">{fieldState?.error?.message}</p>
+                )}
               </div>
             )}
           />
@@ -110,14 +180,15 @@ const AddTournament = () => {
                   type="file"
                   accept="image/*"
                   onChange={(e) => onChange(e.target.files)}
+                  required
                 />
               </LabelInputContainer>
             )}
           />
 
         </div>
-        <div className="bg-red-500 p-6 rounded-lg shadow-md lg:col-span-2 gap-2">
-          <Label>Content</Label>
+        <div className="grid grid-cols-1 p-6 rounded-lg shadow-md lg:col-span-2 gap-y-2">
+          <Label className="text-white text-lg">Content</Label>
           <Controller
             name="content"
             control={form.control}
@@ -160,7 +231,11 @@ const AddTournament = () => {
             )}
           />
         </div>
-        <button type="submit" className='text-white bg-green-500'>Submit</button>
+        <div className="flex justify-center items-center lg:col-span-2">
+          <button type="submit" className="text-white bg-blue-900 px-6 py-2 rounded-md">
+            Submit
+          </button>
+        </div>
       </form>
     </>
   )
