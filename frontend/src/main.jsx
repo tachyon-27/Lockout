@@ -9,6 +9,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import { Toaster } from "@/components/ui/toaster"
 import AdminLayout from './layout/AdminLayout'
 import TournamentLayout from './layout/TournamentLayout'
+import { Tournament } from './pages/tournament/Tournaments'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -22,6 +23,8 @@ const router = createBrowserRouter(
         <Route path='/forgot-password' element={<ForgotPassword />} />
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route path='/dashboard' element={<Dashboard />} />
+        <Route path='/tournaments' element={ <Tournament />} />
+
         <Route path='/tournament' element={ <TournamentLayout />}>
           <Route path='view' element={ <ViewTournament /> } />
         </Route>
