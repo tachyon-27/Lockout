@@ -26,8 +26,8 @@ function Navbar() {
             active: true,
         },
         {
-            name: 'Past Tournaments',
-            slug: '#',
+            name: 'Tournaments',
+            slug: '/tournaments',
             active: true,
         },
     ];

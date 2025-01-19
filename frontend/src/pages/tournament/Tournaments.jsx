@@ -1,15 +1,14 @@
-import { MagicCard } from "@/components/magicui/magic-card";
+import { MagicCard } from "@/components/ui/magic-card";
 
-export function MagicCardDemo() {
-//   const { theme } = useTheme();
+export function Tournament() {
   return (
     <div
       className={
-        "flex h-[500px] w-full flex-col gap-4 lg:h-[250px] lg:flex-row"
+        "w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
       }
     >
       <MagicCard
-        className="cursor-pointer flex-col items-center justify-center whitespace-nowrap text-4xl shadow-2xl"
+        className="h-[50vh] cursor-pointer flex-col items-center justify-center whitespace-nowrap text-4xl shadow-2xl"
         gradientColor={"#262626"}
       >
         Magic
