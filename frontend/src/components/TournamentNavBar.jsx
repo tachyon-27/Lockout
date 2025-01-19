@@ -73,7 +73,9 @@ export default function TournamentNavBar() {
                             sx={{
                                 color: "white",
                                 '&:hover': {
-                                    color: "#1976D2",
+                                    color: "white",
+                                    background: "#1976D2",
+                                    borderRadius: "10px 10px 0px 0px",
                                 }
                             }}
                             {...a11yProps(index)}

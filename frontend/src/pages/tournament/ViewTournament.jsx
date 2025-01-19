@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom"; // To access query parameters
+import { useSearchParams } from "react-router-dom";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { RingLoader, ScaleLoader } from "react-spinners";
 
 const ViewTournament = () => {
   const [searchParams] = useSearchParams();
   const tournamentId = searchParams.get("id");
-  const [tournament, setTournament] = useState(null); // State to store the fetched tournament data
+  const [tournament, setTournament] = useState(null); 
   const [timeLeft, setTimeLeft] = useState(null);
 
   useEffect(() => {
