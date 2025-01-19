@@ -5,10 +5,10 @@ import Tournament from "../models/tournament.model.js";
 
 export const addTournament = asyncHandler(async (req, res) => {
     try {        
-        const {title, summary, startDate, description} = req.body;
+        const {title, summary, startDate, startTime, description} = req.body;
     
         if(
-            [title, summary, startDate, description].some((field)=> field.trim()==="")
+            [title, summary, startDate, description, startTime].some((field)=> field.trim()==="")
         ) {
             res.status(400);
             throw new Error('Please Add all fields!');
@@ -26,9 +26,12 @@ export const addTournament = asyncHandler(async (req, res) => {
             title,
             summary,
             startDate,
+            startTime,
             description,
             coverImage: coverImage.url
         })
+
+        console.log(tournament)
         
         return res
             .status(201)
