@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
-import { RingLoader, ScaleLoader } from "react-spinners";
+import { RingLoader } from "react-spinners";
+import axios from "axios";
 
 const ViewTournament = () => {
   const [searchParams] = useSearchParams();
   const tournamentId = searchParams.get("id");
   const [tournament, setTournament] = useState(null); 
   const [timeLeft, setTimeLeft] = useState(null);
+  const location = useLocation()
 
   useEffect(() => {
     if (!tournamentId) {
@@ -17,37 +19,30 @@ const ViewTournament = () => {
 
     const fetchTournament = async () => {
       try {
-        const response = await fetch(`/api/tournaments`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: tournamentId }),
+        const response = await axios.post(`/api/tournament/get-tournament`, {
+          _id: tournamentId
         });
 
-        if (!response.ok) {
+        if (!response.data.success) {
           throw new Error("Failed to fetch tournament data.");
         }
+        console.log(location.state?.from || "No referrer")
+        setTournament(response.data.data);
 
-        const data = await response.json();
-        setTournament(data);
-
-        const eventStart = new Date(`${data.startDate}T${data.startTime}`);
-        setTimeLeft(calculateTimeLeft(eventStart));
+        setTimeLeft(calculateTimeLeft(new Date(response.data.data.startDate)));
       } catch (error) {
         console.error("Error fetching tournament data:", error);
       }
     };
 
     fetchTournament();
-  }, [tournamentId]);
+  }, [tournamentId, location]);
 
   useEffect(() => {
     if (!timeLeft || !tournament) return;
 
     const timer = setInterval(() => {
-      const eventStart = new Date(`${tournament.startDate}T${tournament.startTime}`);
-      setTimeLeft(calculateTimeLeft(eventStart));
+      setTimeLeft(calculateTimeLeft(new Date(tournament.startDate)));
     }, 1000);
 
     return () => clearInterval(timer);
@@ -117,7 +112,7 @@ const ViewTournament = () => {
 
       <div
         dangerouslySetInnerHTML={{ __html: tournament.description }}
-        className="text-white text-lg"
+        className="text-white"
       ></div>
     </div>
   );
