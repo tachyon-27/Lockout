@@ -2,14 +2,28 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
 import Layout from './layout/Layout'
-import { Home, Login, Register, AuthGithub, Verify, ForgotPassword, ResetPassword, Dashboard, AdminLogin, AddTournament, ViewTournament } from './pages'
 import { Provider } from 'react-redux'
 import store from './app/store'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { Toaster } from "@/components/ui/toaster"
 import AdminLayout from './layout/AdminLayout'
 import TournamentLayout from './layout/TournamentLayout'
-import { Tournament } from './pages/tournament/Tournaments'
+import { 
+  Home, 
+  Login, 
+  Register, 
+  AuthGithub, 
+  Verify, 
+  ForgotPassword, 
+  ResetPassword, 
+  Dashboard, 
+  AdminLogin, 
+  AddTournament, 
+  ViewTournament, 
+  Tournament,
+  Logout,
+  AdminTournaments
+} from './pages'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -30,10 +44,12 @@ const router = createBrowserRouter(
         </Route>
       </Route>
       <Route path='/admin' element={<AdminLogin />} />
+      <Route path='/admin/logout' element={<Logout />} />
 
       <Route path='/admin/dashboard' element={ <AdminLayout /> } >
         <Route path='' element = { <Home /> } />
         <Route path='add-tournament' element={<AddTournament />} />
+        <Route path='tournaments' element={<AdminTournaments />} />
       </Route>
     </>
   )

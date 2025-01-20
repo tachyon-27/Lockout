@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function Tournament() {
+export default function AdminTournaments() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [tournaments, setTournaments] = useState([]);
@@ -48,18 +48,22 @@ export default function Tournament() {
           >
             View
           </button>
-          <button
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
-            onClick={() => navigate(`/register/${tournament._id}`)}
-          >
-            Register
-          </button>
+          <div className="flex gap-2">
+            <button
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
+            >
+              Edit
+            </button>
+            <button
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     </MagicCard>
   ))}
 </div>
-
-
   );
 }
