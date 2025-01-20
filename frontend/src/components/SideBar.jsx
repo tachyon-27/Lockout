@@ -15,14 +15,14 @@ export function SideBar() {
   const links = [
     {
       label: "Dashboard",
-      href: "#",
+      href: "/admin/dashboard",
       icon: (
         <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Tournaments",
-      href: "#",
+      href: "/admin/dashboard/tournaments",
       icon: (
         <IconUserBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
@@ -36,7 +36,7 @@ export function SideBar() {
     },
     {
       label: "Logout",
-      href: "#",
+      href: "/admin/logout",
       icon: (
         <IconArrowLeft className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),

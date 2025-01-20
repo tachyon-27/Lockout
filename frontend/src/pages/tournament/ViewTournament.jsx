@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { RingLoader } from "react-spinners";
 import axios from "axios";
@@ -9,7 +9,6 @@ const ViewTournament = () => {
   const tournamentId = searchParams.get("id");
   const [tournament, setTournament] = useState(null); 
   const [timeLeft, setTimeLeft] = useState(null);
-  const location = useLocation()
 
   useEffect(() => {
     if (!tournamentId) {
@@ -26,7 +25,6 @@ const ViewTournament = () => {
         if (!response.data.success) {
           throw new Error("Failed to fetch tournament data.");
         }
-        console.log(location.state?.from || "No referrer")
         setTournament(response.data.data);
 
         setTimeLeft(calculateTimeLeft(new Date(response.data.data.startDate)));
@@ -36,7 +34,7 @@ const ViewTournament = () => {
     };
 
     fetchTournament();
-  }, [tournamentId, location]);
+  }, [tournamentId]);
 
   useEffect(() => {
     if (!timeLeft || !tournament) return;
