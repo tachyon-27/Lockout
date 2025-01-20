@@ -18,7 +18,6 @@ import { Calendar } from "@/components/ui/calendar"
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { MobileTimePicker } from "@mui/x-date-pickers/MobileTimePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { TextField } from '@mui/material';
 
 import axios from "axios";
 
@@ -35,11 +34,11 @@ const AddTournament = () => {
   const popoverRef = useRef(null);
 
   const submit = async (data) => {
-    console.log(dayjs(data.startTime).format('HH:mm'))
+    const dateObject = dayjs(data.startDate).format('YYYY-MM-DD') + ' ' + dayjs(data.startTime).format('HH:mm');
+    const date = dayjs(dateObject).toDate();
     const formData = new FormData();
     formData.append("title", data.title);
-    formData.append("startDate", data.startDate);
-    formData.append("startTime", dayjs(data.startTime).format('HH:mm'));
+    formData.append("startDate", date);
     formData.append("description", data.description);
     formData.append("summary", data.summary);
     if (data.coverImage && data.coverImage[0]) {

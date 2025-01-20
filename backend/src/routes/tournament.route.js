@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addTournament } from "../controllers/tournament.controller.js";
+import { addTournament, getTournament, tournaments } from "../controllers/tournament.controller.js";
 import { verifyAdmin } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
@@ -10,5 +10,8 @@ router.route('/add-tournament').post(
     upload.single("coverImage"),
     addTournament
 );
+
+router.route('/tournaments').get(tournaments)
+router.route('/get-tournament').post(getTournament) 
 
 export default router
