@@ -15,11 +15,13 @@ import {
 } from "@/components/ui/form"
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import { BeatLoader } from "react-spinners";
 
 export default function AdminLogin() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -37,17 +39,20 @@ export default function AdminLogin() {
 
   const submit = async (data) => {
     try {
+      setIsLoading(true);
       const response = await axios.post('/api/admin/login', data)
 
       toast({
         title: response.data.message,
       })
-
+      setIsLoading(false);
+      
       if(response.data.success) {
         navigate('/admin/dashboard')
       }
-
+      
     } catch (error) {
+      setIsLoading(false);
       console.log(error)
       toast({
         title: "Error",
@@ -117,8 +122,14 @@ export default function AdminLogin() {
           <button
             className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block bg-blue-500 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
             type="submit"
+            disabled={isLoading}
           >
-            Login &rarr;
+            {isLoading ? (
+                  <BeatLoader size={10} color="#3b82f6" />
+                ) : (
+                  <>Login &rarr;</>
+                )}
+            
             <BottomGradient />
           </button>
 
