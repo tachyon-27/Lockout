@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast"
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { RingLoader } from "react-spinners";
 import axios from "axios";
@@ -9,6 +10,9 @@ const ViewTournament = () => {
   const tournamentId = searchParams.get("id");
   const [tournament, setTournament] = useState(null); 
   const [timeLeft, setTimeLeft] = useState(null);
+  const [isErrorFetching, setIsErrorFetching] = useState(false);
+  const { toast } = useToast()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!tournamentId) {
@@ -29,6 +33,10 @@ const ViewTournament = () => {
 
         setTimeLeft(calculateTimeLeft(new Date(response.data.data.startDate)));
       } catch (error) {
+        navigate('/')
+        toast({
+          title: "Error Fetching Tournament Data!"
+        })
         console.error("Error fetching tournament data:", error);
       }
     };

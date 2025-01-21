@@ -49,6 +49,7 @@ const router = createBrowserRouter(
       <Route path='/admin/dashboard' element={ <AdminLayout /> } >
         <Route path='' element = { <Home /> } />
         <Route path='add-tournament' element={<AddTournament />} />
+        <Route path='update-tournament' element={<AddTournament isEditing={true}/>} />
         <Route path='tournaments' element={<AdminTournaments />} />
       </Route>
     </>
