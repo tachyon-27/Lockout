@@ -19,61 +19,105 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { MobileTimePicker } from "@mui/x-date-pickers/MobileTimePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
+import { BeatLoader } from 'react-spinners';
+
 import axios from "axios";
+import { useSearchParams } from 'react-router-dom';
 
 
-const AddTournament = () => {
+const AddTournament = ({ isEditing }) => {
+
+  const [searchParams] = useSearchParams();
+  const tournamentId = searchParams.get("id");
+
   const form = useForm({
     defaultValues: {
-      startTime: "",
-    }
-  })
+      title: '',
+      summary: '',
+      startDate: '',
+      startTime: '',
+      description: '',
+      coverImage: null,
+    },
+  });
+
   const { toast } = useToast()
-  const defaultValue = form.getValues("content")
   const [popOverOpen, setPopOverOpen] = useState(false);
   const popoverRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [existingImage, setExistingImage] = useState(null);
+
+  useEffect(() => {
+    if (isEditing && tournamentId) {
+      (async () => {
+        try {
+          const response = await axios.post(`/api/tournament/get-tournament`, {
+            _id: tournamentId
+          });
+          const data = response.data;
+          const startDateTime = dayjs(data.startDate);
+
+          form.reset({
+            title: data.data.title,
+            summary: data.data.summary,
+            startDate: startDateTime.format('YYYY-MM-DD'),
+            startTime: startDateTime,
+            description: data.data.description,
+          });
+
+          setExistingImage(data.coverImage);
+        } catch (error) {
+          console.error('Error fetching tournament data:', error);
+          toast({
+            title: 'Error Fetching Data',
+            description: 'Failed to load tournament details. Please try again later.',
+          });
+        }
+      })();
+    }
+  }, [isEditing, tournamentId, form, toast]);
 
   const submit = async (data) => {
+    setIsLoading(true);
+    console.log(data)
     const dateObject = dayjs(data.startDate).format('YYYY-MM-DD') + ' ' + dayjs(data.startTime).format('HH:mm');
     const date = dayjs(dateObject).toDate();
     const formData = new FormData();
-    formData.append("title", data.title);
-    formData.append("startDate", date);
-    formData.append("description", data.description);
-    formData.append("summary", data.summary);
-    if (data.coverImage && data.coverImage[0]) {
-      formData.append("coverImage", data.coverImage[0]);
-    }
+    formData.append('title', data.title);
+    formData.append('startDate', date);
+    formData.append('description', data.description);
+    formData.append('summary', data.summary);
 
+    console.log(data.coverImage)
+    
     try {
-      const response = await axios.post(
-        `/api/tournament/add-tournament`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      toast({
-        title: "Event added Successfully!",
-        description: "The event has been successfully created.",
+      if (data.coverImage && data.coverImage[0]) {
+        formData.append('coverImage', data.coverImage[0]);
+      } else formData.append('coverImage', existingImage);
+      console.log(formData.get('coverImage'))
+      const endpoint = isEditing ? `/api/tournament/update-tournament/${tournamentId}` : `/api/tournament/add-tournament`;
+      const response = await axios.post(endpoint, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-
-      console.log("Response from server:", response.data);
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || error.message || "Something went wrong!";
+      console.log(response)
+      setIsLoading(false);
       toast({
-        title: "Could Not Add Event!",
+        title: 'Success!',
+        description: isEditing ? 'Event updated successfully.' : 'Event created successfully.',
+      });
+    } catch (error) {
+      console.log(error)
+      setIsLoading(false);
+      const errorMessage = error.response?.data?.message || error.message || 'Something went wrong!';
+      toast({
+        title: 'Error!',
         description: errorMessage,
       });
-      console.error("Error while submitting:", error);
     }
   };
 
-  // Close popover if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (popoverRef.current && !popoverRef.current.contains(event.target)) {
@@ -122,10 +166,10 @@ const AddTournament = () => {
                     placeholder='Description'
                     className="bg-gray-600 border-none text-white placeholder:text-white"
                     required
-                    />
+                  />
                 </LabelInputContainer>
               )}
-              />
+            />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-[49%_49%] md:gap-3 lg:grid-cols-1 p-6 rounded-lg shadow-md">
             <div className='grid grid-cols-[49%_49%] rounded-lg gap-2'>
@@ -144,13 +188,14 @@ const AddTournament = () => {
                         >
                           <Button
                             variant={"outline"}
+                            type="button"
                             className={cn(
                               "w-full pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground",
                               "bg-gray-600 border-none text-white placeholder:text-white hover:bg-gry-600 rounded-md"
                             )}
                             onClick={() => setPopOverOpen(true)}
-                            >
+                          >
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
@@ -178,7 +223,7 @@ const AddTournament = () => {
                             date < new Date("1900-01-01")
                           }
                           initialFocus
-                          />
+                        />
                       </PopoverContent>
                     </Popover>
                     {fieldState?.invalid && fieldState?.error?.type === "required" && (
@@ -186,47 +231,47 @@ const AddTournament = () => {
                     )}
                   </div>
                 )}
-                />
-
-<div>
-
-              <Controller
-                name="startTime"
-                control={form.control}
-                rules={{ required: "Start Time is required" }}
-                render={({ field, fieldState }) => (
-                  <>
-                    <Label className="text-white">Start Time</Label>
-                    <MobileTimePicker
-                      value={field.value || null} // Ensure this is always either a valid time or null
-                      onChange={field.onChange}
-                      className="bg-gray-600 text-white w-full" // Adjust width and background
-                      sx={{
-                        '& .MuiInputLabel-root': { color: 'white' },
-                        '& .MuiInputBase-root': {
-                          backgroundColor: '#4b5563',
-                          borderRadius: '4px',
-                        },
-                        '& .MuiOutlinedInput-input': {
-                          color: 'white',
-                        },
-                      }}
-                      TextFieldComponent={(params) => (
-                          <Input
-                          {...params} // Spread operator for all the input props
-                          error={!!fieldState.error}
-                          helperText={fieldState?.error?.message}
-                          className="bg-gray-600 border-none text-white placeholder:text-white"
-                          />
-                      )}
-                    />
-                    {fieldState?.invalid && fieldState?.error?.type === "required" && (
-                      <p className="text-red-500 text-sm">{fieldState?.error?.message}</p>
-                    )}
-                  </>
-                )}
               />
-</div>
+
+              <div>
+
+                <Controller
+                  name="startTime"
+                  control={form.control}
+                  rules={{ required: "Start Time is required" }}
+                  render={({ field, fieldState }) => (
+                    <>
+                      <Label className="text-white">Start Time</Label>
+                      <MobileTimePicker
+                        value={field.value || null} // Ensure this is always either a valid time or null
+                        onChange={field.onChange}
+                        className="bg-gray-600 text-white w-full" // Adjust width and background
+                        sx={{
+                          '& .MuiInputLabel-root': { color: 'white' },
+                          '& .MuiInputBase-root': {
+                            backgroundColor: '#4b5563',
+                            borderRadius: '4px',
+                          },
+                          '& .MuiOutlinedInput-input': {
+                            color: 'white',
+                          },
+                        }}
+                        TextFieldComponent={(params) => (
+                          <Input
+                            {...params}
+                            error={!!fieldState.error}
+                            helperText={fieldState?.error?.message}
+                            className="bg-gray-600 border-none text-white placeholder:text-white"
+                          />
+                        )}
+                      />
+                      {fieldState?.invalid && fieldState?.error?.type === "required" && (
+                        <p className="text-red-500 text-sm">{fieldState?.error?.message}</p>
+                      )}
+                    </>
+                  )}
+                />
+              </div>
 
             </div>
 
@@ -242,7 +287,7 @@ const AddTournament = () => {
                     accept="image/*"
                     onChange={(e) => onChange(e.target.files)}
                     className="bg-gray-600 border-none text-white placeholder:text-white"
-                    required
+                    {...(!isEditing && { required: true })}
                   />
                 </LabelInputContainer>
               )}
@@ -254,12 +299,12 @@ const AddTournament = () => {
             <Controller
               name="description"
               control={form.control}
-              render={({ field: { onChange } }) => (
+              render={({ field: { onChange, value } }) => (
                 <Editor
                   apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
-                  initialValue={defaultValue}
+                  initialValue={value}
                   init={{
-                    initialValue: defaultValue,
+                    initialValue: value,
                     height: 500,
                     menubar: true,
                     skin: 'oxide-dark',
@@ -297,7 +342,13 @@ const AddTournament = () => {
           </div>
           <div className="flex justify-center items-center lg:col-span-2">
             <button type="submit" className="text-white bg-blue-900 px-6 py-2 rounded-md">
-              Submit
+              {
+                isLoading ? (
+                  <BeatLoader size={10} color="#36D7B7" />
+                ) : (
+                  <>Submit</>
+                )
+              }
             </button>
           </div>
         </form>
