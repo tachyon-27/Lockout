@@ -3,15 +3,13 @@ import { Navbar, Footer } from "@/components"
 
 function Layout() {
     return (
-        <>
-            <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <main className="flex-grow">
-                    <Outlet />
-                </main>
-                <Footer />
-            </div>
-        </>
+        <div className="flex flex-col min-h-screen items-center">
+            <Navbar />
+            <main className="flex-grow">
+                <Outlet />
+            </main>
+            <Footer />
+        </div>
     )
 }
 
