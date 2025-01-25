@@ -1,4 +1,22 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose, { mongo, Mongoose } from "mongoose";
+
+const participantSchema = mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    cfid: {
+        type: String,
+        required: true
+    },
+    maxRating: {
+        type: Number
+    }
+},{
+        timestamps: true
+    }
+)
 
 const tournamentSchema = mongoose.Schema({
     title: {
@@ -20,6 +38,10 @@ const tournamentSchema = mongoose.Schema({
     coverImage: {
         type: String,
         required: [true, 'Cover Image is required']
+    },
+    participants: {
+        type: [participantSchema],  
+        default: [] 
     }
 })
 

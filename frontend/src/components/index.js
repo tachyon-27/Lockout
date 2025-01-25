@@ -4,6 +4,9 @@ import Timelines from "./Timeline";
 import HeroSection from "./HeroSection";
 import Features from "./Features";
 import { SideBar } from "./SideBar";
+import TournamentRegister from "./TournamentRegister";
+import AddCfID from "./AddCfID";
+import RegistrButton from "./RegistrButton";
 
 export {
     Footer,
@@ -11,5 +14,8 @@ export {
     Timelines,
     HeroSection,
     Features,
-    SideBar
+    SideBar,
+    TournamentRegister,
+    AddCfID,
+    RegistrButton,
 }

@@ -1,5 +1,21 @@
 import mongoose from 'mongoose'
 
+const codeforcesIDSchema = mongoose.Schema({
+    cfid: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    verifyString: {
+        type: String
+    },
+    isVerified: {
+        type: Boolean,
+        required: true,
+        default: false
+    }
+})
+
 const userSchema = mongoose.Schema({
     name: {
         type: String,
@@ -35,6 +51,10 @@ const userSchema = mongoose.Schema({
     },
     isAdmin: {
         type: Boolean
+    },
+    codeforcesID: {
+        type: [codeforcesIDSchema],
+        default: []
     }
 },
 {

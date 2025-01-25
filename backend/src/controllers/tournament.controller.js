@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import Tournament from "../models/tournament.model.js";
 import mongoose from "mongoose";
+import axios from "axios";
 
 export const addTournament = asyncHandler(async (req, res) => {
     try {
@@ -104,7 +105,6 @@ export const updateTournament = asyncHandler(async (req, res) => {
     }
 });
 
-
 export const tournaments = asyncHandler(async (req, res) => {
     try {
         const data = await Tournament.find({})
@@ -141,3 +141,48 @@ export const getTournament = asyncHandler(async (req, res) => {
         throw new Error(error)
     }
 })
+
+export const tournamentRegister = asyncHandler(async (req, res) => {
+    try {
+        const { _id, cfid } = req.body;
+
+        if (!_id || !cfid) {
+            return res.json(new ApiResponse(400, "Tournament ID and Codeforces ID are required."));
+        }
+
+        const tournament = await Tournament.findById(_id);
+        if (!tournament) {
+            return res.json(new ApiResponse(404, "Tournament not found."));
+        }
+
+        const cfres = await axios.get(`https://codeforces.com/api/user.info?handles=${cfid}`);
+        const userInfo = cfres.data.result[0];
+
+        if (!userInfo) {
+            return res.json(new ApiResponse(404, "Codeforces user not found."));
+        }
+
+        const maxRating = userInfo.maxRating;
+
+        const alreadyRegistered = tournament.participants?.some(participant => participant.cfid === cfid);
+        if (alreadyRegistered) {
+            return res.json(new ApiResponse(400, "User is already registered for this tournament."));
+        }
+
+        tournament.participants.push({
+            user: req.user._id,
+            cfid,
+            maxRating
+        });
+
+        await tournament.save();
+
+        return res
+            .status(201)
+            .json(new ApiResponse(201, "User successfully registered to the tournament"));
+        
+    } catch (error) {
+        console.log(error)
+        return res.json(new ApiResponse(500, "An error occurred while registering for the tournament.", error));
+    }
+});
