@@ -46,6 +46,7 @@ const AddTournament = ({ isEditing }) => {
   const popoverRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [existingImage, setExistingImage] = useState(null);
+  const descriptionDefaultValue = ""
 
   useEffect(() => {
     if (isEditing && tournamentId) {
@@ -56,7 +57,7 @@ const AddTournament = ({ isEditing }) => {
           });
           const data = response.data;
           const startDateTime = dayjs(data.startDate);
-
+          descriptionDefaultValue = data.data.description
           form.reset({
             title: data.data.title,
             summary: data.data.summary,
@@ -87,14 +88,11 @@ const AddTournament = ({ isEditing }) => {
     formData.append('startDate', date);
     formData.append('description', data.description);
     formData.append('summary', data.summary);
-
-    console.log(data.coverImage)
     
     try {
       if (data.coverImage && data.coverImage[0]) {
         formData.append('coverImage', data.coverImage[0]);
       } else formData.append('coverImage', existingImage);
-      console.log(formData.get('coverImage'))
       const endpoint = isEditing ? `/api/tournament/update-tournament/${tournamentId}` : `/api/tournament/add-tournament`;
       const response = await axios.post(endpoint, formData, {
         headers: {
@@ -190,8 +188,9 @@ const AddTournament = ({ isEditing }) => {
                             variant={"outline"}
                             type="button"
                             className={cn(
-                              "w-full pl-3 text-left text-sm font-normal",
+                              "w-full pl-1 text-left font-normal",
                               !field.value && "text-muted-foreground",
+                              `${field.value && "text-wrap"} truncate`,
                               "bg-gray-600 border-none text-white placeholder:text-white hover:bg-gry-600 rounded-md"
                             )}
                             onClick={() => setPopOverOpen(true)}
@@ -243,14 +242,15 @@ const AddTournament = ({ isEditing }) => {
                     <>
                       <Label className="text-white">Start Time</Label>
                       <MobileTimePicker
-                        value={field.value || null} // Ensure this is always either a valid time or null
+                        value={field.value || null} 
                         onChange={field.onChange}
-                        className="bg-gray-600 text-white w-full" // Adjust width and background
+                        className="bg-gray-600 text-white w-full rounded-md" 
                         sx={{
                           '& .MuiInputLabel-root': { color: 'white' },
                           '& .MuiInputBase-root': {
                             backgroundColor: '#4b5563',
                             borderRadius: '4px',
+                            height: '40px',
                           },
                           '& .MuiOutlinedInput-input': {
                             color: 'white',
@@ -302,9 +302,9 @@ const AddTournament = ({ isEditing }) => {
               render={({ field: { onChange, value } }) => (
                 <Editor
                   apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
-                  initialValue={value}
+                  initialValue={descriptionDefaultValue}
                   init={{
-                    initialValue: value,
+                    initialValue: descriptionDefaultValue,
                     height: 500,
                     menubar: true,
                     skin: 'oxide-dark',
@@ -321,13 +321,12 @@ const AddTournament = ({ isEditing }) => {
                       "anchor",
                       "searchreplace",
                       "visualblocks",
-                      "code",
                       "fullscreen",
                       "insertdatetime",
                       "media",
                       "table",
-                      "code",
                       "help",
+                      "code",
                       "wordcount",
                       "anchor",
                     ],
