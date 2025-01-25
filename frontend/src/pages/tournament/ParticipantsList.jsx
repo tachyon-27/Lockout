@@ -1,6 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const ParticipantsList = () => {
+    const [searchParams] = useSearchParams();
+    const tournamentId = searchParams.get("id");
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (!tournamentId) {
+            console.log("Tournament ID is required in the query parameters.");
+            toast({
+                title: "Tournament not Specified!"
+            })
+            navigate('/tournaments');
+        }
+    }, [tournamentId, navigate])
+
+
+
     const data = [
         // Uncomment this line to test the "no participants" message
         { participantName: 'Alice', maxRating: 1900 },
