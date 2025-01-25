@@ -38,9 +38,10 @@ export default function TournamentNavBar() {
     const location = useLocation();
 
     const routes = [
-        { path: '/tournament/view', label: 'View Tournament', component: 'View Tournament' },
-        { path: '/tournament/anotherRoute', label: 'Another Route', component: 'Another Route' },
-        { path: '/tournament/yetAnotherRoute', label: 'Yet Another Route', component: 'Yet Another Route' },
+        { path: '/tournament/view', label: 'View', component: 'View Tournament' },
+        { path: '#', label: 'Fixtures', component: 'Another Route' },
+        { path: '#', label: 'Matches', component: 'Yet Another Route' },
+        { path: '#', label: 'Participants', component: 'Yet Another Route' },
     ];
 
     useEffect(() => {
