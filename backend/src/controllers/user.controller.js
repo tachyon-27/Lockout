@@ -282,3 +282,9 @@ export const resetPassword = asyncHandler(async (req, res) => {
     return res.json(new ApiResponse(501, "Error while resetting password", error))
   }
 })
+
+export const getCFIDs = asyncHandler(async (req, res) => {
+  return res
+    .status(201)
+    .json(new ApiResponse(201, "", {cfids: req.user.codeforcesID}))
+})

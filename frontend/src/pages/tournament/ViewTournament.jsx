@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast"
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { RingLoader } from "react-spinners";
 import axios from "axios";
+import { RegistrButton } from "@/components";
 
 const ViewTournament = () => {
   const [searchParams] = useSearchParams();
   const tournamentId = searchParams.get("id");
   const [tournament, setTournament] = useState(null); 
   const [timeLeft, setTimeLeft] = useState(null);
-  const [isErrorFetching, setIsErrorFetching] = useState(false);
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -42,7 +41,7 @@ const ViewTournament = () => {
     };
 
     fetchTournament();
-  }, [tournamentId]);
+  }, [tournamentId, navigate, toast]);
 
   useEffect(() => {
     if (!timeLeft || !tournament) return;
@@ -107,13 +106,7 @@ const ViewTournament = () => {
 
 
       <div className="flex justify-center items-center">
-        <HoverBorderGradient
-          containerClassName="rounded-full"
-          as="button"
-          className="dark:bg-gray-900 bg-white text-black dark:text-white flex self-center items-center space-x-2 justify-center mx-auto"
-        >
-          <span>Register</span>
-        </HoverBorderGradient>
+        <RegistrButton tournamentId={tournamentId}/>
       </div>
 
       <div

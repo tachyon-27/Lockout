@@ -22,7 +22,6 @@ import {
   ViewTournament, 
   Tournament,
   Logout,
-  AdminTournaments
 } from './pages'
 
 const router = createBrowserRouter(
@@ -50,7 +49,7 @@ const router = createBrowserRouter(
         <Route path='' element = { <Home /> } />
         <Route path='add-tournament' element={<AddTournament />} />
         <Route path='update-tournament' element={<AddTournament isEditing={true}/>} />
-        <Route path='tournaments' element={<AdminTournaments />} />
+        <Route path='tournaments' element={<Tournament isAdmin={true} />} />
       </Route>
     </>
   )

@@ -190,7 +190,7 @@ const AddTournament = ({ isEditing }) => {
                             variant={"outline"}
                             type="button"
                             className={cn(
-                              "w-full pl-3 text-left font-normal",
+                              "w-full pl-3 text-left text-sm font-normal",
                               !field.value && "text-muted-foreground",
                               "bg-gray-600 border-none text-white placeholder:text-white hover:bg-gry-600 rounded-md"
                             )}
@@ -341,7 +341,7 @@ const AddTournament = ({ isEditing }) => {
             />
           </div>
           <div className="flex justify-center items-center lg:col-span-2">
-            <button type="submit" className="text-white bg-blue-900 px-6 py-2 rounded-md">
+            <button type="submit" disabled={isLoading} className="text-white bg-blue-900 px-6 py-2 rounded-md">
               {
                 isLoading ? (
                   <BeatLoader size={10} color="#36D7B7" />

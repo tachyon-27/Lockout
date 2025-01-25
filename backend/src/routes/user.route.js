@@ -6,7 +6,8 @@ import {
   sendEmail,
   getUser,
   passwordOTP,
-  resetPassword
+  resetPassword,
+  getCFIDs
 } from "../controllers/user.controller.js";
 import { verifyUser } from "../middlewares/auth.middleware.js";
 
@@ -20,5 +21,6 @@ router.route("/get-user").post(getUser)
 router.route("/logout").get(verifyUser, logoutUser)
 router.route("/password-otp").post(verifyUser, passwordOTP)
 router.route("/reset-password").post(verifyUser, resetPassword)
+router.route("/get-cfids").get(verifyUser, getCFIDs)
 
 export default router;
