@@ -15,7 +15,11 @@ const ViewTournament = () => {
 
   useEffect(() => {
     if (!tournamentId) {
-      console.error("Tournament ID is required in the query parameters.");
+      console.log("Tournament ID is required in the query parameters.");
+      toast({
+        title: "Tournament not Specified!"
+      })
+      navigate('/tournaments');
       return;
     }
 
