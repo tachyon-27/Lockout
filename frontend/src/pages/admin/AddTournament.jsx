@@ -46,7 +46,7 @@ const AddTournament = ({ isEditing }) => {
   const popoverRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [existingImage, setExistingImage] = useState(null);
-  const descriptionDefaultValue = ""
+  let descriptionDefaultValue = ""
 
   useEffect(() => {
     if (isEditing && tournamentId) {
