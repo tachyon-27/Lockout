@@ -4,7 +4,9 @@ import {
   IconArrowLeft,
   IconBrandTabler,
   IconSettings,
-  IconUserBolt,
+  IconHome,
+  IconUsersPlus,
+  IconDeviceGamepad2,
 } from "@tabler/icons-react";
 import {Link} from "react-router-dom";
 import { motion } from "framer-motion";
@@ -24,7 +26,7 @@ export function SideBar() {
       label: "Tournaments",
       href: "/admin/dashboard/tournaments",
       icon: (
-        <IconUserBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <IconDeviceGamepad2 className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
@@ -32,6 +34,20 @@ export function SideBar() {
       href: "/admin/dashboard/add-tournament",
       icon: (
         <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: "Back to main",
+      href: "/",
+      icon: (
+        <IconHome className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: "Add Admin",
+      href: "#",
+      icon: (
+        <IconUsersPlus className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
@@ -45,7 +61,7 @@ export function SideBar() {
 
   return (
     <Sidebar open={open} setOpen={setOpen}>
-    <SidebarBody className="z-[5000] justify-between gap-10">
+    <SidebarBody className="z-[51] justify-between gap-10">
         <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
         {open ? <Logo /> : <LogoIcon />}
         <div className="mt-8 flex flex-col gap-2">
@@ -55,19 +71,7 @@ export function SideBar() {
         </div>
         </div>
         <div>
-        <SidebarLink
-            link={{
-            label: "Manu Arora",
-            href: "#",
-            icon: (
-                <img
-                src="https://assets.aceternity.com/manu.png"
-                className="h-7 w-7 flex-shrink-0 rounded-full"
-                width={50}
-                height={50}
-                alt="Avatar" />
-            ),
-            }} />
+        
         </div>
     </SidebarBody>
     </Sidebar>
