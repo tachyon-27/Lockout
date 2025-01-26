@@ -1,7 +1,9 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useToast } from "@/hooks/use-toast"
 
 const ParticipantsList = () => {
+    const { toast } = useToast()
     const [searchParams] = useSearchParams();
     const tournamentId = searchParams.get("id");
     const navigate = useNavigate()
@@ -16,10 +18,7 @@ const ParticipantsList = () => {
         }
     }, [tournamentId, navigate])
 
-
-
     const data = [
-        // Uncomment this line to test the "no participants" message
         { participantName: 'Alice', maxRating: 1900 },
         { participantName: 'Bob', maxRating: 2100 },
         { participantName: 'Charlie', maxRating: 1750 },
