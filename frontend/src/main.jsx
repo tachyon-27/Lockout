@@ -23,6 +23,7 @@ import {
   Tournament,
   Logout,
   ParticipantsList,
+  Fixtures,
 } from './pages'
 
 const router = createBrowserRouter(
@@ -42,6 +43,7 @@ const router = createBrowserRouter(
         <Route path='/tournament' element={ <TournamentLayout />}>
           <Route path='view' element={ <ViewTournament /> } />
           <Route path='participants' element={ <ParticipantsList /> } />
+          <Route path='fixtures' element={ <Fixtures /> } />
         </Route>
       </Route>
       <Route path='/admin' element={<AdminLogin />} />
