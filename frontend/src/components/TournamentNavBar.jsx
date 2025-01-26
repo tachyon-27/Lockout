@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useSearchParams } from 'react-router-dom';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -35,13 +35,15 @@ function a11yProps(index) {
 
 export default function TournamentNavBar() {
     const [value, setValue] = useState(0);
+    const [searchParams] = useSearchParams()
+    const tournamentId = searchParams.get("id");
     const location = useLocation();
 
     const routes = [
-        { path: '/tournament/view', label: 'View', component: 'View Tournament' },
+        { path: `/tournament/view?id=${tournamentId}`, label: 'View', component: 'View Tournament' },
         { path: '#', label: 'Fixtures', component: 'Another Route' },
         { path: '#', label: 'Matches', component: 'Yet Another Route' },
-        { path: '/tournament/participants', label: 'Participants', component: 'Yet Another Route' },
+        { path: `/tournament/participants?id=${tournamentId}`, label: 'Participants', component: 'Yet Another Route' },
     ];
 
     useEffect(() => {
