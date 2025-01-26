@@ -34,7 +34,7 @@ export default function Tournament({ isAdmin }) {
   }, [toast]);
 
   return (
-    <Accordion type="single" collapsible className="w-[80vw]">
+    <Accordion type="single" collapsible className="w-full px-10">
       {tournaments.map((tournament, idx) => (
         <AccordionItem key={idx} value={idx}>
           <AccordionTrigger> {tournament.title} </AccordionTrigger>
