@@ -28,6 +28,24 @@ const ParticipantsList = () => {
             })
 
             if (response.data.success) {
+                // const y = [
+                //     {
+                //         name: "as",
+                //         maxRating: 2,
+                //     },
+                //     {
+                //         name: "as",
+                //         maxRating: 1,
+                //     },
+                //     {
+                //         name: "as",
+                //         maxRating: 4,
+                //     },
+                //     {
+                //         name: "as",
+                //         maxRating: 3,
+                //     }
+                // ]
                 const sortedParticipants = response.data.data.sort(
                     (a, b) => b.maxRating - a.maxRating
                 );
