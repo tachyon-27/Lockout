@@ -186,3 +186,42 @@ export const tournamentRegister = asyncHandler(async (req, res) => {
         return res.json(new ApiResponse(500, "An error occurred while registering for the tournament.", error));
     }
 });
+
+export const getParticipantsList = asyncHandler(async (req, res) => {
+
+    try {
+        
+        const { _id } = req.body;
+    
+        if(!_id) {
+            return res.json(new ApiResponse(400, "Tournament ID is required"))
+        }
+
+        if(!mongoose.Types.ObjectId.isValid(_id)) {
+            return res.json(new ApiResponse(400, "Invalid Tournament ID"));
+        }
+    
+        const tournament = await Tournament.findById(_id).populate({
+            path: 'participants.user',
+            select: 'name'
+        });
+    
+        
+        if(!tournament) {
+            return res.json(new ApiResponse(404, "Tournament not Found!"));
+        }
+        
+        const participants = tournament.participants.map(participant => ({
+            name: participant.user.name,
+            maxRating: participant.maxRating 
+        }));
+
+        return res.json(new ApiResponse(200, "Participants Retrieved successfully!", participants))
+
+    } catch (error) {
+        console.log(error)
+        res.status(500)
+        throw new Error(error)
+    }
+
+})
