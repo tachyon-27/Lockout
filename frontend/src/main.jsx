@@ -23,6 +23,7 @@ import {
   Tournament,
   Logout,
   ParticipantsList,
+  Fixtures,
   AllMatches
 } from './pages'
 
@@ -44,6 +45,7 @@ const router = createBrowserRouter(
           <Route path='view' element={ <ViewTournament /> } />
           <Route path='participants' element={ <ParticipantsList /> } />
           <Route path='all-matches' element={ <AllMatches /> } />
+          <Route path='fixtures' element={ <Fixtures /> } />
         </Route>
       </Route>
       <Route path='/admin' element={<AdminLogin />} />

@@ -13,6 +13,7 @@ import Tournament from './tournament/Tournaments'
 import Logout from "./admin/Logout";
 import ParticipantsList from "./tournament/ParticipantsList";
 import AllMatches from "./tournament/AllMatches";
+import Fixtures from "./tournament/Fixtures";
 
 export {
     Home,
@@ -30,4 +31,5 @@ export {
     Logout,
     ParticipantsList,
     AllMatches,
+    Fixtures
 }
