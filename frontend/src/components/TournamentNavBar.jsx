@@ -41,7 +41,7 @@ export default function TournamentNavBar() {
         { path: '/tournament/view', label: 'View', component: 'View Tournament' },
         { path: '#', label: 'Fixtures', component: 'Another Route' },
         { path: '#', label: 'Matches', component: 'Yet Another Route' },
-        { path: '#', label: 'Participants', component: 'Yet Another Route' },
+        { path: '/tournament/participants', label: 'Participants', component: 'Yet Another Route' },
     ];
 
     useEffect(() => {
