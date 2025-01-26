@@ -13,62 +13,46 @@ const ParticipantsList = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [err, setErr] = useState("");
 
-    useEffect(async () => {
-        if (!tournamentId) {
-            console.log("Tournament ID is required in the query parameters.");
-            toast({
-                title: "Tournament not Specified!"
-            })
-            navigate('/tournaments');
-        }
-
-        try {
-            const response = await axios.post('/api/tournament/get-participants', {
-                _id: tournamentId,
-            })
-
-            if (response.data.success) {
-                // const y = [
-                //     {
-                //         name: "as",
-                //         maxRating: 2,
-                //     },
-                //     {
-                //         name: "as",
-                //         maxRating: 1,
-                //     },
-                //     {
-                //         name: "as",
-                //         maxRating: 4,
-                //     },
-                //     {
-                //         name: "as",
-                //         maxRating: 3,
-                //     }
-                // ]
-                const sortedParticipants = response.data.data.sort(
-                    (a, b) => b.maxRating - a.maxRating
-                );
-                setParticipants(sortedParticipants);
-
-            } else {
-                setErr(response.data.message || "Failed to fetch participants")
+    useEffect(() => {
+        const fetchParticipants = async () => {
+            if (!tournamentId) {
+                console.log("Tournament ID is required in the query parameters.");
+                toast({
+                    title: "Tournament not Specified!"
+                });
+                navigate('/tournaments');
+                return;
             }
 
-        } catch (error) {
-            console.log(error)
-            toast({
-                title: "Error occured while fetching participants!",
-                description: error.message,
-            })
-            navigate('/tournaments')
-        } finally {
-            setIsLoading(false)
-        }
+            try {
+                const response = await axios.post('/api/tournament/get-participants', {
+                    _id: tournamentId,
+                });
 
+                if (response.data.success) {
+                    const sortedParticipants = response.data.data.sort(
+                        (a, b) => b.maxRating - a.maxRating
+                    );
+                    setParticipants(sortedParticipants);
+                } else {
+                    setErr(response.data.message || "Failed to fetch participants");
+                }
+            } catch (error) {
+                console.log(error);
+                toast({
+                    title: "Error occurred while fetching participants!",
+                    description: error.message,
+                });
+                navigate('/tournaments');
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
+        fetchParticipants();
 
-    }, [tournamentId, navigate, toast])
+    }, [tournamentId, navigate, toast]);
+
 
     if (isLoading) {
         return (
