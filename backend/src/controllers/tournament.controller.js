@@ -188,9 +188,7 @@ export const tournamentRegister = asyncHandler(async (req, res) => {
 });
 
 export const getParticipantsList = asyncHandler(async (req, res) => {
-
     try {
-        
         const { _id } = req.body;
     
         if(!_id) {
@@ -212,16 +210,14 @@ export const getParticipantsList = asyncHandler(async (req, res) => {
         }
         
         const participants = tournament.participants.map(participant => ({
-            name: participant.user.name,
+            name: participant.cfid,
             maxRating: participant.maxRating 
         }));
 
         return res.json(new ApiResponse(200, "Participants Retrieved successfully!", participants))
-
     } catch (error) {
         console.log(error)
         res.status(500)
         throw new Error(error)
     }
-
 })
