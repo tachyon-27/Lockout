@@ -42,7 +42,7 @@ export default function TournamentNavBar() {
     const routes = [
         { path: `/tournament/view?id=${tournamentId}`, label: 'View', component: 'View Tournament' },
         { path: '#', label: 'Fixtures', component: 'Another Route' },
-        { path: '#', label: 'Matches', component: 'Yet Another Route' },
+        { path: `/tournament/all-matches?id=${tournamentId}`, label: 'Matches', component: 'Yet Another Route' },
         { path: `/tournament/participants?id=${tournamentId}`, label: 'Participants', component: 'Yet Another Route' },
     ];
 
