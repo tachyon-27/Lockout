@@ -52,15 +52,19 @@ const generate = (participants) => {
   curr += lowPow/2;
   temp = 1;
   for (let i = 0; i < lowPow; i += 2) {
-    matches.push(
-      round(id, 1, curr + temp, [i < bye ? {
-        id: Math.floor(Math.random()*1000),
-        name: "TBD"
-      } : participants[x++], i+1 < bye ? {
-        id: Math.floor(Math.random()*1000),
-        name: "TBD"
-      } : participants[x++]])
-    );
+    if(i+1 < bye) {
+      matches.push(round(id, 1, curr+temp));
+    } else {
+      matches.push(
+        round(id, 1, curr + temp, [i < bye ? {
+          id: Math.floor(Math.random()*1000),
+          name: "TBD"
+        } : participants[x++], i+1 < bye ? {
+          id: Math.floor(Math.random()*1000),
+          name: "TBD"
+        } : participants[x++]])
+      );
+    }
     if (id % 2 === 0) temp++;
     id++;
   }
@@ -79,7 +83,7 @@ const generate = (participants) => {
   return matches;
 };
 
-const participants = Array.from({ length: 63 }, (v, i) => ({
+const participants = Array.from({ length: 13 }, (v, i) => ({
   id: `p${i + 1}`,
   name: `Participant ${i + 1}`,
 }));
