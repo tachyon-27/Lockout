@@ -13,27 +13,34 @@ const participantSchema = mongoose.Schema({
     maxRating: {
         type: Number
     }
-},{
-        timestamps: true
+}, {
+    timestamps: true
+}
+)
+
+const matchParticipantSchema = mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: [true, "Please specify the parrticipant name"],
+        },
+        resultText: {
+            type: String,
+        },
+        isWinner: {
+            type: Boolean,
+        },
+    },
+    {
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
     }
 )
 
-const matchParticipantSchema = mongoose.Schema({
-    id: {
-        type: String,
-        required: [true, "Please Specify the participant ID"],
-    },
-    name: {
-        type: String,
-        required: [true, "Please specify the parrticipant name"],
-    },
-    resultText: {
-        type: String,
-    },
-    isWinner: {
-        type: Boolean,
-    },
-})
+matchParticipantSchema.virtual("id").get(function () {
+    return this._id.toHexString();
+});
+
 
 const matchSchema = mongoose.Schema({
     id: {
@@ -54,8 +61,8 @@ const matchSchema = mongoose.Schema({
     state: {
         type: String,
         enum: ['NO_SHOW', 'WALK_OVER', 'NO_PARTY', 'DONE', 'SCORE_DONE', 'SCHEDULED'],
-        required: true, 
-        default: 'SCHEDULED' 
+        required: true,
+        default: 'SCHEDULED'
     },
     participants: [matchParticipantSchema],
 })
@@ -82,8 +89,8 @@ const tournamentSchema = mongoose.Schema({
         required: [true, 'Cover Image is required']
     },
     participants: {
-        type: [participantSchema],  
-        default: [] 
+        type: [participantSchema],
+        default: []
     },
     matches: [matchSchema],
 })
