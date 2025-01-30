@@ -7,6 +7,7 @@ import { SideBar } from "./SideBar";
 import TournamentRegister from "./TournamentRegister";
 import AddCfID from "./AddCfID";
 import RegistrButton from "./RegistrButton";
+import MatchCard from "./MatchCard";
 
 export {
     Footer,
@@ -18,4 +19,5 @@ export {
     TournamentRegister,
     AddCfID,
     RegistrButton,
+    MatchCard,
 }
