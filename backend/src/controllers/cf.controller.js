@@ -75,6 +75,23 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
         const { tournamentId, problemList, startTime } = req.body;
         const user = req.user;
 
+        if(!user) {
+            return res.json(new ApiResponse(404, "User not specified!"));
+        }
+
+        if(!tournamentId) {
+            return res.json(new ApiResponse(404, "TournamentId required!"));
+        }
+
+        if(!problemList) {
+            return res.json(new ApiResponse(404, "problemList required!"));
+        }
+
+        if(!startTime) {
+            return res.json(new ApiResponse(404, "startTime required!"));
+        }
+        
+
         const tournament = await Tournament.findById(tournamentId);
         if (!tournament) {
             return res.json(new ApiResponse(404, "Tournament not Found!"));
@@ -120,6 +137,4 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
         res.status(500)
         throw new Error("Server Error!")
     }
-    const url = new URL(link);
-    const parts = url.pathname.split("/").filter(Boolean);
 })
