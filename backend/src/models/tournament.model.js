@@ -65,6 +65,12 @@ const matchSchema = mongoose.Schema({
         default: 'SCHEDULED'
     },
     participants: [matchParticipantSchema],
+    problemList: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Question"
+        }
+    ]
 })
 
 const tournamentSchema = mongoose.Schema({
