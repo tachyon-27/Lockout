@@ -13,10 +13,59 @@ const participantSchema = mongoose.Schema({
     maxRating: {
         type: Number
     }
-},{
-        timestamps: true
+}, {
+    timestamps: true
+}
+)
+
+const matchParticipantSchema = mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: [true, "Please specify the parrticipant name"],
+        },
+        resultText: {
+            type: String,
+        },
+        isWinner: {
+            type: Boolean,
+        },
+    },
+    {
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
     }
 )
+
+matchParticipantSchema.virtual("id").get(function () {
+    return this._id.toHexString();
+});
+
+
+const matchSchema = mongoose.Schema({
+    id: {
+        type: Number,
+        required: [true, "Match cannot be made without an match id!"]
+    },
+    name: {
+        type: String,
+    },
+    nextMatchId: {
+        type: Number,
+        default: null,
+    },
+    tournamentRoundText: {
+        type: Number,
+        required: [true, "Specify the round header"]
+    },
+    state: {
+        type: String,
+        enum: ['NO_SHOW', 'WALK_OVER', 'NO_PARTY', 'DONE', 'SCORE_DONE', 'SCHEDULED'],
+        required: true,
+        default: 'SCHEDULED'
+    },
+    participants: [matchParticipantSchema],
+})
 
 const tournamentSchema = mongoose.Schema({
     title: {
@@ -40,9 +89,10 @@ const tournamentSchema = mongoose.Schema({
         required: [true, 'Cover Image is required']
     },
     participants: {
-        type: [participantSchema],  
-        default: [] 
-    }
+        type: [participantSchema],
+        default: []
+    },
+    matches: [matchSchema],
 })
 
 const Tournament = mongoose.model('Tournament', tournamentSchema)
