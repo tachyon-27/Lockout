@@ -83,7 +83,7 @@ const generate = (participants) => {
   return matches;
 };
 
-const participants = Array.from({ length: 13 }, (v, i) => ({
+const participants = Array.from({ length: 63 }, (v, i) => ({
   id: `p${i + 1}`,
   name: `Participant ${i + 1}`,
 }));
