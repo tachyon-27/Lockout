@@ -4,6 +4,7 @@ import User from "../models/user.model.js";
 import generateRandomString from "../utils/generateRandomString.js";
 import axios from 'axios';
 import Tournament from "../models/tournament.model.js";
+import Question from "../models/question.model.js";
 
 export const addCFID = asyncHandler(async (req, res) => {
     try {
@@ -70,7 +71,6 @@ export const verifyCFID = asyncHandler(async (req, res) => {
 
 export const UpdateProblemStatus = asyncHandler(async (req, res) => {
     try {
-
         // Start Time whether to take from backend or frontend still not confirmed!
         const { tournamentId, problemList, startTime } = req.body;
         const user = req.user;
@@ -91,7 +91,6 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
             return res.json(new ApiResponse(404, "startTime required!"));
         }
         
-
         const tournament = await Tournament.findById(tournamentId);
         if (!tournament) {
             return res.json(new ApiResponse(404, "Tournament not Found!"));
@@ -112,9 +111,7 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
         }
 
         const submissions = response.data.result;
-
         const startTimestamp = new Date(startTime).getTime();
-
         const validSubmissions = submissions.filter(submission => {
             const submissionTime = submission.creationTimeSeconds * 1000;
             return submissionTime >= startTimestamp && submission.verdict === "OK";
@@ -136,5 +133,56 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
     } catch (error) {
         res.status(500)
         throw new Error("Server Error!")
+    }
+})
+
+export const populateQuestions = asyncHandler(async (req, res) => {
+    try {
+        await Question.deleteMany({})
+
+        const response = await axios.get('https://codeforces.com/api/problemset.problems');
+    
+        if (response.data.status === 'OK') {
+          const problems = response.data.result.problems;
+    
+          const questionsToInsert = problems
+            .filter(problem => problem.rating && typeof problem.rating === 'number')
+            .map(problem => ({
+            contestId: problem.contestId,
+            index: problem.index,
+            name: problem.name,
+            rating: problem.rating
+          }));
+    
+          const result = await Question.insertMany(questionsToInsert);
+
+          const info = {
+            totalQuestions: await Question.countDocuments(),
+            r800: await Question.countDocuments({ rating: 800 }),
+            r900: await Question.countDocuments({ rating: 900 }),
+            r1000: await Question.countDocuments({ rating: 1000 }),
+            r1100: await Question.countDocuments({ rating: 1100 }),
+            r1200: await Question.countDocuments({ rating: 1200 }),
+            r1300: await Question.countDocuments({ rating: 1300 }),
+            r1400: await Question.countDocuments({ rating: 1400 }),
+            r1500: await Question.countDocuments({ rating: 1500 }),
+            r1600: await Question.countDocuments({ rating: 1600 }),
+            r1700: await Question.countDocuments({ rating: 1700 }),
+            r1800: await Question.countDocuments({ rating: 1800 }),
+            r1900: await Question.countDocuments({ rating: 1900 }),
+            r2000: await Question.countDocuments({ rating: 2000 }),
+          }
+          
+          return res
+            .status(201)
+            .json(new ApiResponse(201, "questions populated successfully.", info))
+        } else {
+          return res
+            .status(500)
+            .json(new ApiResponse(500, 'Failed to retrieve problems from Codeforces API'))
+        }
+    } catch(error) {
+        res.status(501)
+        res.json(new ApiResponse(501, "Error while populating questions.", error))
     }
 })
