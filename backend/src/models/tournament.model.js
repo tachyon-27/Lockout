@@ -12,34 +12,36 @@ const participantSchema = mongoose.Schema({
     },
     maxRating: {
         type: Number
-    }
+    },
+    resultText: {
+        type: String,
+    },
+    isWinner: {
+        type: Boolean,
+    },
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
 }
 )
 
-const matchParticipantSchema = mongoose.Schema(
-    {
-        name: {
-            type: String,
-            required: [true, "Please specify the parrticipant name"],
-        },
-        resultText: {
-            type: String,
-        },
-        isWinner: {
-            type: Boolean,
-        },
-    },
-    {
-        toJSON: { virtuals: true },
-        toObject: { virtuals: true }
-    }
-)
-
-matchParticipantSchema.virtual("id").get(function () {
+participantSchema.virtual("id").get(function () {
     return this._id.toHexString();
 });
+participantSchema.virtual("name").get(function () {
+    return this.cfid;
+});
+
+const problemSchema = mongoose.Schema({
+    question: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Question"
+    },
+    solved: {
+        type: String,
+    }
+})
 
 
 const matchSchema = mongoose.Schema({
@@ -58,19 +60,17 @@ const matchSchema = mongoose.Schema({
         type: Number,
         required: [true, "Specify the round header"]
     },
+    startTime: {
+        type: Date,
+    },
     state: {
         type: String,
         enum: ['NO_SHOW', 'WALK_OVER', 'NO_PARTY', 'DONE', 'SCORE_DONE', 'SCHEDULED'],
         required: true,
         default: 'SCHEDULED'
     },
-    participants: [matchParticipantSchema],
-    problemList: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Question"
-        }
-    ]
+    participants: [participantSchema],
+    problemList: [ problemSchema ],
 })
 
 const tournamentSchema = mongoose.Schema({
