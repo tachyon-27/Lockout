@@ -186,3 +186,41 @@ export const populateQuestions = asyncHandler(async (req, res) => {
         res.json(new ApiResponse(501, "Error while populating questions.", error))
     }
 })
+export const generateProblemList = asyncHandler(async (req, res) => {
+    try {
+      let { startingRating } = req.body;
+      startingRating = parseInt(startingRating);
+  
+      if (isNaN(startingRating) || startingRating < 800) {
+        return res.json(new ApiResponse(400, 'startingRating must be a number and at least 800'));
+      }
+  
+      let selectedQuestions = [];
+  
+      for (let i = 0; i < 5; i++) {
+        const ratingThreshold = startingRating + (i * 100);
+  
+        const question = await Question.aggregate([
+          { $match: { rating: ratingThreshold } },
+          { $sample: { size: 1 } }
+        ]);
+  
+        if (question.length === 0) {
+          return res
+            .status(404)
+            .json(new ApiResponse(404, `No question found for rating == ${ratingThreshold}`));
+        }
+  
+        selectedQuestions.push(question[0]);
+      }
+  
+      return res
+        .status(201)
+        .json(new ApiResponse(201, "Problem list generated successfully.", selectedQuestions));
+    } catch (error) {
+      return res
+        .status(501)
+        .json(new ApiResponse(501, "Error while generating Problem List.", error.message));
+    }
+  });
+  
