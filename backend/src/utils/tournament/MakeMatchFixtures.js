@@ -1,4 +1,4 @@
-const generateMatches = async (tournamentId, participants) => {
+const generateMatches = async (participants) => {
     const matches = [];
     let id = 1;
     let temp = 1;
@@ -7,10 +7,6 @@ const generateMatches = async (tournamentId, participants) => {
     const bye = participants.length - lowPow;
     let curr = 0;
     let x = 0;
-
-    const mapToMatchParticipant = (participant) => ({
-        name: participant.name,
-    });
 
     if (bye > 0) {
         curr += highPow / 2;
@@ -21,10 +17,10 @@ const generateMatches = async (tournamentId, participants) => {
                 nextMatchId: curr + temp,
                 participants: [
                     x < 2 * bye
-                        ? mapToMatchParticipant(participants[x++])
+                        ? participants[x++]
                         : { name: 'NA' },
                     x < 2 * bye
-                        ? mapToMatchParticipant(participants[x++])
+                        ? participants[x++]
                         : { name: 'NA' }
                 ]
             });
@@ -50,10 +46,10 @@ const generateMatches = async (tournamentId, participants) => {
                 nextMatchId: curr + temp,
                 participants: [
                     i < bye
-                        ? mapToMatchParticipant(participants[x++])
+                        ? (participants[x++])
                         : { name: 'TBD' },
                     i + 1 < bye
-                        ? mapToMatchParticipant(participants[x++])
+                        ? (participants[x++])
                         : { name: 'TBD' }
                 ]
             });
