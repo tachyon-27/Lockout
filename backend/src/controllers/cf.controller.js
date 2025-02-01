@@ -186,6 +186,7 @@ export const populateQuestions = asyncHandler(async (req, res) => {
         res.json(new ApiResponse(501, "Error while populating questions.", error))
     }
 })
+
 export const generateProblemList = asyncHandler(async (req, res) => {
     try {
       let { startingRating } = req.body;
