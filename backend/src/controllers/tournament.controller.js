@@ -218,6 +218,39 @@ export const getParticipantsList = asyncHandler(async (req, res) => {
     }
 })
 
+export const startTournament = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId } = req.body;
+
+        if(!tournamentId) {
+            return res.json(new ApiResponse(404, "Tournament Id not specified!"));
+        }
+
+        const tournament = await Tournament.findById(tournamentId).populate({
+            path: "participants",
+            select: "name",  
+        });
+
+        if (!tournament) {
+            return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
+        }
+
+        tournament.startDate = new Date();
+
+        tournament.matches = generateMatches(tournament.participants);
+
+        await tournament.save();
+
+        res.json(new ApiResponse(200, "Tournament Started!"));
+
+    } catch (error) {
+        console.error(error);
+        res.statusCode = 500;
+        throw new Error("Server Error!");
+    }
+});
+
+
 export const getMatches = asyncHandler(async (req, res) => {
     try {
         const { _id } = req.body;

@@ -24,7 +24,8 @@ import {
   Logout,
   ParticipantsList,
   Fixtures,
-  AllMatches
+  AllMatches,
+  Match,
 } from './pages'
 
 const router = createBrowserRouter(
@@ -40,6 +41,9 @@ const router = createBrowserRouter(
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/tournaments' element={ <Tournament />} />
+
+        {/* Temporary */}
+        <Route path='/match' element= { <Match /> } />
 
         <Route path='/tournament' element={ <TournamentLayout />}>
           <Route path='view' element={ <ViewTournament /> } />

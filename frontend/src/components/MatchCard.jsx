@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const ShowStatus = ({ status }) => {
     const bgColor = {
@@ -26,25 +28,25 @@ const MatchCard = ({ match }) => {
     // };
     
     useEffect(() => {
-        if (!match?.startTime) return;
-    
+        if (!matchData?.startTime) return;
+
         const timer = setInterval(() => {
-            const time = calculateTimeLeft(new Date(match.startTime));
+            const time = calculateTimeLeft(new Date(matchData.startTime));
             setTimeLeft(time);
         }, 1000);
-    
+
         return () => clearInterval(timer);
-    }, [match.startTime]);
-    
+    }, [matchData.startTime]);
+
     function formatTime(time) {
         if (!time) return "Loading...";
         return `${time.days}d ${time.hours}h ${time.minutes}m ${time.seconds}s`;
     }
-    
+
     function calculateTimeLeft(eventStart) {
         const now = new Date();
         const difference = eventStart - now;
-    
+
         return difference > 0
             ? {
                 total: difference,
@@ -55,10 +57,11 @@ const MatchCard = ({ match }) => {
             }
             : { total: 0, days: 0, hours: 0, minutes: 0, seconds: 0 };
     }
-    
+
+
     return (
         <div className="p-4 border rounded-md shadow-md w-full bg-transparent bg-gradient-to-tr from-black via-gray-400/30 to-gray-500/50 transition-transform duration-300 hover:scale-105  hover:shadow-lg">
-            {/* Match Title & Status */}
+            {/* MatchData Title & Status */}
             <div className="flex justify-between items-center mb-2 pb-2 border-b-2 border-slate-700">
                 <h3 className="text-lg font-semibold">{match.tournamentRoundText}</h3>
                 <ShowStatus status={match.state} />
@@ -72,7 +75,7 @@ const MatchCard = ({ match }) => {
             {/* Separator Line */}
             <div className="w-full h-[2px] bg-slate-500 my-2"></div>
 
-            {/* Match Time / Remaining Time */}
+            {/* MatchData Time / Remaining Time */}
             <div className="text-center text-gray-600 text-sm mb-4">
                 {match.state === "RUNNING" ? `Remaining: ${match.matchTime}` : match.state === "DONE" ? "Match Ended" : `Starts in: ${formatTime(timeLeft)}`}
             </div>
