@@ -162,7 +162,7 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
 
         // req.io.to(`match_${matchId}`).emit("problemListUpdated", {
         //     matchId,
-        //     updatedProblemList: match.problemList
+        //     problemList: match.problemList
         // });
 
         res.json(new ApiResponse(200, "Problem List Updated!", match.problemList));
