@@ -65,9 +65,12 @@ const matchSchema = mongoose.Schema({
     },
     state: {
         type: String,
-        enum: ['NO_SHOW', 'WALK_OVER', 'NO_PARTY', 'DONE', 'SCORE_DONE', 'SCHEDULED'],
+        enum: ['NO_SHOW', 'RUNNING', 'WALK_OVER', 'NO_PARTY', 'DONE', 'SCORE_DONE', 'SCHEDULED'],
         required: true,
         default: 'SCHEDULED'
+    },
+    matchTime: {
+        type: Number
     },
     participants: [participantSchema],
     problemList: [ problemSchema ],

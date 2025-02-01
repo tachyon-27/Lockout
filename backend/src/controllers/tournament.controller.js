@@ -199,11 +199,7 @@ export const getParticipantsList = asyncHandler(async (req, res) => {
             return res.json(new ApiResponse(400, "Invalid Tournament ID"));
         }
     
-        const tournament = await Tournament.findById(_id).populate({
-            path: 'participants.user',
-            select: 'name'
-        });
-    
+        const tournament = await Tournament.findById(_id)
         
         if(!tournament) {
             return res.json(new ApiResponse(404, "Tournament not Found!"));
@@ -221,3 +217,70 @@ export const getParticipantsList = asyncHandler(async (req, res) => {
         throw new Error(error)
     }
 })
+
+export const getMatches = asyncHandler(async (req, res) => {
+    try {
+        const { _id } = req.body;
+    
+        if(!_id) {
+            return res.json(new ApiResponse(400, "Tournament ID is required"))
+        }
+
+        if(!mongoose.Types.ObjectId.isValid(_id)) {
+            return res.json(new ApiResponse(400, "Invalid Tournament ID"));
+        }
+    
+        const tournament = await Tournament.findById(_id)
+        
+        if(!tournament) {
+            return res.json(new ApiResponse(404, "Tournament not Found!"));
+        }
+
+        return res.json(new ApiResponse(200, "Matches Retrieved successfully!", tournament.matches))
+    } catch (error) {
+        return res
+          .status(501)
+          .json(new ApiResponse(501, "Error while getting matches.", error));
+    }
+})
+
+export const getMatch = asyncHandler(async (req, res) => {
+    try {
+        const { _id, matchId } = req.body;
+
+        if (!_id) {
+            return res
+                .status(400)
+                .json(new ApiResponse(400, "Tournament ID is required"));
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
+            return res
+                .status(400)
+                .json(new ApiResponse(400, "Invalid Tournament ID"));
+        }
+
+        const tournament = await Tournament.findById(_id)
+
+        if (!tournament) {
+            return res.
+                status(404)
+                .json(new ApiResponse(404, "Tournament not Found!"));
+        }
+
+        const match = tournament.matches.find(match => match.id == matchId);
+
+        if (!match) {
+            return res
+                .json(new ApiResponse(404, "Match not Found!"));
+        }
+
+        return res
+            .status(200)
+            .json(new ApiResponse(200, "Match Retrieved successfully!", match));
+    } catch (error) {
+        return res
+            .status(500)
+            .json(new ApiResponse(500, "Error while getting match.", error.message));
+    }
+});
