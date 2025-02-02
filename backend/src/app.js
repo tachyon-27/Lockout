@@ -1,9 +1,13 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { Server } from 'socket.io'
+import http from 'http'
 import {errorHandler} from "./middlewares/errorHandler.js";
+import { setupSocket, getIo, getUserSocket } from './socket.js'
 
 const app = express();
+const server = http.createServer(app);
 
 app.use(
   cors({
@@ -11,6 +15,19 @@ app.use(
     credentials: true,
   }),
 );
+
+
+// Creating socket.io instance
+const io = new Server(Server, {
+  cors: {
+      origin: process.env.CORS_ORIGIN,
+      methods: ["GET", "POST"],
+      credentials: true,
+  },
+})
+
+// Authenticating and setting up io instance
+setupSocket(io);
 
 app.use(
   express.json({
@@ -28,11 +45,19 @@ app.use(
 app.use(express.static("public"));
 app.use(cookieParser());
 
+// Attach `io` & `userSocket` to `req`
+app.use((req, res, next) => {
+  req.io = getIo();
+  req.getUserSocket = getUserSocket
+  next();
+});
+
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import adminRouter from "./routes/admin.route.js";
 import tournamentRouter from "./routes/tournament.route.js"
 import cfRouter from "./routes/cf.route.js"
+import { setupSocket } from "./socket.js";
 
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
