@@ -42,16 +42,15 @@ const router = createBrowserRouter(
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/tournaments' element={ <Tournament />} />
 
-        {/* Temporary */}
-        <Route path='/match' element= { <Match /> } />
-
         <Route path='/tournament' element={ <TournamentLayout />}>
           <Route path='view' element={ <ViewTournament /> } />
           <Route path='participants' element={ <ParticipantsList /> } />
           <Route path='all-matches' element={ <AllMatches /> } />
           <Route path='fixtures' element={ <Fixtures /> } />
+          <Route path='match' element= { <Match /> } />
         </Route>
       </Route>
+
       <Route path='/admin' element={<AdminLogin />} />
       <Route path='/admin/logout' element={<Logout />} />
 

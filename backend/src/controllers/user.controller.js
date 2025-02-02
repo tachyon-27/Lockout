@@ -74,20 +74,23 @@ export const registerUser = asyncHandler(async (req, res) => {
 export const loginUser = asyncHandler(async (req, res) => {
   try {
     const {email, password} = req.body;
-  
+    
     // If any of the fields are missing
     if(!email || !password) {
       res.status(400);
       throw new Error('Please add all fields')
     }
-  
+    
     // Check if user exists
     const user = await User.findOne({email});
-  
+    
+    if(!user) {
+      res.json(new ApiResponse(404, "User not found!"))
+    }
     if(!user.password) {
       res.json(new ApiResponse(401, "Password not set!"))
     }
-
+    
     if(user && user.isVerified && (await bcrypt.compare(password, user.password))) {
       const token = generateToken(user._id)
   
