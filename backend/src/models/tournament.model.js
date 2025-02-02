@@ -38,11 +38,13 @@ const problemSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Question"
     },
+    points: {
+        type: Number
+    },
     solved: {
         type: String,
     }
 })
-
 
 const matchSchema = mongoose.Schema({
     id: {
@@ -63,17 +65,20 @@ const matchSchema = mongoose.Schema({
     startTime: {
         type: Date,
     },
-    duration: {
-        type: Number,
-    },
     state: {
         type: String,
-        enum: ['NO_SHOW', 'WALK_OVER', 'NO_PARTY', 'DONE', 'SCORE_DONE', 'SCHEDULED'],
+        enum: ['NO_SHOW', 'RUNNING', 'WALK_OVER', 'NO_PARTY', 'DONE', 'SCORE_DONE', 'SCHEDULED'],
         required: true,
         default: 'SCHEDULED'
     },
+    matchTime: {
+        type: Number
+    },
     participants: [participantSchema],
-    problemList: [ problemSchema ],
+    problemList: {
+        type: [problemSchema],
+        default: []
+    }
 })
 
 const tournamentSchema = mongoose.Schema({
