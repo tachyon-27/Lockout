@@ -5,6 +5,8 @@ import {
     getMatches, 
     getParticipantsList, 
     getTournament, 
+    startMatch, 
+    startTournament, 
     tournamentRegister, 
     tournaments, 
     updateTournament 
@@ -31,6 +33,8 @@ router.route('/update-tournament/:tournamentId').post(
     upload.single("coverImage"),
     updateTournament
 );
+router.route('/start-tournament').get(verifyAdmin, startTournament)
+router.route('/start-match').post(verifyAdmin, startMatch)
 
 router.route('/tournament-register').post(verifyUser, tournamentRegister)
 
