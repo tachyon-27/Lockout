@@ -2,9 +2,7 @@ import mongoose from 'mongoose'
 
 const codeforcesIDSchema = mongoose.Schema({
     cfid: {
-        type: String,
-        required: true,
-        unique: true
+        type: String
     },
     verifyString: {
         type: String

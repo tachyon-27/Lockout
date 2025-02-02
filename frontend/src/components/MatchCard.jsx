@@ -1,5 +1,4 @@
-import { useToast } from "@/hooks/use-toast";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ShowStatus = ({ status }) => {
@@ -16,27 +15,20 @@ const ShowStatus = ({ status }) => {
     );
 };
 
-const MatchCard = ({ match }) => {
+const MatchCard = ({ tournamentId, match }) => {
     const [timeLeft, setTimeLeft] = useState(null);
+    const navigate = useNavigate()
 
-    // const match = {
-    //     tournamentRoundText: "Championship Finals",
-    //     startTime: "2025-12-30T09:42:00", // ISO format
-    //     state: "Upcoming",
-    //     participants: ["Player A", "Player B"],
-    //     matchTime: "30 min",
-    // };
-    
     useEffect(() => {
-        if (!matchData?.startTime) return;
+        if (!match?.startTime) return;
 
         const timer = setInterval(() => {
-            const time = calculateTimeLeft(new Date(matchData.startTime));
+            const time = calculateTimeLeft(new Date(match.startTime));
             setTimeLeft(time);
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [matchData.startTime]);
+    }, [match.startTime]);
 
     function formatTime(time) {
         if (!time) return "Loading...";
@@ -58,12 +50,11 @@ const MatchCard = ({ match }) => {
             : { total: 0, days: 0, hours: 0, minutes: 0, seconds: 0 };
     }
 
-
     return (
         <div className="p-4 border rounded-md shadow-md w-full bg-transparent bg-gradient-to-tr from-black via-gray-400/30 to-gray-500/50 transition-transform duration-300 hover:scale-105  hover:shadow-lg">
             {/* MatchData Title & Status */}
             <div className="flex justify-between items-center mb-2 pb-2 border-b-2 border-slate-700">
-                <h3 className="text-lg font-semibold">{match.tournamentRoundText}</h3>
+                <h3 className="text-lg font-semibold">Round: {match.tournamentRoundText}</h3>
                 <ShowStatus status={match.state} />
             </div>
 
@@ -76,18 +67,21 @@ const MatchCard = ({ match }) => {
             <div className="w-full h-[2px] bg-slate-500 my-2"></div>
 
             {/* MatchData Time / Remaining Time */}
-            <div className="text-center text-gray-600 text-sm mb-4">
+            {/* <div className="text-center text-gray-600 text-sm mb-4">
                 {match.state === "RUNNING" ? `Remaining: ${match.matchTime}` : match.state === "DONE" ? "Match Ended" : `Starts in: ${formatTime(timeLeft)}`}
-            </div>
+            </div> */}
 
             {/* Enter Button */}
-            {match.state == "RUNNING" ? (<button
-                className={`w-full py-2 rounded-md font-semibold text-white 
-                ${match.state === "RUNNING" ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"}`}
-                disabled={match.state !== "RUNNING"}
-            >
-                Enter
-            </button>) : (
+            {match.state != "SCHEDULED" ? (
+                <button
+                    className={`w-full py-2 rounded-md font-semibold text-white 
+                    ${match.state != "RUNNING" ? "bg-blue-600 hover:bg-blue-700" : "bg-green-600 cursor-not-allowed"}`}
+                    disabled={match.state == "SCHEDULED"}
+                    onClick={() => navigate(`/tournament/match?tournamentId=${tournamentId}&matchId=${match.id}`)}
+                >
+                    Enter
+                </button>
+            ) : (
                 <></>
             )}
         </div>

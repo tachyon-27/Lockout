@@ -1,62 +1,61 @@
 import { useToast } from "@/hooks/use-toast";
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 
 const Match = () => {
-
     const { toast } = useToast();
-
     const [searchParams] = useSearchParams()
-    const matchId = searchParams.get('match')
-    const tournamentId = searchParams.get('tournament')
-
+    const matchId = searchParams.get('matchId')
+    const tournamentId = searchParams.get('tournamentId')
     const navigate = useNavigate()
+    const [matchData, setMatchData] = useState()
+    const [timeLeft, setTimeLeft] = useState(0);
+    
+    const calculateTimeLeft = () => {
+        const start = new Date(matchData.startTime).getTime();
+        const now = new Date().getTime();
+        const timePassed = now - start;
+        const timeRemaining = matchData.duration * 60 * 1000 - timePassed;
+        return Math.max(timeRemaining, 0); // Avoid negative time
+    };
 
-    // const [matchData, setMatchData] = useState()
+    useEffect(() => {
+        if(!matchId || !tournamentId) {
+            toast({
+                title: "Match or Tournament not specified!"
+            })
+            navigate('/tournaments')
+        }
 
-    // useEffect(() => {
+        try {
+            const getMatch = async () => {
+                const response = await axios.get('/api/tournament/get-match', {
+                    _id: tournamentId,
+                    matchId,
+               })
 
-    //     if(!matchId || !tournamentId) {
-    //         toast({
-    //             title: "Match or Tournament not specified!"
-    //         })
-    //         navigate('/tournaments')
-    //     }
+               if(!response.data.success) {
+                toast({
+                    title: "Error Fetching questions!"
+                })
+                console.log(response.data);
+                navigate('/tournaments')
+               }
+                setMatchData(response.data.data);
+            }
 
-    //     try {
+            getMatch()
+            setTimeLeft(calculateTimeLeft())
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: "Error!"
+            })
 
-    //         const getMatch = async () => {
-    //             const response = await axios.get('/api/cf/get-match', {
-    //                 tournamentId,
-    //                 matchId,
-    //            })
-
-    //            if(!response.data.success === 'OK') {
-    //             toast({
-    //                 title: "Error Fetching questions!"
-    //             })
-    //             console.log(response.data);
-    //             navigate('/tournaments')
-    //            }
-
-    //             setMatchData(response.data.data);
-
-    //         }
-
-    //         getMatch()
-
-    //     } catch (error) {
-    //         console.error(error);
-
-    //         toast({
-    //             title: "Error!"
-    //         })
-
-    //         navigate('/tournaments')
-
-    //     }
-    // }, [toast, tournamentId, matchId, navigate])
+            navigate('/tournaments')
+        }
+    }, [])
 
     // const handleSubmit = async () => {
     //     try {
@@ -87,36 +86,26 @@ const Match = () => {
 
     // }, []);
 
-    const matchData = {
-        id: 1,
-        name: "Grand Finale",
-        nextmatchId: null,
-        tournamentRoundText: 1,
-        startTime: new Date('2025-02-01T21:00:00').toISOString(),
-        state: "Running",
-        duration: 1500,
-        problemList: [
-            { question: { contestId: 2023, index: "A", name: "temp" }, points: 100 , solved: "luv29"},
-            { question: { contestId: 2023, index: "B", name: "temp" }, points: 200 , solved: "kunj_30"},
-            { question: { contestId: 2023, index: "C", name: "temp" }, points: 300 },
-            { question: { contestId: 2023, index: "D", name: "temp" }, points: 400 },
-            { question: { contestId: 2023, index: "E", name: "temp" }, points: 500 },
-        ],
-        participants: [
-            { cfid: "luv29", },
-            { cfid: "kunj_30", },
-        ],
-    };
-
-    const calculateTimeLeft = () => {
-        const start = new Date(matchData.startTime).getTime();
-        const now = new Date().getTime();
-        const timePassed = now - start;
-        const timeRemaining = matchData.duration * 60 * 1000 - timePassed;
-        return Math.max(timeRemaining, 0); // Avoid negative time
-    };
-
-    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+    // const matchData = {
+    //     id: 1,
+    //     name: "Grand Finale",
+    //     nextmatchId: null,
+    //     tournamentRoundText: 1,
+    //     startTime: new Date('2025-02-01T21:00:00').toISOString(),
+    //     state: "Running",
+    //     duration: 1500,
+    //     problemList: [
+    //         { question: { contestId: 2023, index: "A", name: "temp" }, points: 100 , solved: "luv29"},
+    //         { question: { contestId: 2023, index: "B", name: "temp" }, points: 200 , solved: "kunj_30"},
+    //         { question: { contestId: 2023, index: "C", name: "temp" }, points: 300 },
+    //         { question: { contestId: 2023, index: "D", name: "temp" }, points: 400 },
+    //         { question: { contestId: 2023, index: "E", name: "temp" }, points: 500 },
+    //     ],
+    //     participants: [
+    //         { cfid: "luv29", },
+    //         { cfid: "kunj_30", },
+    //     ],
+    // };
 
     useEffect(() => {
         const interval = setInterval(() => {

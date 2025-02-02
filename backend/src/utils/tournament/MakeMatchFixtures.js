@@ -1,4 +1,5 @@
 const generateMatches = async (participants) => {
+    console.log(participants.length)
     const matches = [];
     let id = 1;
     let temp = 1;
@@ -7,7 +8,7 @@ const generateMatches = async (participants) => {
     const bye = participants.length - lowPow;
     let curr = 0;
     let x = 0;
-
+    console.log()
     if (bye > 0) {
         curr += highPow / 2;
         for (let i = 0; i < highPow / 2; i++) {
@@ -15,15 +16,18 @@ const generateMatches = async (participants) => {
                 id,
                 tournamentRoundText: 0,
                 nextMatchId: curr + temp,
-                participants: [
-                    x < 2 * bye
-                        ? participants[x++]
-                        : { name: 'NA' },
-                    x < 2 * bye
-                        ? participants[x++]
-                        : { name: 'NA' }
-                ]
+                participants: []
             });
+            if(x >= 2*bye) matches[matches.length-1].state = "DONE";
+            if(x < 2*bye) matches[matches.length-1].participants.push(participants[x++]);
+            if(x >= 2*bye) matches[matches.length-1].state = "DONE";
+            if(x < 2*bye) matches[matches.length-1].participants.push(participants[x++]);
+            // x < 2 * bye
+            //     ? participants[x++]
+            //     : { name: 'NA' },
+            // x < 2 * bye
+            //     ? participants[x++]
+            //     : { name: 'NA' }
             if (id % 2 === 0) temp++;
             id++;
         }
@@ -44,16 +48,17 @@ const generateMatches = async (participants) => {
                 id,
                 tournamentRoundText: 1,
                 nextMatchId: curr + temp,
-                participants: [
-                    i < bye
-                        ? (participants[x++])
-                        : { name: 'TBD' },
-                    i + 1 < bye
-                        ? (participants[x++])
-                        : { name: 'TBD' }
-                ]
+                participants: []
             });
+            if(i >= bye) matches[matches.length-1].participants.push(participants[x++]);
+            if(i+1 >= bye) matches[matches.length-1].participants.push(participants[x++]);
         }
+        // i < bye
+        //     ? (participants[x++])
+        //     : { name: 'TBD' },
+        // i + 1 < bye
+        //     ? (participants[x++])
+        //     : { name: 'TBD' }
         if (id % 2 === 0) temp++;
         id++;
     }
@@ -74,6 +79,9 @@ const generateMatches = async (participants) => {
     }
 
     matches[matches.length - 1].nextMatchId = null;
+    console.log(matches);
 
     return matches;
 };
+
+export default generateMatches;
