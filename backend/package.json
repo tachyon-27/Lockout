@@ -31,7 +31,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.2",
     "multer": "^1.4.5-lts.1",
-    "resend": "^4.0.1",
-    "socket.io": "^4.8.1"
+    "resend": "^4.0.1"
   }
 }

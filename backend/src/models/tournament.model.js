@@ -71,7 +71,7 @@ const matchSchema = mongoose.Schema({
         required: true,
         default: 'SCHEDULED'
     },
-    matchTime: {
+    duration: {
         type: Number
     },
     participants: [participantSchema],
