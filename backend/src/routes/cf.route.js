@@ -16,7 +16,7 @@ router.route('/generate-problemlist').post(generateProblemList)
 // secured routes
 router.route('/add-id').post(verifyUser, addCFID)
 router.route('/verify-id').post(verifyUser, verifyCFID)
-router.route('/update-match-problems').get(verifyUser, UpdateProblemStatus)
+router.route('/update-match-problems').post(verifyUser, UpdateProblemStatus)
  
 
 export default router

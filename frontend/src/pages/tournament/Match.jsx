@@ -10,18 +10,22 @@ const Match = () => {
     const tournamentId = searchParams.get('tournamentId')
     const navigate = useNavigate()
     const [matchData, setMatchData] = useState()
+    const [isLoading, setIsLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState(0);
-    
+    let running = 1;
+
     const calculateTimeLeft = () => {
         const start = new Date(matchData.startTime).getTime();
         const now = new Date().getTime();
         const timePassed = now - start;
+        // console.log(timePassed)
         const timeRemaining = matchData.duration * 60 * 1000 - timePassed;
-        return Math.max(timeRemaining, 0); // Avoid negative time
+        // console.log(timeRemaining)
+        return Math.max(timeRemaining, 0);
     };
 
     useEffect(() => {
-        if(!matchId || !tournamentId) {
+        if (!matchId || !tournamentId) {
             toast({
                 title: "Match or Tournament not specified!"
             })
@@ -30,23 +34,24 @@ const Match = () => {
 
         try {
             const getMatch = async () => {
-                const response = await axios.get('/api/tournament/get-match', {
+                const response = await axios.post('/api/tournament/get-match', {
                     _id: tournamentId,
                     matchId,
-               })
-
-               if(!response.data.success) {
-                toast({
-                    title: "Error Fetching questions!"
                 })
-                console.log(response.data);
-                navigate('/tournaments')
-               }
+
+                if (!response.data.success) {
+                    toast({
+                        title: "Error Fetching questions!"
+                    })
+                    console.log(response.data);
+                    navigate('/tournaments')
+                }
                 setMatchData(response.data.data);
+                console.log(response.data.data);
+                setIsLoading(false);
             }
 
             getMatch()
-            setTimeLeft(calculateTimeLeft())
         } catch (error) {
             console.error(error);
             toast({
@@ -57,67 +62,65 @@ const Match = () => {
         }
     }, [])
 
-    // const handleSubmit = async () => {
-    //     try {
-    //         await axios.get('/api/cf/update-match-problems', {
-    //             tournamentId,
-    //             matchId,
-    //         })
-    //     } catch (error) {
-    //         console.error(error);
-    //         toast({
-    //             title: "Error Updating problem Status!",
-    //         })
-    //     }
-    // }
-
-    // useEffect(() => {
-    //     socket.on("problemListUpdated", (data) => {
-    //         if(data.matchId === matchId) {
-    //             setProblemList(data.problemList);
-    //         } else {
-    //             console.log("Event Emmited to wrong room!")
-    //         }
-    //     })
-
-    //     return () => {
-    //         socket.off("problemListUpdated");
-    //     }
-
-    // }, []);
-
-    // const matchData = {
-    //     id: 1,
-    //     name: "Grand Finale",
-    //     nextmatchId: null,
-    //     tournamentRoundText: 1,
-    //     startTime: new Date('2025-02-01T21:00:00').toISOString(),
-    //     state: "Running",
-    //     duration: 1500,
-    //     problemList: [
-    //         { question: { contestId: 2023, index: "A", name: "temp" }, points: 100 , solved: "luv29"},
-    //         { question: { contestId: 2023, index: "B", name: "temp" }, points: 200 , solved: "kunj_30"},
-    //         { question: { contestId: 2023, index: "C", name: "temp" }, points: 300 },
-    //         { question: { contestId: 2023, index: "D", name: "temp" }, points: 400 },
-    //         { question: { contestId: 2023, index: "E", name: "temp" }, points: 500 },
-    //     ],
-    //     participants: [
-    //         { cfid: "luv29", },
-    //         { cfid: "kunj_30", },
-    //     ],
-    // };
+    // Update problemList
+    useEffect(() => {
+        console.log("Hi")
+        const updateProblem = async () => {
+            console.log("k")
+            try {
+                console.log("called!");
+                const response = await axios.post(`/api/cf/update-match-problems`, {
+                    tournamentId,
+                    matchId,
+                });
+                
+                if (response.data.success) {
+                    setMatchData(prevMatchData => ({
+                        ...prevMatchData,
+                        problemList: response.data.data
+                    }));
+                    console.log(response.data.data)
+                } else {
+                    console.log(response.data);
+                    toast({
+                        title: response.data.message,
+                    });
+                }
+            } catch (error) {
+                toast({
+                    title: "Server Error while updating problem Status!",
+                    description: "Contact Administrator!"
+                });
+                console.log(error);
+            }
+        };
+        console.log(running);
+        if (running > 0) {
+            console.log("Hello")
+            const interval = setInterval(() => {
+                console.log("K");
+                updateProblem()
+            }, 10000);
+            return () => {
+                console.log("Clearing interval...");
+                clearInterval(interval);
+            };  // ✅ Clears interval properly on unmount
+        }
+    }, [tournamentId, toast]); // ✅ Removed `matchData` to prevent unnecessary re-renders
+    
 
     useEffect(() => {
         const interval = setInterval(() => {
             const updatedTimeLeft = calculateTimeLeft();
             setTimeLeft(updatedTimeLeft);
             if (updatedTimeLeft <= 0) {
+                running = 0;
                 clearInterval(interval);
             }
         }, 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [matchData]);
 
     const formatTime = (timeInMillis) => {
         const minutes = Math.floor(timeInMillis / 60000);
@@ -128,6 +131,10 @@ const Match = () => {
     const renderProblemStatus = (solved, problem) => {
         return solved ? "✔️" : problem.points;
     };
+
+    if (isLoading) {
+        return (<></>);
+    }
 
     return (
         <div className="bg-cover bg-center opacity-70" style={{ backgroundImage: "url('../../../public/matchbg.jpg')" }}>
@@ -151,7 +158,16 @@ const Match = () => {
                                             renderProblemStatus(problem.solved === matchData.participants[0].cfid, problem)
                                         ) : (problem.points)
                                     }</div>
-                                    <div className="w-[60%] text-center">{problem.question.name || problem.question.index}</div>
+                                    <div className="w-[60%] text-center">
+                                        <a
+                                            href={`https://codeforces.com/contest/${problem.question.contestId}/problem/${problem.question.index}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-500 hover:underline"
+                                        >
+                                            {problem.question.name || problem.question.index}
+                                        </a>
+                                    </div>
                                     <div className="w-[20%] text-center">{
                                         problem.solved ? (
                                             renderProblemStatus(problem.solved === matchData.participants[1].cfid, problem)

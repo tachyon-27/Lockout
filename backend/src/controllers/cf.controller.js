@@ -81,13 +81,13 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
             return res.json(new ApiResponse(404, "Tournament Id not specified!"));
         }
 
-        const tournament = await Tournament.findById(tournamentId);
+        const tournament = await Tournament.findById(tournamentId).populate("matches.problemList.question");
 
         if (!tournament) {
             return res.json(new ApiResponse(404, "Tournament not found!"));
         }
 
-        const match = tournament.matches.find(match => match.id === matchId);
+        const match = tournament.matches.find(match =>  String(match.id) === String(matchId));
 
         if (!match) {
             return res.json(new ApiResponse(404, "Match not found!"));
@@ -101,7 +101,6 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
             return res.json(new ApiResponse(400, "Match does not have 2 participants!"));
         }
 
-        await match.populate("problemList.question");
 
         const problemList = match.problemList;
         const cfid1 = match.participants[0].cfid;
@@ -120,13 +119,13 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
         });
 
         await new Promise(resolve => setTimeout(resolve, 2000));
-
+        
         const p2Response = await axios.get(`https://codeforces.com/api/user.status?handle=${cfid2}`);
         if (p2Response.data.status !== "OK") {
             throw new Error("Failed to fetch submissions from Codeforces for Player 2");
         }
         const p2Submissions = p2Response.data.result;
-
+        
         const p2ValidSubmissions = p2Submissions.filter(submission => {
             const submissionTime = submission.creationTimeSeconds * 1000;
             return submissionTime >= startTimestamp && submission.verdict === "OK";
@@ -134,13 +133,13 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
 
         match.problemList = problemList.map(problem => {
             const p1Solved = p1ValidSubmissions.find(submission =>
-                submission.problem.contestId === problem.question.contestId &&
-                submission.problem.index === problem.question.index
+                String(submission.problem.contestId) === problem.question.contestId &&
+                String(submission.problem.index) === problem.question.index
             );
 
             const p2Solved = p2ValidSubmissions.find(submission =>
-                submission.problem.contestId === problem.question.contestId &&
-                submission.problem.index === problem.question.index
+                String(submission.problem.contestId) === problem.question.contestId &&
+                String(submission.problem.index) === problem.question.index
             );
 
             let solvedBy = null;
@@ -159,11 +158,6 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
         });
 
         await tournament.save();
-
-        // req.io.to(`match_${matchId}`).emit("problemListUpdated", {
-        //     matchId,
-        //     problemList: match.problemList
-        // });
 
         res.json(new ApiResponse(200, "Problem List Updated!", match.problemList));
 

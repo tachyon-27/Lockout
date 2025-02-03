@@ -2,7 +2,7 @@ import User from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { getGithubAcessToken, getGithubUser } from "../utils/auth/githubAuth.js";
-import { getOrCreateGoogleUser, fetchUserInfo } from "../utils/auth/googleAuth.js"; 
+import { getOrCreateGoogleUser, fetchUserInfo } from "../utils/auth/googleAuth.js";
 import { generateToken } from "../utils/token.js";
 import { OAuth2Client } from 'google-auth-library';
 
@@ -10,68 +10,68 @@ import { OAuth2Client } from 'google-auth-library';
 // @route POST /api/auth/github
 // @access Public
 export const githubCallback = asyncHandler(async (req, res) => {
-    try {
-        const {code} = req.body;
-        if(!code) {
-            throw new Error('Github OAuth code not found!')
-        }
-
-        const access_token = await getGithubAcessToken(code)
-        const user = await getGithubUser(access_token)
-
-        if(user && user.isVerified) {
-            const token = generateToken(user._id)
-        
-            const options = {
-              httpOnly: true,
-              secure: true
-            }
-
-            res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
-            res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-            return res
-              .status(201)
-              .cookie("token", token, options)
-              .json(new ApiResponse('User Github Logged in!'))
-          } else {
-            res.status(501)
-            throw new Error('Error Authenticating Github profile')
-          }
-
-    } catch (error) {
-        res.status(501)
-        throw new Error(error.message)
+  try {
+    const { code } = req.body;
+    if (!code) {
+      throw new Error('Github OAuth code not found!')
     }
 
-  })
+    const access_token = await getGithubAcessToken(code)
+    const user = await getGithubUser(access_token)
 
-export const verifyEmail = asyncHandler(async (req, res)=> {
+    if (user && user.isVerified) {
+      const token = generateToken(user._id)
+
+      const options = {
+        httpOnly: true,
+        secure: true
+      }
+
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+      return res
+        .status(201)
+        .cookie("token", token, options)
+        .json(new ApiResponse('User Github Logged in!'))
+    } else {
+      res.status(501)
+      throw new Error('Error Authenticating Github profile')
+    }
+
+  } catch (error) {
+    res.status(501)
+    throw new Error(error.message)
+  }
+
+})
+
+export const verifyEmail = asyncHandler(async (req, res) => {
   try {
     const { otp } = req.body;
     const user = req.user
 
-    if(!user) {
+    if (!user) {
       res.status(401)
       throw new Error("Unauthorized request")
     }
 
-    if(user.isVerified) {
+    if (user.isVerified) {
       res.status(401)
       throw new Error("User already verified")
     }
 
-    if(!otp) {
+    if (!otp) {
       res.status(401)
       throw new Error("OTP is required")
     }
 
-    if(otp != user.verifyCode) {
+    if (otp != user.verifyCode) {
       return res
         .json(new ApiResponse(401, "Incorrect OTP!"))
     }
 
-    if(Date.now() > user.verifyCodeExpiry) {
+    if (Date.now() > user.verifyCodeExpiry) {
       return res
         .json(new ApiResponse(401, "OTP is expired! Resend the OTP."))
     }
@@ -111,12 +111,12 @@ export const resetOTP = asyncHandler(async (req, res) => {
   try {
     const user = req.user
 
-    if(!user) {
+    if (!user) {
       res.status(401)
       throw new Error("Unauthorized request")
     }
 
-    const verifyCode = Math.floor(100000 + Math.random()*900000).toString()
+    const verifyCode = Math.floor(100000 + Math.random() * 900000).toString()
     const expiryDate = new Date()
     expiryDate.setHours(expiryDate.getHours() + 1)
 
@@ -132,11 +132,11 @@ export const resetOTP = asyncHandler(async (req, res) => {
         new: true
       }
     ).select("-password")
-  
+
     return res
       .status(201)
       .json(new ApiResponse(201, "OTP is reset.", newUser))
-  } catch(error) {
+  } catch (error) {
     res.status(501)
     throw new Error(error.message)
   }
@@ -157,21 +157,22 @@ export const googleCallback = asyncHandler(async (req, res) => {
 
     const user = await getOrCreateGoogleUser(email, name);
 
-    if(user && user.isVerified) {
+    if (user && user.isVerified) {
       const token = generateToken(user._id)
-  
+
       const options = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: "none"
       }
       return res
-        .status(201)
         .cookie("token", token, options)
+        .status(201)
         .json(new ApiResponse(201, "Google User logged in successfully.", user))
-      } else {
-        res.status(501)
-        throw new Error('Error Authenticating Google profile')
-      }
+    } else {
+      res.status(501)
+      throw new Error('Error Authenticating Google profile')
+    }
   } catch (error) {
     throw new Error(error);
   }

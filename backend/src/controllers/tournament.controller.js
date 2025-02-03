@@ -295,7 +295,7 @@ export const getMatch = asyncHandler(async (req, res) => {
                 .json(new ApiResponse(400, "Invalid Tournament ID"));
         }
 
-        const tournament = await Tournament.findById(_id)
+        const tournament = await Tournament.findById(_id).populate("matches.problemList.question")
 
         if (!tournament) {
             return res.
@@ -322,7 +322,7 @@ export const getMatch = asyncHandler(async (req, res) => {
 
 export const startMatch = asyncHandler(async (req, res) => {
     try {
-        let {tournamentId, matchId, startingRating, matchTime} = req.body;
+        let {tournamentId, matchId, startingRating, duration} = req.body;
 
         if(!tournamentId || !matchId) {
             throw new Error("All fields are required.")
@@ -372,9 +372,10 @@ export const startMatch = asyncHandler(async (req, res) => {
         }
 
         match.problemList = selectedQuestions
-        match.matchTime = matchTime
+        match.duration = duration
         match.state = "RUNNING"
         match.startTime = Date.now()
+        console.log(match)
         await tournament.save()
 
         // Refetch with populated questions
