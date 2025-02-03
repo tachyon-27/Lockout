@@ -9,7 +9,8 @@ const Match = () => {
     const matchId = searchParams.get('matchId')
     const tournamentId = searchParams.get('tournamentId')
     const navigate = useNavigate()
-    const [matchData, setMatchData] = useState()
+    const [matchData, setMatchData] = useState({})
+    const [totalPoints, setTotalPoints] = useState()
     const [isLoading, setIsLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState(0);
     let running = 1;
@@ -47,6 +48,10 @@ const Match = () => {
                     navigate('/tournaments')
                 }
                 setMatchData(response.data.data);
+                setTotalPoints({
+                    [response.data.data.participants[0].cfid]: totalPoints[response.data.data?.participants[0].cfid] || 0,
+                    [response.data.data.participants[1].cfid]: 0,
+                })
                 console.log(response.data.data);
                 setIsLoading(false);
             }
@@ -77,9 +82,11 @@ const Match = () => {
                 if (response.data.success) {
                     setMatchData(prevMatchData => ({
                         ...prevMatchData,
-                        problemList: response.data.data
+                        problemList: response.data.data.problemList
                     }));
-                    console.log(response.data.data)
+                    setTotalPoints(response.data.data.participantPoints);
+                    console.log(response.data.data.participantPoints[matchData.participants[0].cfid])
+                    console.log(totalPoints);
                 } else {
                     console.log(response.data);
                     toast({
@@ -106,7 +113,7 @@ const Match = () => {
                 clearInterval(interval);
             };  // ✅ Clears interval properly on unmount
         }
-    }, [tournamentId, toast]); // ✅ Removed `matchData` to prevent unnecessary re-renders
+    }, [tournamentId, toast]); 
     
 
     useEffect(() => {
@@ -145,7 +152,7 @@ const Match = () => {
                 <div className="flex min-w-full text-white pt-7">
                     <div className="w-[25%] flex flex-col items-center gap-y-3">
                         <span className="text-4xl">{matchData.participants[0].cfid}</span>
-                        <span>Total Points: </span>
+                        <span>Total Points: {totalPoints[matchData.participants[0].cfid]}</span>
                     </div>
 
                     <div className="flex flex-grow items-center justify-center pt-[8%]">
@@ -180,7 +187,7 @@ const Match = () => {
 
                     <div className="w-[25%] flex flex-col items-center gap-y-3">
                         <span className="text-4xl">{matchData.participants[1].cfid}</span>
-                        <span>Total Points: </span>
+                        <span>Total Points: {totalPoints[matchData.participants[0].cfid]}</span>
                     </div>
                 </div>
             </div>

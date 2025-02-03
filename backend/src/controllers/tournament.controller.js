@@ -391,3 +391,48 @@ export const startMatch = asyncHandler(async (req, res) => {
           .json(new ApiResponse(501, "Error while starting match.", error.message));
     }
 })
+
+const endMatch = asyncHandler( async (req, res) => {
+    try {
+        const { tournamentId, matchId } = req.body;
+
+        if(!tournamentId || !matchId) {
+            throw new Error("All fields are required.")
+        }
+        const tournament = await Tournament.findById(tournamentId)
+
+        if (!tournament) {
+            return res.
+                status(404)
+                .json(new ApiResponse(404, "Tournament not Found!"));
+        }
+
+        const match = tournament.matches.find(match => match.id == matchId);
+
+        if (!match) {
+            return res
+                .json(new ApiResponse(404, "Match not Found!"));
+        }
+
+        const winner = match.participants[0].totalPoints > match.participants[1].totalPoints ? match.participants[0] : match.participants[1];
+
+        winner.resultText = "WON";
+
+        if(match.nextMatchId) {
+            const nextmatch = tournament.matches.find(match => match.id == match.nextMatchId);
+            nextmatch.participants.push(winner);
+            await tournament.save()
+        }
+
+        await tournament.save();
+
+        res
+        .status(200)
+        .json(new ApiResponse(200, "Match Ended!"));
+
+    } catch (error) {
+        return res
+        .status(501)
+        .json(new ApiResponse(501, "Error While Ending Match!"))
+    }
+})

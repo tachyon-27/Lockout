@@ -87,7 +87,7 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
             return res.json(new ApiResponse(404, "Tournament not found!"));
         }
 
-        const match = tournament.matches.find(match =>  String(match.id) === String(matchId));
+        const match = tournament.matches.find(match => String(match.id) === String(matchId));
 
         if (!match) {
             return res.json(new ApiResponse(404, "Match not found!"));
@@ -100,7 +100,6 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
         if (match.participants.length !== 2) {
             return res.json(new ApiResponse(400, "Match does not have 2 participants!"));
         }
-
 
         const problemList = match.problemList;
         const cfid1 = match.participants[0].cfid;
@@ -119,17 +118,20 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
         });
 
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
+
         const p2Response = await axios.get(`https://codeforces.com/api/user.status?handle=${cfid2}`);
         if (p2Response.data.status !== "OK") {
             throw new Error("Failed to fetch submissions from Codeforces for Player 2");
         }
         const p2Submissions = p2Response.data.result;
-        
+
         const p2ValidSubmissions = p2Submissions.filter(submission => {
             const submissionTime = submission.creationTimeSeconds * 1000;
             return submissionTime >= startTimestamp && submission.verdict === "OK";
         });
+
+        let p1TotalPoints = 0;
+        let p2TotalPoints = 0;
 
         match.problemList = problemList.map(problem => {
             const p1Solved = p1ValidSubmissions.find(submission =>
@@ -151,21 +153,38 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
                 solvedBy = cfid2;
             }
 
+            if (solvedBy === cfid1) {
+                p1TotalPoints += problem.points; // Assuming problem has a `points` field
+            } else if (solvedBy === cfid2) {
+                p2TotalPoints += problem.points;
+            }
+
             return {
                 ...problem,
                 solved: solvedBy
             };
         });
 
+        // Update participants' total points
+        match.participants[0].totalPoints = p1TotalPoints;
+        match.participants[1].totalPoints = p2TotalPoints;
+
         await tournament.save();
 
-        res.json(new ApiResponse(200, "Problem List Updated!", match.problemList));
+        res.json(new ApiResponse(200, "Problem List Updated!", {
+            problemList: match.problemList,
+            participantPoints: {
+                [cfid1]: p1TotalPoints,
+                [cfid2]: p2TotalPoints
+            }
+        }));
 
     } catch (error) {
         console.error(error);
         res.status(500).json(new ApiResponse(500, "Server Error!"));
     }
 });
+
 
 export const populateQuestions = asyncHandler(async (req, res) => {
     try {
