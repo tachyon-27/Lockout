@@ -19,6 +19,9 @@ const participantSchema = mongoose.Schema({
     isWinner: {
         type: Boolean,
     },
+    totalPoints: {
+        type: Number,
+    }
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
