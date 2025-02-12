@@ -111,6 +111,32 @@ export const updateTournament = asyncHandler(async (req, res) => {
     }
 });
 
+export const deleteTournament = asyncHandler(async (req, res) => {
+    try {
+        const { _id } = req.body
+
+        if (!_id) {
+            throw new Error("Id is required")
+        }
+
+        const deletedTournament = await Tournament.findByIdAndDelete(_id);
+
+        if (!deletedTournament) {
+            return res
+                .status(404)
+                .json(new ApiResponse(404, "Tournament not found."));
+        }
+
+        return res
+            .status(200)    
+            .json(new ApiResponse(200, "Tournament deleted successfully."))
+    } catch(error) {
+        return res
+            .status(500)
+            .json(new ApiResponse(500, "Error while deleting tournament.", error.message));
+    }
+});
+
 export const tournaments = asyncHandler(async (req, res) => {
     try {
         const data = await Tournament.find({})
@@ -255,7 +281,6 @@ export const startTournament = asyncHandler(async (req, res) => {
         throw new Error("Server Error!");
     }
 });
-
 
 export const getMatches = asyncHandler(async (req, res) => {
     try {
