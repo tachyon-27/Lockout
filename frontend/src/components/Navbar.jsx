@@ -6,7 +6,7 @@ import { logout } from '../features/userSlice';
 import { useState } from 'react';
 
 function Navbar() {
-    const loggedIn = useSelector((state) => state.user.status);
+    const loggedIn = useSelector((state) => state.user.isAuthenticated);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { toast } = useToast();
