@@ -6,7 +6,6 @@ import mongoose from "mongoose";
 import axios from "axios";
 import generateMatches from "../utils/tournament/MakeMatchFixtures.js";
 import Question from "../models/question.model.js";
-import { startMatchTimer } from "../utils/tournament/matchTimer.js";
 import { getIo } from "../socket.js";
 import { UpdateProblemStatus } from "../utils/tournament/UpdateProblemStatus.js";
 import { handleMatchEnd } from "../utils/tournament/matchEnd.js";
@@ -455,6 +454,34 @@ export const startMatch = asyncHandler(async (req, res) => {
             .json(new ApiResponse(501, "Error while starting match.", error.message));
     }
 })
+
+export const removeParticipant = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId, cfid } = req.body;
+        if (!tournamentId || !cfid) {
+            throw new Error("Tournament ID and CFID are required.");
+        }
+        const tournament = await Tournament.findById(tournamentId);
+        if (!tournament) {
+            throw new Error("Tournament not found.");
+        }
+        const updatedParticipants = tournament.participants.filter(
+            (participant) => participant.cfid !== cfid
+        );
+        if (updatedParticipants.length === tournament.participants.length) {
+            throw new Error("Participant not found in the tournament.");
+        }
+        tournament.participants = updatedParticipants;
+        await tournament.save();
+        return res
+            .status(200)
+            .json(new ApiResponse(200, "Participant removed successfully."));
+    } catch (error) {
+        return res
+            .status(500)
+            .json(new ApiResponse(500, error.message));
+    }
+});
 
 // export const endMatch = asyncHandler(async (req, res) => {
 //     try {
