@@ -1,10 +1,12 @@
 import { Router } from "express";
-import { 
+import {
     addTournament, 
+    deleteTournament, 
     getMatch, 
     getMatches, 
     getParticipantsList, 
     getTournament, 
+    removeParticipant, 
     startMatch, 
     startTournament, 
     tournamentRegister, 
@@ -35,6 +37,8 @@ router.route('/update-tournament/:tournamentId').post(
 );
 router.route('/start-tournament').get(verifyAdmin, startTournament)
 router.route('/start-match').post(verifyAdmin, startMatch)
+router.route('/delete-tournament').post(verifyAdmin, deleteTournament)
+router.route('/remove-participant').post(verifyAdmin, removeParticipant)
 
 router.route('/tournament-register').post(verifyUser, tournamentRegister)
 
