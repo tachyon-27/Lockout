@@ -2,6 +2,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import axios from 'axios'
+import { socket } from "../../socket";
 
 const Match = () => {
     const { toast } = useToast();
@@ -13,49 +14,57 @@ const Match = () => {
     const [totalPoints, setTotalPoints] = useState()
     const [isLoading, setIsLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState(0);
-    let running = 1;
 
     const calculateTimeLeft = () => {
         const start = new Date(matchData.startTime).getTime();
         const now = new Date().getTime();
         const timePassed = now - start;
-        // console.log(timePassed)
         const timeRemaining = matchData.duration * 60 * 1000 - timePassed;
-        // console.log(timeRemaining)
         return Math.max(timeRemaining, 0);
     };
 
+    // Join Match
     useEffect(() => {
+        socket.connect()
         if (!matchId || !tournamentId) {
             toast({
                 title: "Match or Tournament not specified!"
             })
             navigate('/tournaments')
+            return;
         }
 
         try {
             const getMatch = async () => {
-                const response = await axios.post('/api/tournament/get-match', {
-                    _id: tournamentId,
-                    matchId,
-                })
+                try {
+                    const response = await axios.post('/api/tournament/get-match', { 
+                        _id: tournamentId, 
+                        matchId 
+                    });
+                    if (response.data.success) {
+                        setMatchData(response.data.data);
+                        setTotalPoints({
+                            [response.data.data.participants[0].cfid]: 0,
+                            [response.data.data.participants[1].cfid]: 0,
+                        })
 
-                if (!response.data.success) {
-                    toast({
-                        title: "Error Fetching questions!"
-                    })
-                    console.log(response.data);
-                    navigate('/tournaments')
+                        socket.emit("joinRoom", `${tournamentId}_${matchId}`);
+                    } else {
+                        toast({ 
+                            title: "Error Fetching Questions" 
+                        });
+                        console.log(response.data);
+                        navigate('/tournaments');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    toast({ title: "Error fetching match details!" });
+                    navigate('/tournaments');
+                } finally {
+                    setIsLoading(false);
                 }
-                setMatchData(response.data.data);
-                setTotalPoints({
-                    [response.data.data.participants[0].cfid]: totalPoints[response.data.data?.participants[0].cfid] || 0,
-                    [response.data.data.participants[1].cfid]: 0,
-                })
-                console.log(response.data.data);
-                setIsLoading(false);
-            }
-
+            };
+                
             getMatch()
         } catch (error) {
             console.error(error);
@@ -65,55 +74,44 @@ const Match = () => {
 
             navigate('/tournaments')
         }
+
+        return () => {
+            socket.emit("leaveRoom", `${tournamentId}_${matchId}`);
+        };
+
     }, [])
 
     // Update problemList
     useEffect(() => {
-        console.log("Hi")
-        const updateProblem = async () => {
-            console.log("k")
-            try {
-                console.log("called!");
-                const response = await axios.post(`/api/cf/update-match-problems`, {
-                    tournamentId,
-                    matchId,
-                });
-                
-                if (response.data.success) {
-                    setMatchData(prevMatchData => ({
+        const handleMatchStatus = (data) => {
+            if (data.success) {
+                if (data.status === "RUNNING") {
+                    setMatchData((prevMatchData) => ({
                         ...prevMatchData,
-                        problemList: response.data.data.problemList
+                        problemList: data.updatedMatchScore.problemList,
                     }));
-                    setTotalPoints(response.data.data.participantPoints);
-                    console.log(response.data.data.participantPoints[matchData.participants[0].cfid])
-                    console.log(totalPoints);
-                } else {
-                    console.log(response.data);
-                    toast({
-                        title: response.data.message,
-                    });
+                    setTotalPoints(data.updatedMatchScore.participantPoints);
+                } else if (data.status === "DONE") {
+                    setMatchData((prevMatchData) => ({
+                        ...prevMatchData,
+                        problemList: data.finalMatchScore.problemList,
+                    }));
+                    setTotalPoints(data.finalMatchScore.participantPoints);
                 }
-            } catch (error) {
+            } else {
                 toast({
-                    title: "Server Error while updating problem Status!",
-                    description: "Contact Administrator!"
+                    title: data.message,
                 });
-                console.log(error);
             }
         };
-        console.log(running);
-        if (running > 0) {
-            console.log("Hello")
-            const interval = setInterval(() => {
-                console.log("K");
-                updateProblem()
-            }, 10000);
-            return () => {
-                console.log("Clearing interval...");
-                clearInterval(interval);
-            };  // ✅ Clears interval properly on unmount
-        }
-    }, [tournamentId, toast]); 
+    
+        socket.on("match-status", handleMatchStatus);
+    
+        return () => {
+            socket.off("match-status", handleMatchStatus);
+        };
+    }, [toast]);
+    
     
 
     useEffect(() => {
@@ -121,7 +119,6 @@ const Match = () => {
             const updatedTimeLeft = calculateTimeLeft();
             setTimeLeft(updatedTimeLeft);
             if (updatedTimeLeft <= 0) {
-                running = 0;
                 clearInterval(interval);
             }
         }, 1000);
@@ -187,7 +184,7 @@ const Match = () => {
 
                     <div className="w-[25%] flex flex-col items-center gap-y-3">
                         <span className="text-4xl">{matchData.participants[1].cfid}</span>
-                        <span>Total Points: {totalPoints[matchData.participants[0].cfid]}</span>
+                        <span>Total Points: {totalPoints[matchData.participants[1].cfid]}</span>
                     </div>
                 </div>
             </div>

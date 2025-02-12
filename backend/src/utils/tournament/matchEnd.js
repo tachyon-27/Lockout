@@ -1,3 +1,5 @@
+import { UpdateProblemStatus } from "./UpdateProblemStatus.js";
+
 export const handleMatchEnd = async (tournament, match, io, roomId) => {
     try {
         const updatedMatchData = await UpdateProblemStatus(tournament, match);
@@ -37,6 +39,8 @@ export const handleMatchEnd = async (tournament, match, io, roomId) => {
                 }
             }
         }
+
+        match.state = "DONE";
 
         await tournament.save();
 

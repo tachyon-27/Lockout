@@ -127,9 +127,9 @@ export const deleteTournament = asyncHandler(async (req, res) => {
         }
 
         return res
-            .status(200)    
+            .status(200)
             .json(new ApiResponse(200, "Tournament deleted successfully."))
-    } catch(error) {
+    } catch (error) {
         return res
             .status(500)
             .json(new ApiResponse(500, "Error while deleting tournament.", error.message));
@@ -356,6 +356,12 @@ export const startMatch = asyncHandler(async (req, res) => {
             throw new Error("All fields are required.")
         }
         const tournament = await Tournament.findById(tournamentId)
+            .populate({
+                path: 'matches.problemList.question', // Populating question
+                model: 'Question',                    // Ensure the model name is correct
+                select: 'name contestId index rating'  // Specify the fields to retrieve
+            })
+
 
         if (!tournament) {
             return res.
@@ -393,7 +399,7 @@ export const startMatch = asyncHandler(async (req, res) => {
             }
 
             const problem = {
-                question: question[0]._id,
+                question: question[0],
                 points: 100 * (i + 1)
             }
             selectedQuestions.push(problem);
@@ -415,27 +421,25 @@ export const startMatch = asyncHandler(async (req, res) => {
         const startMatchTimer = (roomId, startTime, duration) => {
             duration = parseInt(duration);
             const io = getIo();
-            const endTime = startTime + duration * 60 * 1000;
+            const startTim = new Date(startTime);
+            const endTime = (startTim.getTime() + duration * 60 * 1000);
 
             function updateStatus() {
-                const now = Date.now();
-                const remainingTime = endTime - now;
-
+                const now = new Date();
+                const remainingTime = endTime - now.getTime();
                 if (remainingTime <= 0) {
                     handleMatchEnd(tournament, match, io, roomId);
                     roomTimers.delete(roomId);
                     return;
                 }
-
                 UpdateProblemStatus(tournament, match).then(score => {
                     io.to(roomId).emit("match-status", {
+                        success: true,
                         status: "RUNNING",
                         elapsed: ((now - startTime) / 1000 / 60).toFixed(1),
                         updatedMatchScore: score
                     });
                 });
-                
-
                 setTimeout(updateStatus, Math.min(90 * 1000, remainingTime));
             }
 
