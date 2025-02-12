@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useToast } from "@/hooks/use-toast"
+import { loginSuccess } from "@/features/userSlice";
 import {
     Form,
     FormField,
@@ -17,7 +18,6 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { login } from '../features/userSlice';
 import { loginSchema } from '../schemas/loginSchema';
 
 const Login = () => {
@@ -98,7 +98,7 @@ const Login = () => {
             })
 
             if(res.data.success) {
-                dispatch(login(res.data.data))
+                dispatch(loginSuccess({ token: res.data.data._id, role: "user" }));
                 navigate('/dashboard')
             }
         } catch(error) {
