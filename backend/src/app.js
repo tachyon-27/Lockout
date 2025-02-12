@@ -1,9 +1,13 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import http from 'http';
+import { Server } from 'socket.io';
+import { getIo, getUserSocket, setupSocket } from './socket.js'
 import {errorHandler} from "./middlewares/errorHandler.js";
 
 const app = express();
+const server = http.createServer(app)
 
 app.use(
   cors({
@@ -11,6 +15,18 @@ app.use(
     credentials: true,
   }),
 );
+
+// Creating socket.io instance
+const io = new Server(server, {
+  cors: {
+      origin: process.env.CORS_ORIGIN,
+      methods: ["GET", "POST"],
+      credentials: true,
+  },
+})
+
+// Authenticating and setting up io instance
+setupSocket(io);
 
 app.use(
   express.json({
@@ -27,6 +43,13 @@ app.use(
 
 app.use(express.static("public"));
 app.use(cookieParser());
+
+// Attach `io` & `userSocket` to `req`
+app.use((req, res, next) => {
+  req.io = getIo();
+  req.getUserSocket = getUserSocket
+  next();
+});
 
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
@@ -46,4 +69,4 @@ app.use((req, res, next) => {
 
 app.use(errorHandler);
 
-export { app };
+export { app, server };

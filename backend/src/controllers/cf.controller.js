@@ -174,8 +174,8 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
         res.json(new ApiResponse(200, "Problem List Updated!", {
             problemList: match.problemList,
             participantPoints: {
-                [cfid1]: p1TotalPoints,
-                [cfid2]: p2TotalPoints
+                [cfid1]: match.participants[0].totalPoints,
+                [cfid2]: match.participants[1].totalPoints,
             }
         }));
 

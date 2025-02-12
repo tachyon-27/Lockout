@@ -6,6 +6,10 @@ import mongoose from "mongoose";
 import axios from "axios";
 import generateMatches from "../utils/tournament/MakeMatchFixtures.js";
 import Question from "../models/question.model.js";
+import { startMatchTimer } from "../utils/tournament/matchTimer.js";
+import { getIo } from "../socket.js";
+import { UpdateProblemStatus } from "../utils/tournament/UpdateProblemStatus.js";
+import { handleMatchEnd } from "../utils/tournament/matchEnd.js";
 
 export const addTournament = asyncHandler(async (req, res) => {
     try {
@@ -182,7 +186,7 @@ export const tournamentRegister = asyncHandler(async (req, res) => {
         return res
             .status(201)
             .json(new ApiResponse(201, "User successfully registered to the tournament"));
-        
+
     } catch (error) {
         console.log(error)
         return res.json(new ApiResponse(500, "An error occurred while registering for the tournament.", error));
@@ -192,24 +196,24 @@ export const tournamentRegister = asyncHandler(async (req, res) => {
 export const getParticipantsList = asyncHandler(async (req, res) => {
     try {
         const { _id } = req.body;
-    
-        if(!_id) {
+
+        if (!_id) {
             return res.json(new ApiResponse(400, "Tournament ID is required"))
         }
 
-        if(!mongoose.Types.ObjectId.isValid(_id)) {
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
             return res.json(new ApiResponse(400, "Invalid Tournament ID"));
         }
-    
+
         const tournament = await Tournament.findById(_id)
-        
-        if(!tournament) {
+
+        if (!tournament) {
             return res.json(new ApiResponse(404, "Tournament not Found!"));
         }
-        
+
         const participants = tournament.participants.map(participant => ({
             name: participant.cfid,
-            maxRating: participant.maxRating 
+            maxRating: participant.maxRating
         }));
 
         return res.json(new ApiResponse(200, "Participants Retrieved successfully!", participants))
@@ -224,13 +228,13 @@ export const startTournament = asyncHandler(async (req, res) => {
     try {
         const { tournamentId } = req.body;
 
-        if(!tournamentId) {
+        if (!tournamentId) {
             return res.json(new ApiResponse(404, "Tournament Id not specified!"));
         }
 
         const tournament = await Tournament.findById(tournamentId).populate({
             path: "participants",
-            select: "name",  
+            select: "name",
         });
 
         if (!tournament) {
@@ -256,26 +260,26 @@ export const startTournament = asyncHandler(async (req, res) => {
 export const getMatches = asyncHandler(async (req, res) => {
     try {
         const { _id } = req.body;
-    
-        if(!_id) {
+
+        if (!_id) {
             return res.json(new ApiResponse(400, "Tournament ID is required"))
         }
 
-        if(!mongoose.Types.ObjectId.isValid(_id)) {
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
             return res.json(new ApiResponse(400, "Invalid Tournament ID"));
         }
-    
+
         const tournament = await Tournament.findById(_id)
-        
-        if(!tournament) {
+
+        if (!tournament) {
             return res.json(new ApiResponse(404, "Tournament not Found!"));
         }
 
         return res.json(new ApiResponse(200, "Matches Retrieved successfully!", tournament.matches))
     } catch (error) {
         return res
-          .status(501)
-          .json(new ApiResponse(501, "Error while getting matches.", error));
+            .status(501)
+            .json(new ApiResponse(501, "Error while getting matches.", error));
     }
 })
 
@@ -322,9 +326,9 @@ export const getMatch = asyncHandler(async (req, res) => {
 
 export const startMatch = asyncHandler(async (req, res) => {
     try {
-        let {tournamentId, matchId, startingRating, duration} = req.body;
+        let { tournamentId, matchId, startingRating, duration } = req.body;
 
-        if(!tournamentId || !matchId) {
+        if (!tournamentId || !matchId) {
             throw new Error("All fields are required.")
         }
         const tournament = await Tournament.findById(tournamentId)
@@ -363,10 +367,10 @@ export const startMatch = asyncHandler(async (req, res) => {
                     .status(404)
                     .json(new ApiResponse(404, `No question found for rating == ${ratingThreshold}`));
             }
-            
+
             const problem = {
                 question: question[0]._id,
-                points: 100 * (i+1)
+                points: 100 * (i + 1)
             }
             selectedQuestions.push(problem);
         }
@@ -382,57 +386,92 @@ export const startMatch = asyncHandler(async (req, res) => {
         const updatedTournament = await Tournament.findById(tournamentId).populate("matches.problemList.question");
         const updatedMatch = updatedTournament.matches.find(match => match.id == matchId);
 
+        const roomTimers = new Map();
+
+        const startMatchTimer = (roomId, startTime, duration) => {
+            duration = parseInt(duration);
+            const io = getIo();
+            const endTime = startTime + duration * 60 * 1000;
+
+            function updateStatus() {
+                const now = Date.now();
+                const remainingTime = endTime - now;
+
+                if (remainingTime <= 0) {
+                    handleMatchEnd(tournament, match, io, roomId);
+                    roomTimers.delete(roomId);
+                    return;
+                }
+
+                UpdateProblemStatus(tournament, match).then(score => {
+                    io.to(roomId).emit("match-status", {
+                        status: "RUNNING",
+                        elapsed: ((now - startTime) / 1000 / 60).toFixed(1),
+                        updatedMatchScore: score
+                    });
+                });
+                
+
+                setTimeout(updateStatus, Math.min(90 * 1000, remainingTime));
+            }
+
+            roomTimers.set(roomId, { startTime, endTime });
+            updateStatus();
+        }
+
+        startMatchTimer(`${tournamentId}_${matchId}`, match.startTime, match.duration);
+
         return res
             .status(201)
             .json(new ApiResponse(201, "Match Started!", updatedMatch));
-    } catch(error) {
-        return res
-          .status(501)
-          .json(new ApiResponse(501, "Error while starting match.", error.message));
-    }
-})
-
-const endMatch = asyncHandler( async (req, res) => {
-    try {
-        const { tournamentId, matchId } = req.body;
-
-        if(!tournamentId || !matchId) {
-            throw new Error("All fields are required.")
-        }
-        const tournament = await Tournament.findById(tournamentId)
-
-        if (!tournament) {
-            return res.
-                status(404)
-                .json(new ApiResponse(404, "Tournament not Found!"));
-        }
-
-        const match = tournament.matches.find(match => match.id == matchId);
-
-        if (!match) {
-            return res
-                .json(new ApiResponse(404, "Match not Found!"));
-        }
-
-        const winner = match.participants[0].totalPoints > match.participants[1].totalPoints ? match.participants[0] : match.participants[1];
-
-        winner.resultText = "WON";
-
-        if(match.nextMatchId) {
-            const nextmatch = tournament.matches.find(match => match.id == match.nextMatchId);
-            nextmatch.participants.push(winner);
-            await tournament.save()
-        }
-
-        await tournament.save();
-
-        res
-        .status(200)
-        .json(new ApiResponse(200, "Match Ended!"));
-
     } catch (error) {
         return res
-        .status(501)
-        .json(new ApiResponse(501, "Error While Ending Match!"))
+            .status(501)
+            .json(new ApiResponse(501, "Error while starting match.", error.message));
     }
 })
+
+// export const endMatch = asyncHandler(async (req, res) => {
+//     try {
+//         const { tournamentId, matchId } = req.body;
+
+//         if (!tournamentId || !matchId) {
+//             throw new Error("All fields are required.")
+//         }
+//         const tournament = await Tournament.findById(tournamentId)
+
+//         if (!tournament) {
+//             return res.
+//                 status(404)
+//                 .json(new ApiResponse(404, "Tournament not Found!"));
+//         }
+
+//         const match = tournament.matches.find(match => match.id == matchId);
+
+//         if (!match) {
+//             return res
+//                 .json(new ApiResponse(404, "Match not Found!"));
+//         }
+
+//         const winner = match.participants[0].totalPoints > match.participants[1].totalPoints ? match.participants[0] : match.participants[1];
+
+//         winner.resultText = "WON";
+
+//         if (match.nextMatchId) {
+//             const nextmatch = tournament.matches.find(match => match.id == match.nextMatchId);
+//             nextmatch.participants.push(winner);
+//             await tournament.save()
+//         }
+
+//         await tournament.save();
+
+//         res
+//             .status(200)
+//             .json(new ApiResponse(200, "Match Ended!"));
+
+//     } catch (error) {
+//         return res
+//             .status(501)
+//             .json(new ApiResponse(501, "Error While Ending Match!"))
+//     }
+// })
