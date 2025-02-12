@@ -10,10 +10,10 @@ const startServer = async () => {
     try {
         await connectDB();
 
-        const { app } = await import("./app.js");
+        const { app, server } = await import("./app.js");
         const port = process.env.VITE_BACKEND_PORT || 3000; 
 
-        app.listen(port, () => {
+        server.listen(port, () => {
             console.log(`Server is running on port ${port}`);
         });
     } catch (error) { 
