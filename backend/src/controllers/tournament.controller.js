@@ -107,6 +107,32 @@ export const updateTournament = asyncHandler(async (req, res) => {
     }
 });
 
+export const deleteTournament = asyncHandler(async (req, res) => {
+    try {
+        const { _id } = req.body
+
+        if (!_id) {
+            throw new Error("Id is required")
+        }
+
+        const deletedTournament = await Tournament.findByIdAndDelete(_id);
+
+        if (!deletedTournament) {
+            return res
+                .status(404)
+                .json(new ApiResponse(404, "Tournament not found."));
+        }
+
+        return res
+            .status(200)    
+            .json(new ApiResponse(200, "Tournament deleted successfully."))
+    } catch(error) {
+        return res
+            .status(500)
+            .json(new ApiResponse(500, "Error while deleting tournament.", error.message));
+    }
+});
+
 export const tournaments = asyncHandler(async (req, res) => {
     try {
         const data = await Tournament.find({})
@@ -252,7 +278,6 @@ export const startTournament = asyncHandler(async (req, res) => {
     }
 });
 
-
 export const getMatches = asyncHandler(async (req, res) => {
     try {
         const { _id } = req.body;
@@ -392,7 +417,7 @@ export const startMatch = asyncHandler(async (req, res) => {
     }
 })
 
-const endMatch = asyncHandler( async (req, res) => {
+export const endMatch = asyncHandler( async (req, res) => {
     try {
         const { tournamentId, matchId } = req.body;
 
@@ -436,3 +461,38 @@ const endMatch = asyncHandler( async (req, res) => {
         .json(new ApiResponse(501, "Error While Ending Match!"))
     }
 })
+
+export const removeParticipant = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId, cfid } = req.body;
+
+        if (!tournamentId || !cfid) {
+            throw new Error("Tournament ID and CFID are required.");
+        }
+
+        const tournament = await Tournament.findById(tournamentId);
+
+        if (!tournament) {
+            throw new Error("Tournament not found.");
+        }
+
+        const updatedParticipants = tournament.participants.filter(
+            (participant) => participant.cfid !== cfid
+        );
+
+        if (updatedParticipants.length === tournament.participants.length) {
+            throw new Error("Participant not found in the tournament.");
+        }
+
+        tournament.participants = updatedParticipants;
+        await tournament.save();
+
+        return res
+            .status(200)
+            .json(new ApiResponse(200, "Participant removed successfully."));
+    } catch (error) {
+        return res
+            .status(500)
+            .json(new ApiResponse(500, error.message));
+    }
+});
