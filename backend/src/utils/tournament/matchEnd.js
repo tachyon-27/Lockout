@@ -30,14 +30,14 @@ export const handleMatchEnd = async (tournament, match, io, roomId) => {
         }
 
         if (winner) {
-            match.participants.find(p => p.cfid === winner.cfid).resultText = resultText;
-
             if (match.nextMatchId) {
                 const nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
                 if (nextMatch) {
                     nextMatch.participants.push(winner);
                 }
             }
+
+            match.participants.find(p => p.cfid === winner.cfid).resultText = resultText;
         }
 
         match.state = "DONE";

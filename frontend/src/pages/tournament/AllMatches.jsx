@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast"
 import axios from "axios";
@@ -44,17 +44,64 @@ const AllMatches = () => {
     fetchMatches();
   }, []);
 
-
+  const filteredMatches = useMemo(() => {
+    return {
+      upcomingMatches: matches.filter((match) => match.state === "SCHEDULED"),
+      ongoingMatches: matches.filter((match) => match.state === "RUNNING"),
+      pastMatches: matches.filter((match) => match.state === "DONE")
+    };
+  }, [matches]);
 
   return (
-    <div className='p-2 md:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-      {matches.map((match, idx) => (
-        <div key={idx}>
-          <MatchCard tournamentId={tournamentId} match={match} />
+    <div className='p-2 md:p-5'>
+
+      <section className="mb-6">
+        <h2 className="text-xl font-semibold mb-4">Ongoing Matches</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredMatches.ongoingMatches.length === 0 ? (
+            <p>No ongoing matches.</p>
+          ) : (
+            filteredMatches.ongoingMatches.map((match, idx) => (
+              <div key={idx}>
+                <MatchCard tournamentId={tournamentId} match={match} />
+              </div>
+            ))
+          )}
         </div>
-      ))}
+      </section>
+
+      <section className="mb-6">
+        <h2 className="text-xl font-semibold mb-4">Upcoming Matches</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredMatches.upcomingMatches.length === 0 ? (
+            <p>No upcoming matches.</p>
+          ) : (
+            filteredMatches.upcomingMatches.map((match, idx) => (
+              <div key={idx}>
+                <MatchCard tournamentId={tournamentId} match={match} />
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="mb-6">
+        <h2 className="text-xl font-semibold mb-4">Past Matches</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredMatches.pastMatches.length === 0 ? (
+            <p>No past matches.</p>
+          ) : (
+            filteredMatches.pastMatches.map((match, idx) => (
+              <div key={idx}>
+                <MatchCard tournamentId={tournamentId} match={match} />
+              </div>
+            ))
+          )}
+        </div>
+      </section>
     </div>
-  )
-}
+  );
+};
+
 
 export default AllMatches

@@ -14,6 +14,7 @@ const Match = () => {
     const [totalPoints, setTotalPoints] = useState()
     const [isLoading, setIsLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState(0);
+    const [isRefreshActive, setIsRefreshActive] = useState(true);
 
     const calculateTimeLeft = () => {
         const start = new Date(matchData.startTime).getTime();
@@ -21,6 +22,41 @@ const Match = () => {
         const timePassed = now - start;
         const timeRemaining = matchData.duration * 60 * 1000 - timePassed;
         return Math.max(timeRemaining, 0);
+    };
+
+    // Refresh Problem Status Button
+    const handleProblemRefresh = async () => {
+        setIsRefreshActive(false);
+        try {
+            const response = await axios.post(`/api/cf/update-match-problems`, {
+                tournamentId,
+                matchId,
+            });
+
+            if (response.data.success) {
+                setMatchData(prevMatchData => ({
+                    ...prevMatchData,
+                    problemList: response.data.data.problemList
+                }));
+                setTotalPoints(response.data.data.participantPoints);
+                toast({
+                    title: "Problem Status Updated!"
+                })
+            } else {
+                console.log(response.data);
+                toast({
+                    title: response.data.message,
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Server Error while updating problem Status!",
+                description: "Contact Administrator!"
+            });
+            console.log(error);
+        } finally {
+            setIsRefreshActive(true);
+        }
     };
 
     // Join Match
@@ -37,21 +73,21 @@ const Match = () => {
         try {
             const getMatch = async () => {
                 try {
-                    const response = await axios.post('/api/tournament/get-match', { 
-                        _id: tournamentId, 
-                        matchId 
+                    const response = await axios.post('/api/tournament/get-match', {
+                        _id: tournamentId,
+                        matchId
                     });
                     if (response.data.success) {
                         setMatchData(response.data.data);
                         setTotalPoints({
-                            [response.data.data.participants[0].cfid]: 0,
-                            [response.data.data.participants[1].cfid]: 0,
+                            [response.data.data.participants[0].cfid]: response.data.data.participants[0].totalPoints | 0,
+                            [response.data.data.participants[1].cfid]: response.data.data.participants[1].totalPoints | 0,
                         })
-
+                        
                         socket.emit("joinRoom", `${tournamentId}_${matchId}`);
                     } else {
-                        toast({ 
-                            title: "Error Fetching Questions" 
+                        toast({
+                            title: "Error Fetching Questions"
                         });
                         console.log(response.data);
                         navigate('/tournaments');
@@ -64,7 +100,7 @@ const Match = () => {
                     setIsLoading(false);
                 }
             };
-                
+
             getMatch()
         } catch (error) {
             console.error(error);
@@ -84,6 +120,7 @@ const Match = () => {
     // Update problemList
     useEffect(() => {
         const handleMatchStatus = (data) => {
+            console.log(data);
             if (data.success) {
                 if (data.status === "RUNNING") {
                     setMatchData((prevMatchData) => ({
@@ -104,16 +141,15 @@ const Match = () => {
                 });
             }
         };
-    
+
         socket.on("match-status", handleMatchStatus);
-    
+
         return () => {
             socket.off("match-status", handleMatchStatus);
         };
     }, [toast]);
-    
-    
 
+    // Timer
     useEffect(() => {
         const interval = setInterval(() => {
             const updatedTimeLeft = calculateTimeLeft();
@@ -144,7 +180,7 @@ const Match = () => {
         <div className="bg-cover bg-center opacity-70" style={{ backgroundImage: "url('../../../public/matchbg.jpg')" }}>
             <div className="p-4 flex flex-col items-center min-h-screen bg-black/30">
                 <div className="text-white text-4xl font-bold">Round {matchData.tournamentRoundText}</div>
-                <div className="text-white text-lg font-semibold">Time: {formatTime(timeLeft)}</div>
+                <div className="text-white text-lg font-semibold">{timeLeft > 0 ? <span>Time: {formatTime(timeLeft)}</span> : <span>Match Ended</span>}</div>
 
                 <div className="flex min-w-full text-white pt-7">
                     <div className="w-[25%] flex flex-col items-center gap-y-3">
@@ -179,6 +215,13 @@ const Match = () => {
                                     }</div>
                                 </div>
                             ))}
+                            <button
+                                className="w-[30%] self-center mt-2 p-2 font-semibold bg-white text-black rounded-xl"
+                                onClick={handleProblemRefresh}
+                                disabled={!isRefreshActive}
+                            >
+                                {isRefreshActive ? <span>Refresh Problem Status</span> : <span>Please Wait...</span>}
+                            </button>
                         </div>
                     </div>
 

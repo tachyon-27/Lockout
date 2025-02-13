@@ -52,34 +52,24 @@ const MatchCard = ({ tournamentId, match }) => {
 
     return (
         <div className="p-4 border rounded-md shadow-md w-full bg-transparent bg-gradient-to-tr from-black via-gray-400/30 to-gray-500/50 transition-transform duration-300 hover:scale-105  hover:shadow-lg">
-            {/* MatchData Title & Status */}
             <div className="flex justify-between items-center mb-2 pb-2 border-b-2 border-slate-700">
                 <h3 className="text-lg font-semibold">Round: {match.tournamentRoundText}</h3>
                 <ShowStatus status={match.state} />
             </div>
 
-            {/* Players */}
             <div className="text-center flex justify-between text-gray-300 font-medium mb-2 p-10">
                 <div>{match.participants[0].cfid}</div> <div>Vs</div> <div>{match.participants[1].cfid}</div>
             </div>
 
-            {/* Separator Line */}
             <div className="w-full h-[2px] bg-slate-500 my-2"></div>
 
-            {/* MatchData Time / Remaining Time */}
-            {/* <div className="text-center text-gray-600 text-sm mb-4">
-                {match.state === "RUNNING" ? `Remaining: ${match.matchTime}` : match.state === "DONE" ? "Match Ended" : `Starts in: ${formatTime(timeLeft)}`}
-            </div> */}
-
-            {/* Enter Button */}
             {match.state != "SCHEDULED" ? (
                 <button
                     className={`w-full py-2 rounded-md font-semibold text-white 
-                    ${match.state != "RUNNING" ? "bg-blue-600 hover:bg-blue-700" : "bg-green-600 cursor-not-allowed"}`}
-                    disabled={match.state == "SCHEDULED"}
+                    ${match.state == "RUNNING" ? "bg-blue-600 hover:bg-blue-700" : "bg-green-600 hover:bg-green-700"}`}
                     onClick={() => navigate(`/tournament/match?tournamentId=${tournamentId}&matchId=${match.id}`)}
                 >
-                    Enter
+                    {match.state === "DONE" ? <>View</> : <>Enter</>}
                 </button>
             ) : (
                 <></>
