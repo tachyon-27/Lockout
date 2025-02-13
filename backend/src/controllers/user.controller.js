@@ -4,6 +4,9 @@ import { generateToken } from '../utils/token.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { resend } from '../utils/resend.js';
+import { getGithubAcessToken, getGithubUser } from "../utils/auth/githubAuth.js";
+import { getOrCreateGoogleUser, fetchUserInfo } from "../utils/auth/googleAuth.js";
+import { OAuth2Client } from 'google-auth-library';
 
 // @desc  Register new User
 // @route POST /api/user/register
@@ -56,16 +59,140 @@ export const registerUser = asyncHandler(async (req, res) => {
   }
 
   const token = generateToken(userExists._id, '1h')
-  
-  const options = {
-    httpOnly: true,
-    secure: true
-  }
 
   return res
     .status(201)
-    .cookie("token", token, options)
     .json(new ApiResponse(201, "User Registered Successfully. Please verify your email", userExists))
+})
+
+export const sendEmail = asyncHandler(async (req, res) => {
+    try {
+      const {email, content} = req.body
+    
+      if(!email || !content) {
+        throw new Error("All fields are required.")
+      }
+      const { error} = await resend.emails.send({
+        from: 'Test <onboarding@resend.dev>',
+        to: email,
+        subject: 'Verification code',
+        html: content
+      });
+
+      if(error) {
+          return res.json({
+              success: false,
+              message: error.message
+          })
+      }
+
+      return res.json({
+          success: true,
+          message: "Verification email sent successfully to " + email
+      })
+  } catch(emailError) {
+      console.log("Error while sending verification email ", emailError)
+      return res.json({
+          success: false,
+          message: "Failed to send verification email."
+      }) 
+  }
+})
+
+export const verifyEmail = asyncHandler(async (req, res) => {
+  try {
+    const { otp, _id } = req.body;
+    const user = await User.findById(_id)
+
+    if (!user) {
+      res.status(401)
+      throw new Error("Unauthorized request")
+    }
+
+    if (user.isVerified) {
+      res.status(401)
+      throw new Error("User already verified")
+    }
+
+    if (!otp) {
+      res.status(401)
+      throw new Error("OTP is required")
+    }
+
+    if (otp != user.verifyCode) {
+      return res
+        .json(new ApiResponse(401, "Incorrect OTP!"))
+    }
+
+    if (Date.now() > user.verifyCodeExpiry) {
+      return res
+        .json(new ApiResponse(401, "OTP is expired! Resend the OTP."))
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    const newUser = await User.findByIdAndUpdate(
+      user._id,
+      {
+        $unset: {
+          verifyCode: 1,
+          verifyCodeExpiry: 1
+        }
+      },
+      {
+        new: true
+      }
+    ).select("-password")
+
+    const options = {
+      httpOnly: true,
+      secure: true
+    }
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, "User verified successfully", newUser))
+  } catch (error) {
+    res.status(501)
+    throw new Error(error.message)
+  }
+})
+
+export const resetOTP = asyncHandler(async (req, res) => {
+  try {
+    const {  _id } = req.body;
+    const user = await User.findById(_id)
+
+    if (!user) {
+      res.status(401)
+      throw new Error("Unauthorized request")
+    }
+
+    const verifyCode = Math.floor(100000 + Math.random() * 900000).toString()
+    const expiryDate = new Date()
+    expiryDate.setHours(expiryDate.getHours() + 1)
+
+    const newUser = await User.findByIdAndUpdate(
+      user._id,
+      {
+        $set: {
+          verifyCode: verifyCode,
+          verifyCodeExpiry: expiryDate
+        }
+      },
+      {
+        new: true
+      }
+    ).select("-password")
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, "OTP is reset.", newUser))
+  } catch (error) {
+    res.status(501)
+    throw new Error(error.message)
+  }
 })
 
 // @desc  Login User
@@ -112,55 +239,6 @@ export const loginUser = asyncHandler(async (req, res) => {
   }
 })
 
-// @desc  Logout User
-// @route POST /api/user/logout
-// @access Public
-export const logoutUser = asyncHandler(async (req, res) => {
-  const options = {
-    httpOnly: true,
-    secure: true
-  }
-
-  return res
-    .status(200)
-    .clearCookie("token", options)
-    .json(new ApiResponse(200, "User Logged Out"))
-})
-
-export const sendEmail = asyncHandler(async (req, res) => {
-    try {
-      const {email, content} = req.body
-    
-      if(!email || !content) {
-        throw new Error("All fields are required.")
-      }
-      const { error} = await resend.emails.send({
-        from: 'Test <onboarding@resend.dev>',
-        to: email,
-        subject: 'Verification code',
-        html: content
-      });
-
-      if(error) {
-          return res.json({
-              success: false,
-              message: error.message
-          })
-      }
-
-      return res.json({
-          success: true,
-          message: "Verification email sent successfully to " + email
-      })
-  } catch(emailError) {
-      console.log("Error while sending verification email ", emailError)
-      return res.json({
-          success: false,
-          message: "Failed to send verification email."
-      }) 
-  }
-})
-
 export const getUser = asyncHandler(async (req, res) => {
   try {
     const { email } = req.body;
@@ -176,14 +254,8 @@ export const getUser = asyncHandler(async (req, res) => {
 
     const token = generateToken(user._id, '1h')
 
-    const options = {
-      httpOnly: true,
-      secure: true
-    }
-
     return res
       .status(201)
-      .cookie("token", token, options)
       .json(new ApiResponse(201, "User found.", user))
   } catch (error) {
     return res.json(new ApiResponse(501, error.message || "Error while fetching user", error))
@@ -192,13 +264,12 @@ export const getUser = asyncHandler(async (req, res) => {
 
 export const passwordOTP = asyncHandler(async (req, res) => {
   try {
-    const { otp } = req.body;
+    const { otp, _id } = req.body;
+    const user = await User.findById(_id)
 
     if(!otp) {
       throw new Error("All fields are required!")
     }
-
-    const user = req.user
 
     if(!user || !user.isVerified) {
       throw new Error("User does not exist!")
@@ -237,13 +308,12 @@ export const passwordOTP = asyncHandler(async (req, res) => {
 
 export const resetPassword = asyncHandler(async (req, res) => {
   try {
-    const { password } = req.body;
+    const { password, _id } = req.body;
+    const user = await User.findById(_id)
 
     if(  !password) {
       throw new Error("All fields are required!")
     }
-
-    const user = req.user
 
     if(!user || !user.isVerified) {
       throw new Error("User does not exist!")
@@ -272,18 +342,104 @@ export const resetPassword = asyncHandler(async (req, res) => {
         new: true
       }
     ).select("-password")
-    const options = {
-      httpOnly: true,
-      secure: true
-    }
   
     return res
       .status(201)
-      .clearCookie("token", options)
       .json(new ApiResponse(201, "Password reset successfull.", newUser))
   } catch(error) {
     return res.json(new ApiResponse(501, "Error while resetting password", error))
   }
+})
+
+// @desc  Handle Github OAuth Callback
+// @route POST /api/auth/github
+// @access Public
+export const githubCallback = asyncHandler(async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) {
+      throw new Error('Github OAuth code not found!')
+    }
+
+    const access_token = await getGithubAcessToken(code)
+    const user = await getGithubUser(access_token)
+
+    if (user && user.isVerified) {
+      const token = generateToken(user._id)
+
+      const options = {
+        httpOnly: true,
+        secure: true
+      }
+
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+      return res
+        .status(201)
+        .cookie("token", token, options)
+        .json(new ApiResponse('User Github Logged in!'))
+    } else {
+      res.status(501)
+      throw new Error('Error Authenticating Github profile')
+    }
+
+  } catch (error) {
+    res.status(501)
+    throw new Error(error.message)
+  }
+
+})
+
+const googleClient = new OAuth2Client(process.env.VITE_GOOGLE_CLIENT_ID)
+
+// @desc  Validate token and Get/Create user
+// @route POST /api/auth/google
+// @access Public
+export const googleCallback = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    const userInfo = await fetchUserInfo(token)
+
+    const { email, name } = userInfo
+
+    const user = await getOrCreateGoogleUser(email, name);
+
+    if (user && user.isVerified) {
+      const token = generateToken(user._id)
+
+      const options = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none"
+      }
+      return res
+        .cookie("token", token, options)
+        .status(201)
+        .json(new ApiResponse(201, "Google User logged in successfully.", user))
+    } else {
+      res.status(501)
+      throw new Error('Error Authenticating Google profile')
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+})
+
+// @desc  Logout User
+// @route POST /api/user/logout
+// @access Public
+export const logoutUser = asyncHandler(async (req, res) => {
+  const options = {
+    httpOnly: true,
+    secure: true
+  }
+
+  return res
+    .status(200)
+    .clearCookie("token", options)
+    .json(new ApiResponse(200, "User Logged Out"))
 })
 
 export const getCFIDs = asyncHandler(async (req, res) => {
