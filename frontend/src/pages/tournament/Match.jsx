@@ -80,10 +80,10 @@ const Match = () => {
                     if (response.data.success) {
                         setMatchData(response.data.data);
                         setTotalPoints({
-                            [response.data.data.participants[0].cfid]: 0,
-                            [response.data.data.participants[1].cfid]: 0,
+                            [response.data.data.participants[0].cfid]: response.data.data.participants[0].totalPoints | 0,
+                            [response.data.data.participants[1].cfid]: response.data.data.participants[1].totalPoints | 0,
                         })
-
+                        
                         socket.emit("joinRoom", `${tournamentId}_${matchId}`);
                     } else {
                         toast({
