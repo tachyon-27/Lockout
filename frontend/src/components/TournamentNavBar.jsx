@@ -36,7 +36,7 @@ function a11yProps(index) {
 export default function TournamentNavBar({ isAdmin }) {
     const [value, setValue] = useState(0);
     const [searchParams] = useSearchParams()
-    const tournamentId = searchParams.get("id");
+    const tournamentId = searchParams.get("id") || searchParams.get("tournamentId");
     const location = useLocation();
 
     const routes = [

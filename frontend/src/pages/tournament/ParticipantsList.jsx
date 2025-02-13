@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast"
 import axios from 'axios'
@@ -10,8 +10,24 @@ const ParticipantsList = ({ isAdmin = false }) => {
     const tournamentId = searchParams.get("id");
     const navigate = useNavigate();
     const [participants, setParticipants] = useState([]);
+    const [search, setSearch] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [err, setErr] = useState("");
+
+    const filteredParticipants = useMemo(() => {
+        return participants
+            .filter((participant) => 
+                participant.name.toLowerCase().includes(search.toLowerCase()) // Search by name
+            )
+            .sort((a, b) => {
+                const lowerSearch = search.toLowerCase();
+                const aStarts = a.name.toLowerCase().startsWith(lowerSearch);
+                const bStarts = b.name.toLowerCase().startsWith(lowerSearch);
+    
+                return aStarts === bStarts ? 0 : aStarts ? -1 : 1;
+            });
+    }, [search, participants]);
+    
 
     const remove = async (cfid) => {
         try {
@@ -97,6 +113,17 @@ const ParticipantsList = ({ isAdmin = false }) => {
         <div className='flex flex-col items-center justify-center'>
             <div className="grid gap-y-4 p-3 sm:w-full md:w-[80%]">
                 <div className="bg-gradient-to-b from-gray-400 w-full via-gray-500 to-gray-700 p-[0.5px] rounded-2xl">
+                    <div className="flex items-center gap-2 h-fit border-none p-2 rounded-2xl bg-black bg-gradient-to-r from-black via-gray-400/10 to-gray-500/25 hover:bg-slate-950 text-white">
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full bg-transparent outline-none text-white placeholder-gray-300 p-2 rounded-xl"
+                        />
+                    </div>
+                </div>
+                <div className="bg-gradient-to-b from-gray-400 w-full via-gray-500 to-gray-700 p-[0.5px] rounded-2xl">
                     <div className="grid grid-cols-3 font-bold h-fit text-center border-none p-2 rounded-2xl bg-black bg-gradient-to-r from-black via-gray-400/10 to-gray-500/25 hover:bg-slate-950 text-white">
                         <span>S.no.</span>
                         <span>Participant Name</span>
@@ -104,8 +131,8 @@ const ParticipantsList = ({ isAdmin = false }) => {
                     </div>
                 </div>
 
-                {participants.length > 0 ? (
-                    participants.map((item, index) => (
+                {filteredParticipants.length > 0 ? (
+                    filteredParticipants.map((item, index) => (
                         <div
                             key={index}
                             className="bg-gradient-to-b from-gray-400 w-full via-gray-500 to-gray-700 p-[0.7px] rounded-2xl"
