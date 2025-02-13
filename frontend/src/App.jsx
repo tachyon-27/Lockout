@@ -26,6 +26,7 @@ import {
   Fixtures,
   AllMatches,
   Match,
+  Settings
 } from './pages'
 
 function App() {
@@ -82,6 +83,7 @@ function App() {
                 <Route path='all-matches' element={ <AllMatches isAdmin={ role == "admin" } /> } />
                 <Route path='fixtures' element={ <Fixtures isAdmin={ role == "admin" } /> } />
                 <Route path='match' element= { <Match isAdmin={ role == "admin" } /> } />
+                <Route path='settings' element= { <Settings /> } />
               </Route>
             </Route>
           </Route>
