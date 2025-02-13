@@ -15,9 +15,12 @@ import {
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { BeatLoader } from "react-spinners";
+import { useDispatch } from 'react-redux'
+import { loginSuccess } from "@/features/userSlice";
 
 export default function AdminLogin() {
   const { toast } = useToast()
+  const dispatch = useDispatch()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,11 +33,9 @@ export default function AdminLogin() {
     }
   })
 
-
   const togglePassword = () => {
     setShowPassword((prev) => !prev);
   }
-
 
   const submit = async (data) => {
     try {
@@ -47,9 +48,9 @@ export default function AdminLogin() {
       setIsLoading(false);
       
       if(response.data.success) {
+        dispatch(loginSuccess({ token: response.data.data._id, role: "admin" }));
         navigate('/admin/dashboard')
       }
-      
     } catch (error) {
       setIsLoading(false);
       console.log(error)

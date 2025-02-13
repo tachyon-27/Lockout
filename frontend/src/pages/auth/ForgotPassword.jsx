@@ -17,8 +17,11 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { emailSchema } from '../../schemas/emailSchema';
+import { useDispatch } from 'react-redux'
+import { setRole } from "@/features/userSlice";
 
 const ForgotPassword = () => {
+    const dispatch = useDispatch();
     const { toast } = useToast()
     const navigate = useNavigate()
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,7 +45,9 @@ const ForgotPassword = () => {
               return;
             }
 
-            res = await axios.post('/api/auth/reset-otp')
+            res = await axios.post('/api/user/reset-otp', {
+                _id: res.data.data._id
+            })
 
             const emailHtml = ReactDOMServer.renderToStaticMarkup(
               <VerificationEmail name={data.name} otp={res.data.data.verifyCode} />
@@ -56,6 +61,7 @@ const ForgotPassword = () => {
 
 
             if(emailRes.data.success) {
+                dispatch(setRole({token: res.data.data._id, role: "unverifiedUser"}))
                 navigate('/verify/password')
             }
         } catch(error) {

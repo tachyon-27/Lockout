@@ -33,7 +33,7 @@ function a11yProps(index) {
     };
 }
 
-export default function TournamentNavBar() {
+export default function TournamentNavBar({ isAdmin }) {
     const [value, setValue] = useState(0);
     const [searchParams] = useSearchParams()
     const tournamentId = searchParams.get("id");
@@ -41,23 +41,20 @@ export default function TournamentNavBar() {
 
     const routes = [
         {
-            path: `/tournament/view?id=${tournamentId}`, 
-            label: 'View', 
-            component: 'View Tournament'
+            path: isAdmin ? `/admin/dashboard/tournament/view?id=${tournamentId}` : `/tournament/view?id=${tournamentId}`, 
+            label: 'View'
         },
         {
-            path: `/tournament/fixtures?id=${tournamentId}`, 
-            label: 'Fixtures', 
-            component: 'Another Route' },
-        {
-            path: `/tournament/all-matches?id=${tournamentId}`,
-            label: 'Matches',
-            component: 'Yet Another Route' 
+            path: isAdmin ? `/admin/dashboard/tournament/fixtures?id=${tournamentId}` : `/tournament/fixtures?id=${tournamentId}`, 
+            label: 'Fixtures'
         },
         {
-            path: `/tournament/participants?id=${tournamentId}`, 
-            label: 'Participants', 
-            component: 'Yet Another Route' 
+            path: isAdmin ? `/admin/dashboard/tournament/all-matches?id=${tournamentId}` : `/tournament/all-matches?id=${tournamentId}`,
+            label: 'Matches'
+        },
+        {
+            path: isAdmin ? `/admin/dashboard/tournament/participants?id=${tournamentId}` : `/tournament/participants?id=${tournamentId}`, 
+            label: 'Participants'
         },
     ];
 

@@ -15,7 +15,7 @@ const AuthGithub = () => {
     if (githubCode) {
       const authenticate = async () => {
         try {
-          const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/auth/github`, {
+          const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/user/github`, {
             method: "POST",
             credentials:'include',
             headers: {
@@ -47,9 +47,7 @@ const AuthGithub = () => {
       };
 
       authenticate();
-
     } else {
-      console.warn("No code found in the URL!");
       toast({
         title: 'Error getting GithubCode!'
       })
