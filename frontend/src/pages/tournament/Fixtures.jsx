@@ -17,10 +17,7 @@ function Fixtures() {
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  console.log(tournamentId)
-
   useEffect(() => {
-    console.log("Hello");
     if (!tournamentId) {
       console.log("Tournament ID is required in the query parameters.");
       toast({
@@ -39,7 +36,6 @@ function Fixtures() {
           throw new Error("Failed to fetch matches.");
         }
         setMatches(response.data.data);
-        console.log(response.data.data)
         setIsLoading(false);
       } catch (error) {
         navigate('/tournaments')
