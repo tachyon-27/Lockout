@@ -189,7 +189,6 @@ const Match = () => {
                     </div>
 
                     <div className="flex flex-grow items-center justify-center pt-[8%]">
-                        {/* Table-like structure */}
                         <div className="flex flex-col w-[90%] justify-center">
                             {matchData.problemList.map((problem, idx) => (
                                 <div key={idx} className="flex items-center justify-between py-2 px-4 border-b border-white hover:bg-gray-700">
@@ -203,7 +202,7 @@ const Match = () => {
                                             href={`https://codeforces.com/contest/${problem.question.contestId}/problem/${problem.question.index}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-blue-500 hover:underline"
+                                            className="text-yellow-300 hover:underline"
                                         >
                                             {problem.question.name || problem.question.index}
                                         </a>

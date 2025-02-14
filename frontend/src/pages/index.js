@@ -15,6 +15,7 @@ import ParticipantsList from "./tournament/ParticipantsList";
 import AllMatches from "./tournament/AllMatches";
 import Fixtures from "./tournament/Fixtures";
 import Match from "./tournament/Match";
+import MatchSettings from "./tournament/MatchSettings";
 
 export {
     Home,
@@ -34,4 +35,5 @@ export {
     AllMatches,
     Fixtures,
     Match,
+    MatchSettings,
 }
