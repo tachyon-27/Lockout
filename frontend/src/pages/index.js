@@ -17,6 +17,7 @@ import Fixtures from "./tournament/Fixtures";
 import Match from "./tournament/Match";
 import Settings from "./tournament/Settings";
 import MatchSettings from "./tournament/MatchSettings";
+import Admins from "./admin/Admins";
 
 export {
     Home,
@@ -38,4 +39,5 @@ export {
     Match,
     Settings,
     MatchSettings,
+    Admins
 }

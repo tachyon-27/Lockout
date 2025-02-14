@@ -27,7 +27,8 @@ import {
   AllMatches,
   Match,
   Settings,
-  MatchSettings
+  MatchSettings,
+  Admins
 } from './pages'
 
 function App() {
@@ -77,12 +78,13 @@ function App() {
               <Route path='add-tournament' element={<AddTournament />} />
               <Route path='update-tournament' element={<AddTournament isEditing={true}/>} />
               <Route path='tournaments' element={<Tournament isAdmin={role == "admin"} />} />
+              <Route path='admins' element={<Admins />} />
               
               <Route path='tournament' element={ <TournamentLayout isAdmin={ role == "admin" } />}>
                 <Route path='view' element={ <ViewTournament isAdmin={ role == "admin" } /> } />
                 <Route path='participants' element={ <ParticipantsList isAdmin={ role == "admin" } /> } />
                 <Route path='all-matches' element={ <AllMatches isAdmin={ role == "admin" } /> } />
-                <Route path='fixtures' element={ <Fixtures isAdmin={ role == "admin" } /> } />
+                <Route path='fixtures' element={ <Fixtures /> } />
                 <Route path='match' element= { <Match isAdmin={ role == "admin" } /> } />
                 <Route path='match/settings' element= { <MatchSettings /> } />
                 <Route path='settings' element= { <Settings /> } />
