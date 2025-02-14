@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast"
 import axios from "axios";
 import MatchCard from '@/components/MatchCard'
 
-const AllMatches = () => {
+const AllMatches = ({isAdmin = false}) => {
   const [searchParams] = useSearchParams();
   const tournamentId = searchParams.get("id");
   const [matches, setMatchs] = useState([])
@@ -54,7 +54,6 @@ const AllMatches = () => {
 
   return (
     <div className='p-2 md:p-5'>
-
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-4">Ongoing Matches</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -63,7 +62,7 @@ const AllMatches = () => {
           ) : (
             filteredMatches.ongoingMatches.map((match, idx) => (
               <div key={idx}>
-                <MatchCard tournamentId={tournamentId} match={match} />
+                <MatchCard isAdmin={isAdmin} tournamentId={tournamentId} match={match} />
               </div>
             ))
           )}
@@ -78,7 +77,7 @@ const AllMatches = () => {
           ) : (
             filteredMatches.upcomingMatches.map((match, idx) => (
               <div key={idx}>
-                <MatchCard tournamentId={tournamentId} match={match} />
+                <MatchCard isAdmin={isAdmin} tournamentId={tournamentId} match={match} />
               </div>
             ))
           )}
@@ -93,7 +92,7 @@ const AllMatches = () => {
           ) : (
             filteredMatches.pastMatches.map((match, idx) => (
               <div key={idx}>
-                <MatchCard tournamentId={tournamentId} match={match} />
+                <MatchCard isAdmin={isAdmin} tournamentId={tournamentId} match={match} />
               </div>
             ))
           )}

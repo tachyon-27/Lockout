@@ -139,7 +139,7 @@ const ParticipantsList = ({ isAdmin = false }) => {
                 <div className="bg-gradient-to-b from-gray-400 w-full via-gray-500 to-gray-700 p-[0.5px] rounded-2xl">
                     <div className={`grid ${isAdmin ? "grid-cols-[5fr_5fr_5fr_1fr]" : "grid-cols-3"} font-bold h-fit text-center border-none p-2 rounded-2xl bg-black bg-gradient-to-r from-black via-gray-400/10 to-gray-500/25 hover:bg-slate-950 text-white`}>
                         <span>S.no.</span>
-                        <span>Participant Name</span>
+                        <span>Participant</span>
                         <span>Max Rating</span>
                         {isAdmin && <span>Actions</span>} 
                     </div>
