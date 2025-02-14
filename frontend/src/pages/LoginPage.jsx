@@ -47,7 +47,7 @@ const Login = () => {
     const googleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/auth/google`, {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/user/google`, {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json",
@@ -61,10 +61,9 @@ const Login = () => {
                     toast({
                         title: 'Logged in Successfully!'
                     })
-                    console.log('Google Authentication is Successfull');
+                    dispatch(loginSuccess({ token: data.data._id, role: "verifiedUser" }));
                     navigate('/')
                 } else {
-                    console.error('Login Failed', data.message);
                     toast({
                         title: 'Login Failed',
                         description: data.message,
@@ -72,7 +71,6 @@ const Login = () => {
                 }
 
             } catch (error) {
-                console.log('Error during login', error);
                 toast({
                     title: 'Error during login',
                     description: error,
@@ -80,7 +78,6 @@ const Login = () => {
             }
         },
         onError: () => {
-            console.log('Google Login Failed')
             toast({
                 title: 'Google Authorization Failed',
             })
@@ -98,7 +95,7 @@ const Login = () => {
             })
 
             if(res.data.success) {
-                dispatch(loginSuccess({ token: res.data.data._id, role: "user" }));
+                dispatch(loginSuccess({ token: res.data.data._id, role: "verifiedUser" }));
                 navigate('/dashboard')
             }
         } catch(error) {

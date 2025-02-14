@@ -18,9 +18,13 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux'
+import { setRole, logout } from "@/features/userSlice";
 
 function Verify() {
   const { what } = useParams()
+  const dispatch = useDispatch()
+  const id = useSelector((state) => state.user.token);
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -32,8 +36,9 @@ function Verify() {
     setIsSubmitting(true);
     try {
       if (what == "email") {
-        const res = await axios.post('/api/auth/verify-email', {
+        const res = await axios.post('/api/user/verify-email', {
           otp: data.otp,
+          _id: id
         });
 
         toast({
@@ -42,12 +47,14 @@ function Verify() {
         });
 
         if (res.data.success) {
+          dispatch(logout())
           navigate('/login');
         }
       } 
       else if(what == "password") {
         const res = await axios.post('/api/user/password-otp', {
           otp: data.otp,
+          _id: id
         });
 
         toast({
@@ -56,6 +63,7 @@ function Verify() {
         });
 
         if (res.data.success) {
+          dispatch(setRole({ token: id, role: "changePassword" }))
           navigate('/reset-password');
         }
       }
@@ -71,7 +79,9 @@ function Verify() {
 
   const resend = async () => {
     try {
-      const res = await axios.post('/api/auth/reset-otp');
+      const res = await axios.post('/api/user/reset-otp', {
+        _id: id
+      });
 
       const emailHtml = ReactDOMServer.renderToStaticMarkup(
         <VerificationEmail name={res.data.data.name} otp={res.data.data.verifyCode} />

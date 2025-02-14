@@ -16,8 +16,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { passwordSchema } from "../../schemas/passwordSchema"; 
+import { useDispatch, useSelector } from 'react-redux'
+import { logout } from "@/features/userSlice";
 
 const ResetPassword = () => {
+  const dispatch = useDispatch()
+  const id = useSelector((state) => state.user.token);
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,12 +45,15 @@ const ResetPassword = () => {
     try {
       const res = await axios.post("/api/user/reset-password", {
         password: data.password,
+        _id: id
       });
+
       toast({
         title: res.data.message,
       });
 
       if (res.data.success) {
+        dispatch(logout())
         navigate('/login');
       }
     } catch (error) {
