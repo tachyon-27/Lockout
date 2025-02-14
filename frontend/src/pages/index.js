@@ -36,6 +36,6 @@ export {
     AllMatches,
     Fixtures,
     Match,
-    Settings
+    Settings,
     MatchSettings,
 }
