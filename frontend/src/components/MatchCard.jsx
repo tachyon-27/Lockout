@@ -66,7 +66,7 @@ const MatchCard = ({ tournamentId, match }) => {
             {match.state != "SCHEDULED" ? (
                 <button
                     className={`w-full py-2 rounded-md font-semibold text-white 
-                    ${match.state == "RUNNING" ? "bg-blue-600 hover:bg-blue-700" : "bg-green-600 hover:bg-green-700"}`}
+                    ${match.state == "RUNNING" ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-600 hover:bg-green-700"}`}
                     onClick={() => navigate(`/tournament/match?tournamentId=${tournamentId}&matchId=${match.id}`)}
                 >
                     {match.state === "DONE" ? <>View</> : <>Enter</>}

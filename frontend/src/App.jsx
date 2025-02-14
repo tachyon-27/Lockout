@@ -23,6 +23,7 @@ import {
   Fixtures,
   AllMatches,
   Match,
+  MatchSettings,
 } from './pages'
 
 const router = createBrowserRouter(
@@ -45,6 +46,7 @@ const router = createBrowserRouter(
             <Route path='all-matches' element={ <AllMatches /> } />
             <Route path='fixtures' element={ <Fixtures /> } />
             <Route path='match' element= { <Match /> } />
+            <Route path='match/settings' element= { <MatchSettings /> } />
           </Route>
         </Route>
   
