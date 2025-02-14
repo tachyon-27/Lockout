@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast"
 import axios from 'axios'
 import { RingLoader } from 'react-spinners';
 
-const ParticipantsList = () => {
+const ParticipantsList = ({ isAdmin = false }) => {
     const { toast } = useToast();
     const [searchParams] = useSearchParams();
     const tournamentId = searchParams.get("id");
@@ -28,6 +28,30 @@ const ParticipantsList = () => {
             });
     }, [search, participants]);
     
+
+    const remove = async (cfid) => {
+        try {
+            setIsLoading(true)
+            setErr("")
+            const res = await axios.post('/api/tournament/remove-participant',{
+                tournamentId,
+                cfid
+            })
+
+            toast({
+                title: res.data.message
+            })
+        } catch (error) {
+            console.log(error);
+            toast({
+                title: "Error occurred while fetching participants!",
+                description: error.message,
+            });
+            navigate('/tournaments');
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     useEffect(() => {
         const fetchParticipants = async () => {
@@ -69,7 +93,6 @@ const ParticipantsList = () => {
 
     }, [tournamentId, navigate, toast]);
 
-
     if (isLoading) {
         return (
             <div className="flex items-center justify-center">
@@ -88,7 +111,6 @@ const ParticipantsList = () => {
 
     return (
         <div className='flex flex-col items-center justify-center'>
-
             <div className="grid gap-y-4 p-3 sm:w-full md:w-[80%]">
                 <div className="bg-gradient-to-b from-gray-400 w-full via-gray-500 to-gray-700 p-[0.5px] rounded-2xl">
                     <div className="flex items-center gap-2 h-fit border-none p-2 rounded-2xl bg-black bg-gradient-to-r from-black via-gray-400/10 to-gray-500/25 hover:bg-slate-950 text-white">

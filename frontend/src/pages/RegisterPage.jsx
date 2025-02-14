@@ -20,9 +20,12 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { useDispatch } from 'react-redux'
+import { setRole, loginSuccess } from "../features/userSlice";
 
 const Register = () => {
     const { toast } = useToast()
+    const dispatch = useDispatch()
     const navigate = useNavigate()
     const [isSubmitting, setIsSubmitting] = useState(false);
     const form = useForm({
@@ -49,7 +52,7 @@ const Register = () => {
     const googleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/auth/google`, {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/user/google`, {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json",
@@ -63,10 +66,9 @@ const Register = () => {
                     toast({
                         title: 'Logged in Successfully!'
                     })
-                    console.log('Google Authentication is Successfull');
+                    dispatch(loginSuccess({ token: data.data._id, role: "verifiedUser" }));
                     navigate('/')
                 } else {
-                    console.error('Login Failed', data.message);
                     toast({
                         title: 'Login Failed',
                         description: data.message,
@@ -74,7 +76,6 @@ const Register = () => {
                 }
 
             } catch (error) {
-                console.log('Error during login', error);
                 toast({
                     title: 'Error during login',
                     description: error,
@@ -82,7 +83,6 @@ const Register = () => {
             }
         },
         onError: () => {
-            console.log('Google Login Failed')
             toast({
                 title: 'Google Authorization Failed',
             })
@@ -111,13 +111,13 @@ const Register = () => {
                     title: "Invalid email.",
                     description: emailRes.data.message
                 })
-                console.log(emailRes.data.message)
             }
             else {
                 toast({
                     title: "Success",
                     description: res.data.message
                 })
+                dispatch(setRole({token: res.data.data._id, role: "unverifiiedUser"}))
                 navigate('/verify/email')
             }
         } catch (error) {
