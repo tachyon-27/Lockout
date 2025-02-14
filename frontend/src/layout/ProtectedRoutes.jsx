@@ -5,10 +5,11 @@ const ProtectedRoutes = ({ allowed }) => {
     const { toast } = useToast()
 
     if (!allowed) {
-      toast({
-        title: "You are not allowed to access this route."
-      })
-      return <Navigate to="/" replace />;
+      return (
+        <div className="self-center">
+          Access Denied
+        </div>
+      )
     }
 
     return <Outlet />;

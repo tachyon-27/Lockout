@@ -462,21 +462,27 @@ export const startMatch = asyncHandler(async (req, res) => {
 export const removeParticipant = asyncHandler(async (req, res) => {
     try {
         const { tournamentId, cfid } = req.body;
+
         if (!tournamentId || !cfid) {
             throw new Error("Tournament ID and CFID are required.");
         }
+
         const tournament = await Tournament.findById(tournamentId);
         if (!tournament) {
             throw new Error("Tournament not found.");
         }
+
         const updatedParticipants = tournament.participants.filter(
             (participant) => participant.cfid !== cfid
         );
+
         if (updatedParticipants.length === tournament.participants.length) {
             throw new Error("Participant not found in the tournament.");
         }
+
         tournament.participants = updatedParticipants;
         await tournament.save();
+        
         return res
             .status(200)
             .json(new ApiResponse(200, "Participant removed successfully."));

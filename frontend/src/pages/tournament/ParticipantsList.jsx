@@ -13,6 +13,8 @@ const ParticipantsList = ({ isAdmin = false }) => {
     const [search, setSearch] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [err, setErr] = useState("");
+    const [isConfirming, setIsConfirming] = useState(false);
+    const [participantToRemove, setParticipantToRemove] = useState(null); 
 
     const filteredParticipants = useMemo(() => {
         return participants
@@ -27,31 +29,42 @@ const ParticipantsList = ({ isAdmin = false }) => {
                 return aStarts === bStarts ? 0 : aStarts ? -1 : 1;
             });
     }, [search, participants]);
-    
 
     const remove = async (cfid) => {
         try {
-            setIsLoading(true)
-            setErr("")
-            const res = await axios.post('/api/tournament/remove-participant',{
+            setIsLoading(true);
+            setErr("");
+            const res = await axios.post('/api/tournament/remove-participant', {
                 tournamentId,
                 cfid
-            })
+            });
 
             toast({
                 title: res.data.message
-            })
+            });
+
+            setParticipants(prevParticipants => prevParticipants.filter(p => p.name !== cfid));
         } catch (error) {
             console.log(error);
             toast({
                 title: "Error occurred while fetching participants!",
-                description: error.message,
+                description: error.response.data.message || error.message,
             });
-            navigate('/tournaments');
         } finally {
+            setIsConfirming(false);
             setIsLoading(false);
         }
-    }
+    };
+
+    const handleRemoveClick = (participant) => {
+        setParticipantToRemove(participant); // Set the participant to remove
+        setIsConfirming(true); // Show the confirmation modal
+    };
+
+    const handleCancel = () => {
+        setIsConfirming(false); // Close the modal without removing
+        setParticipantToRemove(null);
+    };
 
     useEffect(() => {
         const fetchParticipants = async () => {
@@ -90,7 +103,6 @@ const ParticipantsList = ({ isAdmin = false }) => {
         };
 
         fetchParticipants();
-
     }, [tournamentId, navigate, toast]);
 
     if (isLoading) {
@@ -123,11 +135,13 @@ const ParticipantsList = ({ isAdmin = false }) => {
                         />
                     </div>
                 </div>
+
                 <div className="bg-gradient-to-b from-gray-400 w-full via-gray-500 to-gray-700 p-[0.5px] rounded-2xl">
-                    <div className="grid grid-cols-3 font-bold h-fit text-center border-none p-2 rounded-2xl bg-black bg-gradient-to-r from-black via-gray-400/10 to-gray-500/25 hover:bg-slate-950 text-white">
+                    <div className={`grid ${isAdmin ? "grid-cols-[5fr_5fr_5fr_1fr]" : "grid-cols-3"} font-bold h-fit text-center border-none p-2 rounded-2xl bg-black bg-gradient-to-r from-black via-gray-400/10 to-gray-500/25 hover:bg-slate-950 text-white`}>
                         <span>S.no.</span>
                         <span>Participant Name</span>
                         <span>Max Rating</span>
+                        {isAdmin && <span>Actions</span>} 
                     </div>
                 </div>
 
@@ -137,10 +151,18 @@ const ParticipantsList = ({ isAdmin = false }) => {
                             key={index}
                             className="bg-gradient-to-b from-gray-400 w-full via-gray-500 to-gray-700 p-[0.7px] rounded-2xl"
                         >
-                            <div className="grid grid-cols-3 p-2 h-fit text-center rounded-2xl bg-black bg-gradient-to-r from-black via-gray-400/10 to-gray-500/25 hover:bg-slate-950 text-white">
+                            <div className={`grid ${isAdmin ? "grid-cols-[5fr_5fr_5fr_1fr]" : "grid-cols-3"} p-2 h-fit text-center rounded-2xl bg-black bg-gradient-to-r from-black via-gray-400/10 to-gray-500/25 hover:bg-slate-950 text-white`}>
                                 <span>{index + 1}</span>
                                 <span>{item.name}</span>
                                 <span>{item.maxRating}</span>
+                                {isAdmin && (
+                                    <button
+                                        className="bg-red-500 hover:bg-red-600 text-white px-1 py-1 text-xs rounded-lg"
+                                        onClick={() => handleRemoveClick(item)}
+                                    >
+                                        &#10005;
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))
@@ -150,8 +172,30 @@ const ParticipantsList = ({ isAdmin = false }) => {
                     </div>
                 )}
             </div>
-        </div>
 
+            {isConfirming && (
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[502]">
+                    <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg w-1/3">
+                        <h3 className="text-lg font-bold mb-4">Confirm Removal</h3>
+                        <p className="mb-4">Are you sure you want to remove {participantToRemove?.name} from the tournament?</p>
+                        <div className="flex justify-between">
+                            <button
+                                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
+                                onClick={handleCancel}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
+                                onClick={() => remove(participantToRemove.name)}
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 
