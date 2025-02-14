@@ -1,10 +1,13 @@
 import { useToast } from "@/hooks/use-toast";
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { RingLoader } from "react-spinners"; 
+import { loginSuccess } from "../../features/userSlice";
 
 
 const AuthGithub = () => {
+  const dispatch = useDispatch()
   const [searchParams] = useSearchParams();
   const githubCode = searchParams.get("code"); 
   const [loading, setLoading] = useState(true);
@@ -24,9 +27,11 @@ const AuthGithub = () => {
             body: JSON.stringify({ code: githubCode }),
           });
           if (response.ok) {
+            const data = await response.json()
             toast({
               title: 'Successfully Logged In'
             })
+            dispatch(loginSuccess({ token: data.data._id, role: "verifiedUser" }));
             navigate('/');
           } else {
             const { message } = await response.json()

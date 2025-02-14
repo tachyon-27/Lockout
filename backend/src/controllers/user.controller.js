@@ -378,7 +378,7 @@ export const githubCallback = asyncHandler(async (req, res) => {
       return res
         .status(201)
         .cookie("token", token, options)
-        .json(new ApiResponse('User Github Logged in!'))
+        .json(new ApiResponse(201,'User Github Logged in!',user))
     } else {
       res.status(501)
       throw new Error('Error Authenticating Github profile')

@@ -53,6 +53,7 @@ const Login = () => {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({ token: tokenResponse.access_token }),
+                    credentials: "include"
                 })
 
                 const data = await response.json()
