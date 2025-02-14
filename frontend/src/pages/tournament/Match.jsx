@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 import { socket } from "../../socket";
 
-const Match = () => {
+const Match = ({ isAdmin }) => {
     const { toast } = useToast();
     const [searchParams] = useSearchParams()
     const matchId = searchParams.get('matchId')
@@ -214,13 +214,24 @@ const Match = () => {
                                     }</div>
                                 </div>
                             ))}
-                            <button
-                                className="w-[30%] self-center mt-2 p-2 font-semibold bg-white text-black rounded-xl"
-                                onClick={handleProblemRefresh}
-                                disabled={!isRefreshActive}
-                            >
-                                {isRefreshActive ? <span>Refresh Problem Status</span> : <span>Please Wait...</span>}
-                            </button>
+                            <div className="flex justify-between">
+                                <button
+                                    className="w-[30%] self-center mt-2 p-2 font-semibold bg-white text-black rounded-xl"
+                                    onClick={handleProblemRefresh}
+                                    disabled={!isRefreshActive}
+                                > 
+                                    {isRefreshActive ? <span>Refresh Status</span> : <span>Please Wait...</span>}
+                                </button>
+
+                                {isAdmin && (
+                                    <button
+                                        className="w-[30%] self-center mt-2 p-2 font-semibold bg-white text-black rounded-xl"
+                                        onClick={() => navigate(`/admin/dashboard/tournament/match/settings?tournamentId=${tournamentId}&matchId=${matchId}`)}
+                                    > 
+                                        Settings
+                                    </button>
+                                ) }
+                            </div>
                         </div>
                     </div>
 

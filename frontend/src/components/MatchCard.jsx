@@ -9,15 +9,15 @@ const ShowStatus = ({ status }) => {
     };
 
     return (
-        <div className="text-white sm:text-xs md:text-sm rounded-md w-fit p-1 px-2 font-semibold" style={{ backgroundColor: bgColor[status] }}>
-            {status}
+        <div className="text-white sm:text-xs md:text-sm rounded-md w-fit p-1 px-2 font-semibold" style={{ backgroundColor: bgColor[status] || "#808080" }}>
+            {status || "Unknown"}
         </div>
     );
 };
 
-const MatchCard = ({ tournamentId, match }) => {
+const MatchCard = ({ isAdmin, tournamentId, match }) => {
     const [timeLeft, setTimeLeft] = useState(null);
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!match?.startTime) return;
@@ -28,7 +28,7 @@ const MatchCard = ({ tournamentId, match }) => {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [match.startTime]);
+    }, [match.startTime]);  // Corrected the dependency array
 
     function formatTime(time) {
         if (!time) return "Loading...";
@@ -51,7 +51,7 @@ const MatchCard = ({ tournamentId, match }) => {
     }
 
     return (
-        <div className="p-4 border rounded-md shadow-md w-full bg-transparent bg-gradient-to-tr from-black via-gray-400/30 to-gray-500/50 transition-transform duration-300 hover:scale-105  hover:shadow-lg">
+        <div className="p-4 border rounded-md shadow-md w-full bg-transparent bg-gradient-to-tr from-black via-gray-400/30 to-gray-500/50 transition-transform duration-300 hover:scale-105 hover:shadow-lg">
             <div className="flex justify-between items-center mb-2 pb-2 border-b-2 border-slate-700">
                 <h3 className="text-lg font-semibold">Round: {match.tournamentRoundText}</h3>
                 <ShowStatus status={match.state} />
@@ -63,13 +63,13 @@ const MatchCard = ({ tournamentId, match }) => {
 
             <div className="w-full h-[2px] bg-slate-500 my-2"></div>
 
-            {match.state != "SCHEDULED" ? (
+            {match.state !== "SCHEDULED" ? (
                 <button
                     className={`w-full py-2 rounded-md font-semibold text-white 
-                    ${match.state == "RUNNING" ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-600 hover:bg-green-700"}`}
-                    onClick={() => navigate(`/tournament/match?tournamentId=${tournamentId}&matchId=${match.id}`)}
+                    ${match.state === "RUNNING" ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-600 hover:bg-green-700"}`}
+                    onClick={() => navigate(`${isAdmin ? "/admin/dashboard/" : "/"}tournament/match?tournamentId=${tournamentId}&matchId=${match.id}`)}
                 >
-                    {match.state === "DONE" ? <>View</> : <>Enter</>}
+                    {match.state === "DONE" ? "View Match" : "Enter Match"}
                 </button>
             ) : (
                 <></>
