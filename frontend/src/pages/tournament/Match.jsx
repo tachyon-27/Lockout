@@ -173,6 +173,8 @@ const Match = ({ isAdmin }) => {
 
     }, [toast])
 
+    socket.on('add-duration',(data) => {setMatchData(data); console.log(data)})
+
     // Timer
     useEffect(() => {
         const interval = setInterval(() => {

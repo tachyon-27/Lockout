@@ -538,10 +538,14 @@ export const updateMatchDuration = asyncHandler(async (req, res) => {
             roomTimers.delete(roomId);
         }
 
+        const io = getIo()
+        io.to(`${tournamentId}_${matchId}`).emit('add-duration', match);
+
         startMatchTimer(roomId, match.startTime, match.duration, tournament, match);
 
-        return res.status(200).json(new ApiResponse(200, "Match duration updated!", { newDuration }));
+        return res.status(200).json(new ApiResponse(200, "Match duration updated!", { duration }));
     } catch (error) {
+        console.log(error)
         return res.status(500).json(new ApiResponse(500, "Error updating match duration.", error.message));
     }
 });
