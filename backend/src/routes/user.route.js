@@ -11,7 +11,8 @@ import {
   githubCallback, 
   resetOTP, 
   verifyEmail, 
-  googleCallback
+  googleCallback,
+  getUsers
 } from "../controllers/user.controller.js";
 import { verifyUser } from "../middlewares/auth.middleware.js";
 
@@ -26,6 +27,7 @@ router.route("/github").post(githubCallback);
 router.route("/google").post(googleCallback);
 router.route('/verify-email').post(verifyEmail)
 router.route('/reset-otp').post(resetOTP)
+router.route('/get-users').get(getUsers)
 
 // secured routes
 router.route("/logout").get(verifyUser, logoutUser)

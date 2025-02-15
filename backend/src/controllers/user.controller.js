@@ -447,3 +447,15 @@ export const getCFIDs = asyncHandler(async (req, res) => {
     .status(201)
     .json(new ApiResponse(201, "", {cfids: req.user.codeforcesID}))
 })
+
+export const getUsers = asyncHandler(async (req, res) => {
+  try {
+    const users = await User.find({isVerified: true}, 'name email isAdmin'); 
+        
+    return res
+      .status(201)
+      .json(new ApiResponse(201, "Successfully fetched all users", users))
+  } catch(error) {
+    return res.json(new ApiResponse(501, "Error while getting users", error))
+  }
+})
