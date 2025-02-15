@@ -68,6 +68,9 @@ const matchSchema = mongoose.Schema({
     startTime: {
         type: Date,
     },
+    endTime: {
+        type: Date,
+    },
     state: {
         type: String,
         enum: ['NO_SHOW', 'RUNNING', 'WALK_OVER', 'NO_PARTY', 'DONE', 'SCORE_DONE', 'SCHEDULED'],

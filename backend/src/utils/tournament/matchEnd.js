@@ -44,6 +44,7 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
             match.participants[1].resultText = "TIE";
         }
 
+        match.endTime = Date.now()
         match.state = "DONE";
 
         await tournament.save();
