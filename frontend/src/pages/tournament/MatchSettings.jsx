@@ -13,7 +13,31 @@ const MatchSettingsActions = ({ setPopupType, loading }) => (
         <Button onClick={() => setPopupType("end")} disabled={loading} variant="destructive">End Match</Button>
         <Button onClick={() => setPopupType("tie")} disabled={loading} variant="secondary">Tie Handling</Button>
         <Button onClick={() => setPopupType("bye")} disabled={loading} variant="outline">Give Bye</Button>
+        <Button onClick={() => setPopupType("addDuration")} disabled={loading} variant="outline">Add Duration</Button>
     </CardContent>
+);
+
+const AddDurationPopup = ({ additionalDuration, setAdditionalDuration, err, setErr, handleMatchAction, loading, setPopupType }) => (
+    <>
+        <h3 className="text-lg font-bold mb-4">Add Duration</h3>
+        <InputField
+            label="Additional Duration (minutes)"
+            type="number"
+            value={additionalDuration}
+            onChange={(e) => setAdditionalDuration(e.target.value)}
+            placeholder="Enter minutes to add"
+        />
+        <p className="text-sm text-red-600 mb-2">{err}</p>
+        <div className="flex justify-between">
+            <Button onClick={() => { setPopupType(null); setErr(""); }} variant="outline">Cancel</Button>
+            <Button
+                onClick={() => handleMatchAction("Add Duration", "/api/tournament/add-duration", { duration: parseFloat(additionalDuration) })}
+                disabled={loading}
+            >
+                Confirm
+            </Button>
+        </div>
+    </>
 );
 
 const InputField = ({ label, value, onChange, type = "number", placeholder = "" }) => (
@@ -124,6 +148,7 @@ const MatchSettings = () => {
     const [customTieBreaker, setCustomTieBreaker] = useState("");
     const [selectedParticipant, setSelectedParticipant] = useState("");
     const [selectedWinner, setSelectedWinner] = useState("");
+    const [additionalDuration, setAdditionalDuration] = useState("");
     const [err, setErr] = useState("");
     const { toast } = useToast();
 
@@ -143,6 +168,12 @@ const MatchSettings = () => {
 
     const handleMatchAction = async (action, endpoint, data = {}) => {
         setLoading(true);
+        console.log(data)
+        if (action === "Add Duration" && (!data.duration || isNaN(data.duration))) {
+            setErr("Please enter a valid duration!");
+            setLoading(false);
+            return;
+        }
         if (action === "Tie Handling" && data.customTieBreaker === '') {
             setErr("Please specify the custom tie breaker!");
             setLoading(false);
@@ -174,6 +205,12 @@ const MatchSettings = () => {
                 toast({
                     title: `${action} successful`
                 });
+                if (action === "Add Duration") {
+                    setMatch(prevMatch => ({
+                        ...prevMatch,
+                        duration: prevMatch.duration + parseInt(data.duration, 10),
+                    }));
+                }
             } else {
                 toast({
                     title: response.data.message,
@@ -181,8 +218,8 @@ const MatchSettings = () => {
             }
 
         } catch (error) {
-            toast({ 
-                title: `Failed to ${action}` ,
+            toast({
+                title: `Failed to ${action}`,
                 description: "Server Error!"
             });
         } finally {
@@ -254,7 +291,18 @@ const MatchSettings = () => {
                                 loading={loading}
                                 err={err}
                             />
+                        ) : popupType === "addDuration" ? (
+                            <AddDurationPopup
+                                additionalDuration={additionalDuration}
+                                setAdditionalDuration={setAdditionalDuration}
+                                setErr={setErr}
+                                err={err}
+                                handleMatchAction={handleMatchAction}
+                                loading={loading}
+                                setPopupType={setPopupType}
+                            />
                         ) : null}
+                
                     </div>
                 </div>
             )}

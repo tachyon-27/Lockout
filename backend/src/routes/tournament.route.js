@@ -40,7 +40,7 @@ router.route('/update-tournament/:tournamentId').post(
 router.route('/start-tournament').get(verifyAdmin, startTournament)
 router.route('/start-match').post(startMatch)
 router.route('/end-match').post(endMatch)
-router.route('/update-duration').post(updateMatchDuration)
+router.route('/add-duration').post(updateMatchDuration)
 router.route('/delete-tournament').post(verifyAdmin, deleteTournament)
 router.route('/remove-participant').post(verifyAdmin, removeParticipant)
 
