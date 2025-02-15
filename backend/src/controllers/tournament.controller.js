@@ -435,6 +435,7 @@ export const startMatch = asyncHandler(async (req, res) => {
         match.duration = duration
         match.state = "RUNNING"
         match.startTime = Date.now()
+        match.endTime = null;
         await tournament.save()
 
         // Refetch with populated questions

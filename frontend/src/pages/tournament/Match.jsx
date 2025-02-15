@@ -19,6 +19,12 @@ const Match = ({ isAdmin }) => {
     const calculateTimeLeft = () => {
         const start = new Date(matchData.startTime).getTime();
         const now = new Date().getTime();
+        if(matchData.endTime) {
+            const end = new Date(matchData.endTime).getTime();
+            if(now >= new Date(matchData.endTime).getTime()) {
+                return 0;
+            }
+        }
         const timePassed = now - start;
         const timeRemaining = matchData.duration * 60 * 1000 - timePassed;
         return Math.max(timeRemaining, 0);
