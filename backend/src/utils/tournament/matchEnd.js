@@ -1,6 +1,6 @@
 import { UpdateProblemStatus } from "./UpdateProblemStatus.js";
 
-export const handleMatchEnd = async (tournament, match, io, roomId) => {
+export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
     try {
         const updatedMatchData = await UpdateProblemStatus(tournament, match);
         
@@ -18,15 +18,16 @@ export const handleMatchEnd = async (tournament, match, io, roomId) => {
         const p1Points = participantPoints[cfid1] || 0;
         const p2Points = participantPoints[cfid2] || 0;
 
-        let winner = null;
         let resultText = "DRAW";
 
-        if (p1Points > p2Points) {
-            winner = match.participants[0];
-            resultText = "WON";
-        } else if (p2Points > p1Points) {
-            winner = match.participants[1];
-            resultText = "WON";
+        if(!winner) {
+            if (p1Points > p2Points) {
+                winner = match.participants[0];
+                resultText = "WON";
+            } else if (p2Points > p1Points) {
+                winner = match.participants[1];
+                resultText = "WON";
+            }
         }
 
         if (winner) {
@@ -38,6 +39,9 @@ export const handleMatchEnd = async (tournament, match, io, roomId) => {
             }
 
             match.participants.find(p => p.cfid === winner.cfid).resultText = resultText;
+        } else {
+            match.participants[0].resultText = "TIE";
+            match.participants[1].resultText = "TIE";
         }
 
         match.state = "DONE";
@@ -47,7 +51,8 @@ export const handleMatchEnd = async (tournament, match, io, roomId) => {
         io.to(roomId).emit("match-status", {
             success: true,
             status: "DONE",
-            finalMatchScore: updatedMatchData,
+            finalMatchScore: updatedMatchData.participantPoints,
+            match,
             winner: winner ? winner.cfid : "DRAW"
         });
 

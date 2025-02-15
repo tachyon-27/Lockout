@@ -120,7 +120,6 @@ const Match = ({ isAdmin }) => {
     // Update problemList
     useEffect(() => {
         const handleMatchStatus = (data) => {
-            console.log(data);
             if (data.success) {
                 if (data.status === "RUNNING") {
                     setMatchData((prevMatchData) => ({
@@ -129,11 +128,9 @@ const Match = ({ isAdmin }) => {
                     }));
                     setTotalPoints(data.updatedMatchScore.participantPoints);
                 } else if (data.status === "DONE") {
-                    setMatchData((prevMatchData) => ({
-                        ...prevMatchData,
-                        problemList: data.finalMatchScore.problemList,
-                    }));
-                    setTotalPoints(data.finalMatchScore.participantPoints);
+                    console.log(data.match)
+                    setMatchData(data.match);
+                    setTotalPoints(data.finalMatchScore);
                 }
             } else {
                 toast({
@@ -148,6 +145,27 @@ const Match = ({ isAdmin }) => {
             socket.off("match-status", handleMatchStatus);
         };
     }, [toast]);
+
+    useEffect(() => {
+        const handleMatchStart = (data) => {
+            console.log(data)
+            try {
+                setMatchData(data)
+            } catch (error) {
+                console.log(error)
+                toast({
+                    title: "Error While starting match!"
+                })
+            }
+        }
+
+        socket.on("match-start", handleMatchStart);
+
+        return () => {
+            socket.off("match-start", handleMatchStart);
+        };
+
+    }, [toast])
 
     // Timer
     useEffect(() => {
