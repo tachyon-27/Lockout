@@ -43,3 +43,55 @@ export const loginAdmin = asyncHandler(async (req, res) => {
         throw new Error(error)
     }
 })
+
+export const addAdmin = asyncHandler(async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if(!email) {
+            throw new Error("Email is required.")
+        }
+
+        const user = await User.findOne({email})
+
+        if(!user || !user.isVerified) {
+            throw new Error("User not found.")
+        }
+
+        user.isAdmin = true;
+        await user.save();
+
+        return res
+            .status(201)
+            .json(new ApiResponse(201, "User promoted to Admin.", user))
+    } catch(error) {
+        res.status(401)
+        throw new Error(error)
+    }
+})
+
+export const removeAdmin = asyncHandler(async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if(!email) {
+            throw new Error("Email is required.")
+        }
+
+        const user = await User.findOne({email})
+
+        if(!user || !user.isVerified) {
+            throw new Error("User not found.")
+        }
+
+        user.isAdmin = false;
+        await user.save();
+
+        return res
+            .status(201)
+            .json(new ApiResponse(201, "User is no longer an Admin.", user))
+    } catch(error) {
+        res.status(401)
+        throw new Error(error)
+    }
+})
