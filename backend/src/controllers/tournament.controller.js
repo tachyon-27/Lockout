@@ -276,6 +276,40 @@ export const startTournament = asyncHandler(async (req, res) => {
     }
 });
 
+export const removeParticipant = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId, cfid } = req.body;
+
+        if (!tournamentId || !cfid) {
+            throw new Error("Tournament ID and CFID are required.");
+        }
+
+        const tournament = await Tournament.findById(tournamentId);
+        if (!tournament) {
+            throw new Error("Tournament not found.");
+        }
+
+        const updatedParticipants = tournament.participants.filter(
+            (participant) => participant.cfid !== cfid
+        );
+
+        if (updatedParticipants.length === tournament.participants.length) {
+            throw new Error("Participant not found in the tournament.");
+        }
+
+        tournament.participants = updatedParticipants;
+        await tournament.save();
+        
+        return res
+            .status(200)
+            .json(new ApiResponse(200, "Participant removed successfully."));
+    } catch (error) {
+        return res
+            .status(500)
+            .json(new ApiResponse(500, error.message));
+    }
+});
+
 export const getMatches = asyncHandler(async (req, res) => {
     try {
         const { _id } = req.body;
@@ -550,36 +584,64 @@ export const updateMatchDuration = asyncHandler(async (req, res) => {
     }
 });
 
-export const removeParticipant = asyncHandler(async (req, res) => {
+export const giveBye = asyncHandler(async (req, res) => {
     try {
-        const { tournamentId, cfid } = req.body;
-
-        if (!tournamentId || !cfid) {
-            throw new Error("Tournament ID and CFID are required.");
-        }
-
-        const tournament = await Tournament.findById(tournamentId);
-        if (!tournament) {
-            throw new Error("Tournament not found.");
-        }
-
-        const updatedParticipants = tournament.participants.filter(
-            (participant) => participant.cfid !== cfid
-        );
-
-        if (updatedParticipants.length === tournament.participants.length) {
-            throw new Error("Participant not found in the tournament.");
-        }
-
-        tournament.participants = updatedParticipants;
-        await tournament.save();
         
-        return res
-            .status(200)
-            .json(new ApiResponse(200, "Participant removed successfully."));
+        const {tournamentId, matchId, byeTo} = req.body;
+
+        if (!tournamentId || !matchId ||!byeTo) {
+            res.statusCode=500;
+            throw new Error("All fields are required.")
+        }
+        const tournament = await Tournament.findById(tournamentId).populate("matches.problemList.question");
+
+        if (!tournament) {
+            return res.
+                status(404)
+                .json(new ApiResponse(404, "Tournament not Found!"));
+        }
+
+        const match = tournament.matches.find(match => match.id == matchId);
+
+        if (!match) {
+            return res
+                .json(new ApiResponse(404, "Match not Found!"));
+        }
+
+        const byeToObj = match.participants.find(participant => participant._id.toString() === byeTo);
+
+        match.participants[0].resultText = null;
+        if(match.participants.length > 1) match.participants[1].resultText = null;
+        
+        if (match.nextMatchId) {
+            const nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
+            if (nextMatch) {
+                nextMatch.participants = nextMatch.participants.filter(participant => participant.cfid != match.participants[0].cfid && match.participants.length > 1 && participant.cfid != match.participants[1].cfid )
+                nextMatch.participants.push(byeToObj.toObject());
+            }
+        }
+        match.participants.find(p => p.cfid === byeToObj.cfid).resultText = "BYE";
+
+        match.endTime = Date.now()
+        match.state = "DONE";
+
+        await tournament.save();
+
+        const io = getIo()
+
+        io.to(`${tournamentId}_${matchId}`).emit({
+            success: true,
+            status: "BYE",
+            match,
+            winner: byeToObj,
+        })
+
+        res
+        .status(200)
+        .json(new ApiResponse(200, "Successfully Gave Bye"))
+
     } catch (error) {
-        return res
-            .status(500)
-            .json(new ApiResponse(500, error.message));
+        console.log(error)
+        throw new Error(error)
     }
 });

@@ -71,7 +71,7 @@ const ByePopup = ({ participants, selectedParticipant, setSelectedParticipant, h
         <div className="flex justify-between">
             <Button onClick={() => { setPopupType(null); setErr(""); }} variant="outline">Cancel</Button>
             <Button
-                onClick={() => handleMatchAction("Give Bye", "/api/tournament/give-bye", { participantId: selectedParticipant })}
+                onClick={() => handleMatchAction("Give Bye", "/api/tournament/give-bye", { byeTo: selectedParticipant })}
                 disabled={loading}
             >
                 Confirm
@@ -189,7 +189,7 @@ const MatchSettings = () => {
             setLoading(false);
             return;
         }
-        if (action === "Give Bye" && !data.participantId) {
+        if (action === "Give Bye" && !data.byeTo) {
             setErr("Please select a participant!");
             setLoading(false);
             return;
@@ -218,6 +218,7 @@ const MatchSettings = () => {
             }
 
         } catch (error) {
+            console.log(error)
             toast({
                 title: `Failed to ${action}`,
                 description: "Server Error!"

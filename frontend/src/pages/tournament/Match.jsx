@@ -126,6 +126,7 @@ const Match = ({ isAdmin }) => {
     // Update problemList
     useEffect(() => {
         const handleMatchStatus = (data) => {
+            console.log(data)
             if (data.success) {
                 if (data.status === "RUNNING") {
                     setMatchData((prevMatchData) => ({
@@ -134,9 +135,10 @@ const Match = ({ isAdmin }) => {
                     }));
                     setTotalPoints(data.updatedMatchScore.participantPoints);
                 } else if (data.status === "DONE") {
-                    console.log(data.match)
                     setMatchData(data.match);
                     setTotalPoints(data.finalMatchScore);
+                } else if (data.status === "BYE") {
+                    setMatchData(data.match)
                 }
             } else {
                 toast({

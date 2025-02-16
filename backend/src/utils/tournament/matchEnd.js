@@ -28,6 +28,8 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
                 winner = match.participants[1];
                 resultText = "WON";
             }
+        } else {
+            resultText = "WON";
         }
 
         if (winner) {
