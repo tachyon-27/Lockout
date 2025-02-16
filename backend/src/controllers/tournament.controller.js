@@ -267,19 +267,50 @@ export const startTournament = asyncHandler(async (req, res) => {
         }
 
         tournament.startDate = new Date();
-        tournament.matches = await generateMatches(tournament.participants);
-        // console.log(tournament.matches)
+        if(!tournament.showDetails) {
+            tournament.matches = await generateMatches(tournament.participants);
+            tournament.showDetails = true;
+        }
 
         await tournament.save();
 
         res.json(new ApiResponse(200, "Tournament Started!"));
-
     } catch (error) {
         console.error(error);
         res.statusCode = 500;
         throw new Error("Server Error!");
     }
-});
+}); 
+
+export const showTournament = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId } = req.body;
+
+        if (!tournamentId) {
+            return res.json(new ApiResponse(404, "Tournament Id not specified!"));
+        }
+
+        const tournament = await Tournament.findById(tournamentId).populate({
+            path: "participants",
+            select: "name",
+        });
+
+        if (!tournament) {
+            return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
+        }
+
+        tournament.matches = await generateMatches(tournament.participants);
+        tournament.showDetails = true;
+
+        await tournament.save();
+
+        res.json(new ApiResponse(200, "Tournament Started!"));
+    } catch(error) {
+        console.error(error);
+        res.statusCode = 500;
+        throw new Error("Error while showing tournament!");
+    }
+})
 
 export const getMatches = asyncHandler(async (req, res) => {
     try {
