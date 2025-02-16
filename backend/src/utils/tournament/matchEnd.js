@@ -2,6 +2,7 @@ import { UpdateProblemStatus } from "./UpdateProblemStatus.js";
 
 export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
     try {
+        
         const updatedMatchData = await UpdateProblemStatus(tournament, match);
         
         if (!updatedMatchData.success) {
@@ -36,6 +37,16 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
             if (match.nextMatchId) {
                 const nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
                 if (nextMatch) {
+                    nextMatch.participants = nextMatch.participants.filter(participant => {
+                        participant.cfid != match.participants[0].cfid && match.participants.length > 1 && participant.cfid != match.participants[1].cfid
+                        if(match.participants[0].cfid === participant.cfid) return false;
+                        else {
+                            if(match.participants.length > 1) {
+                                if(match.participants[1].cfid === participant.cfid) return false;
+                                else return true;
+                            } else return true;
+                        }
+                    } )
                     nextMatch.participants.push(winner);
                 }
             }
