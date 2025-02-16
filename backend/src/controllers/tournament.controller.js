@@ -436,6 +436,8 @@ export const startMatch = asyncHandler(async (req, res) => {
                 .json(new ApiResponse(404, "Match not Found!"));
         }
 
+        if(!match.participants.length >= 1) return res.status(401).json(new ApiResponse(401, "Not Enough Participants to start a Match!"))
+
         // generating problem list
         startingRating = parseInt(startingRating);
         if (isNaN(startingRating) || startingRating < 800) {
@@ -498,6 +500,13 @@ export const endMatch = asyncHandler(async (req, res) => {
         if (!tournamentId || !matchId) {
             throw new Error("All fields are required.")
         }
+
+        if(!winner) {
+            return res.
+            status(404)
+            .json(new ApiResponse(404, "Winner not Specified"))
+        }
+
         const tournament = await Tournament.findById(tournamentId).populate("matches.problemList.question");
 
         if (!tournament) {
@@ -514,6 +523,12 @@ export const endMatch = asyncHandler(async (req, res) => {
         }
 
         const winnerObj = match.participants.find(participant => participant._id.toString() === winner)
+
+        if(!winnerObj) {
+            return res.
+            status(404)
+            .json(new ApiResponse(404, "Winner not found! Please check the Id!"));
+        }
 
         const roomId = `${tournamentId}_${matchId}`;
         if (roomTimers.has(roomId)) {
@@ -629,7 +644,13 @@ export const giveBye = asyncHandler(async (req, res) => {
 
         const io = getIo()
 
-        io.to(`${tournamentId}_${matchId}`).emit({
+        const roomId = `${tournamentId}_${matchId}`;
+        if (roomTimers.has(roomId)) {
+            clearTimeout(roomTimers.get(roomId).timeoutId);
+            roomTimers.delete(roomId);
+        }
+
+        io.to(roomId).emit({
             success: true,
             status: "BYE",
             match,
