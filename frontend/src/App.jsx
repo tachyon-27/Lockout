@@ -47,8 +47,8 @@ function App() {
               <Route path='/register' element={<Register />} />
               <Route path='/auth/github/callback' element={<AuthGithub />} />
               <Route path='/forgot-password' element={<ForgotPassword />} />
-              <Route path='/user-settings' element={<UserSettings />} />
             </Route>
+              <Route path='/user-settings' element={<UserSettings />} />
             
             <Route element={<ProtectedRoutes allowed={role == "unverifiedUser"} />} > 
               <Route path='/verify/:what' element={<Verify />} />

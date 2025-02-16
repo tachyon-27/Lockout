@@ -9,6 +9,7 @@ import AddCfID from "./AddCfID";
 import RegistrButton from "./RegistrButton";
 import MatchCard from "./MatchCard";
 import ChangePassword from "./ChangePassword";
+import Cfid from "./Cfid";
 
 export {
     Footer,
@@ -22,4 +23,5 @@ export {
     RegistrButton,
     MatchCard,
     ChangePassword,
+    Cfid,
 }

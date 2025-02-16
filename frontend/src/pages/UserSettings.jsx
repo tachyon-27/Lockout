@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ChangePassword } from "@/components";
-
-const Cfid = () => <div>CFID Component</div>;
+import Cfid from "@/components/Cfid";
 
 const UserSettings = () => {
   const [selectedOption, setSelectedOption] = useState("changePassword");
