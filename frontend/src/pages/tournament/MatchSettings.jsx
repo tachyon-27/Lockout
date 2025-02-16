@@ -80,7 +80,7 @@ const ByePopup = ({ participants, selectedParticipant, setSelectedParticipant, h
     </>
 );
 
-const TieHandlingPopup = ({ tieOption, setTieOption, customTieBreaker, setCustomTieBreaker, err, setErr, handleMatchAction, loading, setPopupType, startingRating, setStartingRating, duration, setDuration }) => (
+const TieHandlingPopup = ({ tieOption, setTieOption, customTieBreaker, setCustomTieBreaker, customTitle, setCustomTitle, err, setErr, handleMatchAction, loading, setPopupType, startingRating, setStartingRating, duration, setDuration }) => (
     <>
         <h3 className="text-lg font-bold mb-4">Tie Handling</h3>
         <div className="flex space-x-4 mb-4">
@@ -92,13 +92,16 @@ const TieHandlingPopup = ({ tieOption, setTieOption, customTieBreaker, setCustom
             </label>
         </div>
         {tieOption === "custom" ? (
-            <textarea
-                value={customTieBreaker}
-                onChange={(e) => setCustomTieBreaker(e.target.value)}
-                className="w-full p-2 rounded bg-gray-800 border border-gray-700 mb-4"
-                placeholder="Enter tie breaker details"
-                rows="4"
-            ></textarea>
+            <>
+                <InputField label="Title" type="text" value={customTitle} onChange={(e) => setCustomTitle(e.target.value)} />
+                <textarea
+                    value={customTieBreaker}
+                    onChange={(e) => setCustomTieBreaker(e.target.value)}
+                    className="w-full p-2 rounded bg-gray-800 border border-gray-700 mb-4"
+                    placeholder="Enter tie breaker details"
+                    rows="4"
+                ></textarea>
+            </>
         ) : (
             <>
                 <InputField label="Starting Rating" value={startingRating} onChange={(e) => setStartingRating(e.target.value)} />
@@ -108,12 +111,13 @@ const TieHandlingPopup = ({ tieOption, setTieOption, customTieBreaker, setCustom
         <p className="text-sm text-red-600 mb-2">{err}</p>
         <div className="flex justify-between">
             <Button onClick={() => { setPopupType(null); setErr(""); }} variant="outline">Cancel</Button>
-            <Button onClick={() => handleMatchAction("Tie Handling", tieOption === "custom" ? "/api/tournament/tie-break" : "/api/tournament/start-match", tieOption === "custom" ? { customTieBreaker } : { startingRating, duration })} disabled={loading}>
+            <Button onClick={() => handleMatchAction("Tie Handling", tieOption === "custom" ? "/api/tournament/tie-break" : "/api/tournament/start-match", tieOption === "custom" ? { title: customTitle, question: customTieBreaker } : { startingRating, duration })} disabled={loading}>
                 Confirm
             </Button>
         </div>
     </>
 );
+
 
 const EndMatchPopup = ({ selectedWinner, setSelectedWinner, match, err, setErr, handleMatchAction, loading, setPopupType }) => (
     <>
@@ -146,6 +150,7 @@ const MatchSettings = () => {
     const [duration, setDuration] = useState(60);
     const [tieOption, setTieOption] = useState("restart");
     const [customTieBreaker, setCustomTieBreaker] = useState("");
+    const [customTitle, setCustomTitle] = useState("");
     const [selectedParticipant, setSelectedParticipant] = useState("");
     const [selectedWinner, setSelectedWinner] = useState("");
     const [additionalDuration, setAdditionalDuration] = useState("");
@@ -174,7 +179,7 @@ const MatchSettings = () => {
             setLoading(false);
             return;
         }
-        if (action === "Tie Handling" && data.customTieBreaker === '') {
+        if (action === "Tie Handling" && (data.question === '' || data.title === '')) {
             setErr("Please specify the custom tie breaker!");
             setLoading(false);
             return;
@@ -263,6 +268,8 @@ const MatchSettings = () => {
                                 customTieBreaker={customTieBreaker}
                                 setPopupType={setPopupType}
                                 setErr={setErr}
+                                customTitle={customTitle}
+                                setCustomTitle={setCustomTitle}
                                 setStartingRating={setStartingRating}
                                 startingRating={startingRating}
                                 duration={duration}

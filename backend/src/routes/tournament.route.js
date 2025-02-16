@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
     addTournament, 
+    customTieBreaker, 
     deleteTournament, 
     endMatch, 
     getMatch, 
@@ -47,6 +48,7 @@ router.route('/hide-tournament').post(verifyAdmin, hideTournament)
 router.route('/is-tournament-shown').post(verifyAdmin, isTournamentShown)
 router.route('/start-match').post(verifyAdmin, startMatch)
 router.route('/end-match').post(verifyAdmin, endMatch)
+router.route('/tie-break').post(verifyAdmin, customTieBreaker)
 router.route('/add-duration').post(verifyAdmin, updateMatchDuration)
 router.route('/give-bye').post(verifyAdmin, giveBye)
 router.route('/delete-tournament').post(verifyAdmin, deleteTournament)

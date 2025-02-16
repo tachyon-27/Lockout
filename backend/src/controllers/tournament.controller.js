@@ -756,35 +756,57 @@ export const giveBye = asyncHandler(async (req, res) => {
 
 export const customTieBreaker = asyncHandler(async (req, res) => {
     try {
+        const { tournamentId, matchId, title, question } = req.body;
+        console.log(tournamentId, matchId)
+        const customTieBreaker = {title, question};
         
-        const { tournamentId, matchId, customTieBreaker } = req.body;
-
-        if(!tournamentId) {
-            return res.json(new ApiResponse(404, "Tournament Id required!"))
+        if (!tournamentId) {
+            return res.status(400).json(new ApiResponse(400, "Tournament Id required!"));
+        }
+        
+        if (!matchId) {
+            return res.status(400).json(new ApiResponse(400, "Match Id required!"));
+        }
+        
+        if (!customTieBreaker || !customTieBreaker.title || !customTieBreaker.question) {
+            return res.status(400).json(new ApiResponse(400, "Please specify a valid custom tie-breaker with title and question!"));
+        }
+        
+        const tournament = await Tournament.findById(tournamentId);
+        
+        if (!tournament) {
+            return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
+        }
+        
+        const match = tournament.matches.find(m => m.id == matchId);
+        console.log(match)
+        if (!match) {
+            return res.status(404).json(new ApiResponse(404, "Match not found!"));
+        }
+        console.log(customTieBreaker)
+        
+        if (!match.tieBreaker) {
+            match.tieBreaker = [];
         }
 
-        if(!matchId) {
-            return res.json(new ApiResponse(404, "Match Id required!"))
-        }
+        match.tieBreaker.push(customTieBreaker);
 
-        if(!customTieBreaker) {
-            return res.json(new ApiResponse(404, "Please Specify the custom Tie Breaker!"))
-        }
+        await tournament.save();
 
-        const tournament = await Tournament.findById(tournamentId)
+        const io = getIo()
 
-        if(!tournament)
-            return res.json(new ApiResponse(404, "Tournament not Found!"))
+        const roomId = `${tournamentId}_${matchId}`;
+        io.to(roomId).emit("tieBreakerUpdated", {
+            success: true,
+            status: "RUNNING",
+            match,
+            tieBreaker: match.tieBreaker
+        });
 
-        const match = tournament.matches.find(match => match.id === matchId)
-
-        if(!match) 
-            return res.json(new ApiResponse(404, "Match Not found"))
-
-
-
+        return res.status(200).json(new ApiResponse(200, "Tie-breaker added successfully!", match.tieBreaker));
 
     } catch (error) {
-        
+        console.error("Error in customTieBreaker:", error);
+        return res.status(500).json(new ApiResponse(500, "Internal Server Error"));
     }
 });

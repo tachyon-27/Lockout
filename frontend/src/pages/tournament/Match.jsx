@@ -19,9 +19,9 @@ const Match = ({ isAdmin }) => {
     const calculateTimeLeft = () => {
         const start = new Date(matchData.startTime).getTime();
         const now = new Date().getTime();
-        if(matchData.endTime) {
+        if (matchData.endTime) {
             const end = new Date(matchData.endTime).getTime();
-            if(now >= new Date(matchData.endTime).getTime()) {
+            if (now >= new Date(matchData.endTime).getTime()) {
                 return 0;
             }
         }
@@ -89,7 +89,7 @@ const Match = ({ isAdmin }) => {
                             [response.data.data.participants[0].cfid]: response.data.data.participants[0].totalPoints | 0,
                             [response.data.data.participants[1].cfid]: response.data.data.participants[1].totalPoints | 0,
                         })
-                        
+
                         socket.emit("joinRoom", `${tournamentId}_${matchId}`);
                     } else {
                         toast({
@@ -154,6 +154,26 @@ const Match = ({ isAdmin }) => {
         };
     }, [toast]);
 
+    // TieBreaker
+    useEffect(() => {
+        const handleTieBreakerUpdate = (data) => {
+            console.log("TieBreaker Updated:", data);
+            if (data.success) {
+                setMatchData((prevMatchData) => ({
+                    ...prevMatchData,
+                    tieBreaker: data.tieBreaker,
+                }));
+            }
+        };
+
+        socket.on("tieBreakerUpdated", handleTieBreakerUpdate);
+
+        return () => {
+            socket.off("tieBreakerUpdated", handleTieBreakerUpdate);
+        };
+    }, []);
+
+
     useEffect(() => {
         const handleMatchStart = (data) => {
             console.log(data)
@@ -175,7 +195,7 @@ const Match = ({ isAdmin }) => {
 
     }, [toast])
 
-    socket.on('add-duration',(data) => {setMatchData(data); console.log(data)})
+    socket.on('add-duration', (data) => { setMatchData(data); console.log(data) })
 
     // Timer
     useEffect(() => {
@@ -247,7 +267,7 @@ const Match = ({ isAdmin }) => {
                                     className="w-[30%] self-center mt-2 p-2 font-semibold bg-white text-black rounded-xl"
                                     onClick={handleProblemRefresh}
                                     disabled={!isRefreshActive}
-                                > 
+                                >
                                     {isRefreshActive ? <span>Refresh Status</span> : <span>Please Wait...</span>}
                                 </button>
 
@@ -255,10 +275,10 @@ const Match = ({ isAdmin }) => {
                                     <button
                                         className="w-[30%] self-center mt-2 p-2 font-semibold bg-white text-black rounded-xl"
                                         onClick={() => navigate(`/admin/dashboard/tournament/match/settings?tournamentId=${tournamentId}&matchId=${matchId}`)}
-                                    > 
+                                    >
                                         Settings
                                     </button>
-                                ) }
+                                )}
                             </div>
                         </div>
                     </div>
@@ -268,6 +288,20 @@ const Match = ({ isAdmin }) => {
                         <span>Total Points: {totalPoints[matchData.participants[1].cfid]}</span>
                     </div>
                 </div>
+                {matchData.tieBreaker && matchData.tieBreaker.length > 0 && (
+                    <div className="w-full mt-6 p-4 bg-gray-800 text-white rounded-xl shadow-lg">
+                        <h2 className="text-2xl font-bold text-center">Tie Breaker Questions</h2>
+                        <div className="mt-4 space-y-3">
+                            {matchData.tieBreaker.map((tb, idx) => (
+                                <div key={idx} className="p-3 bg-gray-700 rounded-lg border border-gray-600">
+                                    <h3 className="text-lg font-semibold text-yellow-300">{tb.title}</h3>
+                                    <p className="text-gray-300">{tb.question}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
             </div>
         </div>
     );
