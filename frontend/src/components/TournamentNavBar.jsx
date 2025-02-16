@@ -50,7 +50,7 @@ export default function TournamentNavBar({ isAdmin }) {
     {
       path: `/admin/dashboard/tournament/settings?id=${tournamentId}`,
       label: "Settings",
-      active: isAdmin, // Only active for admin
+      active: isAdmin, 
     },
   ];
 

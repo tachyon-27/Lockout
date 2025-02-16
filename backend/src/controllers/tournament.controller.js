@@ -237,7 +237,10 @@ export const getParticipantsList = asyncHandler(async (req, res) => {
             maxRating: participant.maxRating
         }));
 
-        return res.json(new ApiResponse(200, "Participants Retrieved successfully!", participants))
+        return res.json(new ApiResponse(200, "Participants Retrieved successfully!", {
+            show: tournament.showDetails,
+            participants
+        }))
     } catch (error) {
         console.log(error)
         res.status(500)
@@ -263,10 +266,10 @@ export const startTournament = asyncHandler(async (req, res) => {
         }
 
         tournament.startDate = new Date();
-        if(!tournament.showDetails) {
+        if(!tournament.matches) {
             tournament.matches = await generateMatches(tournament.participants);
-            tournament.showDetails = true;
         }
+        tournament.showDetails = true;
 
         await tournament.save();
 
@@ -295,16 +298,65 @@ export const showTournament = asyncHandler(async (req, res) => {
             return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
         }
 
-        tournament.matches = await generateMatches(tournament.participants);
+        if(!tournament.matches) {
+            tournament.matches = await generateMatches(tournament.participants);
+        }
         tournament.showDetails = true;
 
         await tournament.save();
 
-        res.json(new ApiResponse(200, "Tournament Started!"));
+        res.json(new ApiResponse(200, "Tournament fixtures is now visible to all users!"));
     } catch(error) {
         console.error(error);
         res.statusCode = 500;
         throw new Error("Error while showing tournament!");
+    }
+})
+
+export const isTournamentShown = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId } = req.body;
+
+        if (!tournamentId) {
+            return res.json(new ApiResponse(404, "Tournament Id not specified!"));
+        }
+
+        const tournament = await Tournament.findById(tournamentId)
+
+        if (!tournament) {
+            return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
+        }
+
+        res.json(new ApiResponse(200, "Tournament status fetched.", tournament.showDetails));
+    } catch(error) {
+        console.error(error);
+        res.statusCode = 500;
+        throw new Error("Error while fetching tournament show status!");
+    }
+})
+
+export const hideTournament = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId } = req.body;
+
+        if (!tournamentId) {
+            return res.json(new ApiResponse(404, "Tournament Id not specified!"));
+        }
+
+        const tournament = await Tournament.findById(tournamentId)
+
+        if (!tournament) {
+            return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
+        }
+
+        tournament.showDetails = false;
+        await tournament.save();
+
+        res.json(new ApiResponse(200, "Now users cannot see the fixtures and participants."));
+    } catch(error) {
+        console.error(error);
+        res.statusCode = 500;
+        throw new Error("Error while hiding tournament!");
     }
 })
 
@@ -360,7 +412,10 @@ export const getMatches = asyncHandler(async (req, res) => {
             return res.json(new ApiResponse(404, "Tournament not Found!"));
         }
 
-        return res.json(new ApiResponse(200, "Matches Retrieved successfully!", tournament.matches))
+        return res.json(new ApiResponse(200, "Matches Retrieved successfully!", {
+            show: tournament.showDetails,
+            matches: tournament.matches
+        }))
     } catch (error) {
         return res
             .status(501)
