@@ -47,7 +47,7 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
                             } else return true;
                         }
                     } )
-                    nextMatch.participants.push(winner);
+                    nextMatch.participants.push(winner?.toObject ? winner.toObject() : winner);
                 }
             }
 

@@ -28,7 +28,8 @@ import {
   Match,
   Settings,
   MatchSettings,
-  Admins
+  Admins,
+  UserSettings
 } from './pages'
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
               <Route path='/register' element={<Register />} />
               <Route path='/auth/github/callback' element={<AuthGithub />} />
               <Route path='/forgot-password' element={<ForgotPassword />} />
+              <Route path='/user-settings' element={<UserSettings />} />
             </Route>
             
             <Route element={<ProtectedRoutes allowed={role == "unverifiedUser"} />} > 

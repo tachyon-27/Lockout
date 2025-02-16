@@ -8,6 +8,7 @@ import TournamentRegister from "./TournamentRegister";
 import AddCfID from "./AddCfID";
 import RegistrButton from "./RegistrButton";
 import MatchCard from "./MatchCard";
+import ChangePassword from "./ChangePassword";
 
 export {
     Footer,
@@ -20,4 +21,5 @@ export {
     AddCfID,
     RegistrButton,
     MatchCard,
+    ChangePassword,
 }
