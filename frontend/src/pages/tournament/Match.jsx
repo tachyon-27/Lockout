@@ -19,6 +19,12 @@ const Match = ({ isAdmin }) => {
     const calculateTimeLeft = () => {
         const start = new Date(matchData.startTime).getTime();
         const now = new Date().getTime();
+        if(matchData.endTime) {
+            const end = new Date(matchData.endTime).getTime();
+            if(now >= new Date(matchData.endTime).getTime()) {
+                return 0;
+            }
+        }
         const timePassed = now - start;
         const timeRemaining = matchData.duration * 60 * 1000 - timePassed;
         return Math.max(timeRemaining, 0);
@@ -120,7 +126,7 @@ const Match = ({ isAdmin }) => {
     // Update problemList
     useEffect(() => {
         const handleMatchStatus = (data) => {
-            console.log(data);
+            console.log(data)
             if (data.success) {
                 if (data.status === "RUNNING") {
                     setMatchData((prevMatchData) => ({
@@ -129,11 +135,10 @@ const Match = ({ isAdmin }) => {
                     }));
                     setTotalPoints(data.updatedMatchScore.participantPoints);
                 } else if (data.status === "DONE") {
-                    setMatchData((prevMatchData) => ({
-                        ...prevMatchData,
-                        problemList: data.finalMatchScore.problemList,
-                    }));
-                    setTotalPoints(data.finalMatchScore.participantPoints);
+                    setMatchData(data.match);
+                    setTotalPoints(data.finalMatchScore);
+                } else if (data.status === "BYE") {
+                    setMatchData(data.match)
                 }
             } else {
                 toast({
@@ -148,6 +153,29 @@ const Match = ({ isAdmin }) => {
             socket.off("match-status", handleMatchStatus);
         };
     }, [toast]);
+
+    useEffect(() => {
+        const handleMatchStart = (data) => {
+            console.log(data)
+            try {
+                setMatchData(data)
+            } catch (error) {
+                console.log(error)
+                toast({
+                    title: "Error While starting match!"
+                })
+            }
+        }
+
+        socket.on("match-start", handleMatchStart);
+
+        return () => {
+            socket.off("match-start", handleMatchStart);
+        };
+
+    }, [toast])
+
+    socket.on('add-duration',(data) => {setMatchData(data); console.log(data)})
 
     // Timer
     useEffect(() => {
