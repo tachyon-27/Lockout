@@ -113,6 +113,10 @@ const tournamentSchema = mongoose.Schema({
         default: []
     },
     matches: [matchSchema],
+    showDetails: {
+        type: Boolean,
+        default: false
+    }
 })
 
 const Tournament = mongoose.model('Tournament', tournamentSchema)
