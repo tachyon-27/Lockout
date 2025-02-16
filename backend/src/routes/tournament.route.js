@@ -2,16 +2,19 @@ import { Router } from "express";
 import {
     addTournament, 
     deleteTournament, 
+    endMatch, 
     getMatch, 
     getMatches, 
     getParticipantsList, 
     getTournament, 
+    giveBye, 
     removeParticipant, 
     showTournament, 
     startMatch, 
     startTournament, 
     tournamentRegister, 
     tournaments, 
+    updateMatchDuration, 
     updateTournament 
 } from "../controllers/tournament.controller.js";
 import { verifyAdmin, verifyUser } from "../middlewares/auth.middleware.js";
@@ -37,8 +40,15 @@ router.route('/update-tournament/:tournamentId').post(
     updateTournament
 );
 router.route('/start-tournament').get(verifyAdmin, startTournament)
+<<<<<<< HEAD
 router.route('/show-tournament').get(verifyAdmin, showTournament)
 router.route('/start-match').post(verifyAdmin, startMatch)
+=======
+router.route('/start-match').post(startMatch)
+router.route('/end-match').post(endMatch)
+router.route('/add-duration').post(updateMatchDuration)
+router.route('/give-bye').post(giveBye)
+>>>>>>> 62fa91662aeccaad2f2f4c9ef349d8f94bfe863c
 router.route('/delete-tournament').post(verifyAdmin, deleteTournament)
 router.route('/remove-participant').post(verifyAdmin, removeParticipant)
 

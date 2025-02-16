@@ -59,8 +59,6 @@ export const updateTournament = asyncHandler(async (req, res) => {
             throw new Error('Add Tournament id')
         }
 
-        // console.log(title, summary, startDate, description, req.file.path)
-        // console.log("hi")
         if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
             res.status(400);
             throw new Error('Invalid tournamentId');
@@ -86,8 +84,6 @@ export const updateTournament = asyncHandler(async (req, res) => {
             coverImageUrl = await uploadOnCloudinary(coverImageLocalPath);
             coverImageUrl = coverImageUrl.url;
         }
-
-        console.log(coverImageUrl)
 
         tournament.title = title;
         tournament.summary = summary;
@@ -312,6 +308,40 @@ export const showTournament = asyncHandler(async (req, res) => {
     }
 })
 
+export const removeParticipant = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId, cfid } = req.body;
+
+        if (!tournamentId || !cfid) {
+            throw new Error("Tournament ID and CFID are required.");
+        }
+
+        const tournament = await Tournament.findById(tournamentId);
+        if (!tournament) {
+            throw new Error("Tournament not found.");
+        }
+
+        const updatedParticipants = tournament.participants.filter(
+            (participant) => participant.cfid !== cfid
+        );
+
+        if (updatedParticipants.length === tournament.participants.length) {
+            throw new Error("Participant not found in the tournament.");
+        }
+
+        tournament.participants = updatedParticipants;
+        await tournament.save();
+        
+        return res
+            .status(200)
+            .json(new ApiResponse(200, "Participant removed successfully."));
+    } catch (error) {
+        return res
+            .status(500)
+            .json(new ApiResponse(500, error.message));
+    }
+});
+
 export const getMatches = asyncHandler(async (req, res) => {
     try {
         const { _id } = req.body;
@@ -379,6 +409,37 @@ export const getMatch = asyncHandler(async (req, res) => {
     }
 });
 
+const roomTimers = new Map();
+
+const startMatchTimer = (roomId, startTime, duration, tournament, match) => {
+    duration = parseInt(duration);
+    const io = getIo();
+    const startTim = new Date(startTime);
+    const endTime = (startTim.getTime() + duration * 60 * 1000);
+
+    function updateStatus() {
+        const now = new Date();
+        const remainingTime = endTime - now.getTime();
+        if (remainingTime <= 0) {
+            handleMatchEnd(tournament, match, io, roomId);
+            roomTimers.delete(roomId);
+            return;
+        }
+        UpdateProblemStatus(tournament, match).then(score => {
+            io.to(roomId).emit("match-status", {
+                success: true,
+                status: "RUNNING",
+                elapsed: ((now - startTime) / 1000 / 60).toFixed(1),
+                updatedMatchScore: score
+            });
+        });
+        const timeoutId = setTimeout(updateStatus, Math.min(90 * 1000, remainingTime));
+        roomTimers.set(roomId, { startTime, endTime, timeoutId });
+    }
+
+    updateStatus();
+}
+
 export const startMatch = asyncHandler(async (req, res) => {
     try {
         let { tournamentId, matchId, startingRating, duration } = req.body;
@@ -406,6 +467,8 @@ export const startMatch = asyncHandler(async (req, res) => {
             return res
                 .json(new ApiResponse(404, "Match not Found!"));
         }
+
+        if(!match.participants.length >= 1) return res.status(401).json(new ApiResponse(401, "Not Enough Participants to start a Match!"))
 
         // generating problem list
         startingRating = parseInt(startingRating);
@@ -440,45 +503,17 @@ export const startMatch = asyncHandler(async (req, res) => {
         match.duration = duration
         match.state = "RUNNING"
         match.startTime = Date.now()
-        console.log(match)
+        match.endTime = null;
         await tournament.save()
 
         // Refetch with populated questions
         const updatedTournament = await Tournament.findById(tournamentId).populate("matches.problemList.question");
         const updatedMatch = updatedTournament.matches.find(match => match.id == matchId);
 
-        const roomTimers = new Map();
+        const io = getIo()
+        io.to(`${tournamentId}_${matchId}`).emit('match-start',match);
 
-        const startMatchTimer = (roomId, startTime, duration) => {
-            duration = parseInt(duration);
-            const io = getIo();
-            const startTim = new Date(startTime);
-            const endTime = (startTim.getTime() + duration * 60 * 1000);
-
-            function updateStatus() {
-                const now = new Date();
-                const remainingTime = endTime - now.getTime();
-                if (remainingTime <= 0) {
-                    handleMatchEnd(tournament, match, io, roomId);
-                    roomTimers.delete(roomId);
-                    return;
-                }
-                UpdateProblemStatus(tournament, match).then(score => {
-                    io.to(roomId).emit("match-status", {
-                        success: true,
-                        status: "RUNNING",
-                        elapsed: ((now - startTime) / 1000 / 60).toFixed(1),
-                        updatedMatchScore: score
-                    });
-                });
-                setTimeout(updateStatus, Math.min(90 * 1000, remainingTime));
-            }
-
-            roomTimers.set(roomId, { startTime, endTime });
-            updateStatus();
-        }
-
-        startMatchTimer(`${tournamentId}_${matchId}`, match.startTime, match.duration);
+        startMatchTimer(`${tournamentId}_${matchId}`, match.startTime, match.duration, tournament, match);
 
         return res
             .status(201)
@@ -490,81 +525,211 @@ export const startMatch = asyncHandler(async (req, res) => {
     }
 })
 
-export const removeParticipant = asyncHandler(async (req, res) => {
+export const endMatch = asyncHandler(async (req, res) => {
     try {
-        const { tournamentId, cfid } = req.body;
+        const { tournamentId, matchId, winner } = req.body;
 
-        if (!tournamentId || !cfid) {
-            throw new Error("Tournament ID and CFID are required.");
+        if (!tournamentId || !matchId) {
+            throw new Error("All fields are required.")
+        }
+
+        if(!winner) {
+            return res.
+            status(404)
+            .json(new ApiResponse(404, "Winner not Specified"))
+        }
+
+        const tournament = await Tournament.findById(tournamentId).populate("matches.problemList.question");
+
+        if (!tournament) {
+            return res.
+                status(404)
+                .json(new ApiResponse(404, "Tournament not Found!"));
+        }
+
+        const match = tournament.matches.find(match => match.id == matchId);
+
+        if (!match) {
+            return res
+                .json(new ApiResponse(404, "Match not Found!"));
+        }
+
+        const winnerObj = match.participants.find(participant => participant._id.toString() === winner)
+
+        if(!winnerObj) {
+            return res.
+            status(404)
+            .json(new ApiResponse(404, "Winner not found! Please check the Id!"));
+        }
+
+        const roomId = `${tournamentId}_${matchId}`;
+        if (roomTimers.has(roomId)) {
+            clearTimeout(roomTimers.get(roomId).timeoutId);
+            roomTimers.delete(roomId);
+        }
+        const io = getIo()
+        await handleMatchEnd(tournament, match, io, roomId, winnerObj);
+
+        await tournament.save();
+
+        res
+            .status(200)
+            .json(new ApiResponse(200, "Match Ended!", match));
+
+    } catch (error) {
+        return res
+            .status(501)
+            .json(new ApiResponse(501, "Error While Ending Match!"))
+    }
+})
+
+export const updateMatchDuration = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId, matchId, duration } = req.body;
+
+        if (!tournamentId || !matchId || !duration) {
+            throw new Error("All fields are required.");
         }
 
         const tournament = await Tournament.findById(tournamentId);
         if (!tournament) {
-            throw new Error("Tournament not found.");
+            return res.status(404).json(new ApiResponse(404, "Tournament not Found!"));
         }
 
-        const updatedParticipants = tournament.participants.filter(
-            (participant) => participant.cfid !== cfid
-        );
-
-        if (updatedParticipants.length === tournament.participants.length) {
-            throw new Error("Participant not found in the tournament.");
+        const match = tournament.matches.find((match) => match.id == matchId);
+        if (!match) {
+            return res.status(404).json(new ApiResponse(404, "Match not Found!"));
         }
 
-        tournament.participants = updatedParticipants;
+        if (match.state !== "RUNNING") {
+            return res.status(400).json(new ApiResponse(400, "Match is not running."));
+        }
+
+        if(match.duration) {
+            match.duration += duration;
+        } else {
+            match.duration = duration;
+        }
         await tournament.save();
-        
-        return res
-            .status(200)
-            .json(new ApiResponse(200, "Participant removed successfully."));
+
+        const roomId = `${tournamentId}_${matchId}`;
+
+        if (roomTimers.has(roomId)) {
+            clearTimeout(roomTimers.get(roomId).timeoutId);
+            roomTimers.delete(roomId);
+        }
+
+        const io = getIo()
+        io.to(`${tournamentId}_${matchId}`).emit('add-duration', match);
+
+        startMatchTimer(roomId, match.startTime, match.duration, tournament, match);
+
+        return res.status(200).json(new ApiResponse(200, "Match duration updated!", match));
     } catch (error) {
-        return res
-            .status(500)
-            .json(new ApiResponse(500, error.message));
+        console.log(error)
+        return res.status(500).json(new ApiResponse(500, "Error updating match duration.", error.message));
     }
 });
 
-// export const endMatch = asyncHandler(async (req, res) => {
-//     try {
-//         const { tournamentId, matchId } = req.body;
+export const giveBye = asyncHandler(async (req, res) => {
+    try {
+        
+        const {tournamentId, matchId, byeTo} = req.body;
 
-//         if (!tournamentId || !matchId) {
-//             throw new Error("All fields are required.")
-//         }
-//         const tournament = await Tournament.findById(tournamentId)
+        if (!tournamentId || !matchId ||!byeTo) {
+            res.statusCode=500;
+            throw new Error("All fields are required.")
+        }
+        const tournament = await Tournament.findById(tournamentId).populate("matches.problemList.question");
 
-//         if (!tournament) {
-//             return res.
-//                 status(404)
-//                 .json(new ApiResponse(404, "Tournament not Found!"));
-//         }
+        if (!tournament) {
+            return res.
+                status(404)
+                .json(new ApiResponse(404, "Tournament not Found!"));
+        }
 
-//         const match = tournament.matches.find(match => match.id == matchId);
+        const match = tournament.matches.find(match => match.id == matchId);
 
-//         if (!match) {
-//             return res
-//                 .json(new ApiResponse(404, "Match not Found!"));
-//         }
+        if (!match) {
+            return res
+                .json(new ApiResponse(404, "Match not Found!"));
+        }
 
-//         const winner = match.participants[0].totalPoints > match.participants[1].totalPoints ? match.participants[0] : match.participants[1];
+        const byeToObj = match.participants.find(participant => participant._id.toString() === byeTo);
 
-//         winner.resultText = "WON";
+        match.participants[0].resultText = null;
+        if(match.participants.length > 1) match.participants[1].resultText = null;
+        
+        if (match.nextMatchId) {
+            const nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
+            if (nextMatch) {
+                nextMatch.participants = nextMatch.participants.filter(participant => participant.cfid != match.participants[0].cfid && match.participants.length > 1 && participant.cfid != match.participants[1].cfid )
+                nextMatch.participants.push(byeToObj.toObject());
+            }
+        }
+        match.participants.find(p => p.cfid === byeToObj.cfid).resultText = "BYE";
 
-//         if (match.nextMatchId) {
-//             const nextmatch = tournament.matches.find(match => match.id == match.nextMatchId);
-//             nextmatch.participants.push(winner);
-//             await tournament.save()
-//         }
+        match.endTime = Date.now()
+        match.state = "DONE";
 
-//         await tournament.save();
+        await tournament.save();
 
-//         res
-//             .status(200)
-//             .json(new ApiResponse(200, "Match Ended!"));
+        const io = getIo()
 
-//     } catch (error) {
-//         return res
-//             .status(501)
-//             .json(new ApiResponse(501, "Error While Ending Match!"))
-//     }
-// })
+        const roomId = `${tournamentId}_${matchId}`;
+        if (roomTimers.has(roomId)) {
+            clearTimeout(roomTimers.get(roomId).timeoutId);
+            roomTimers.delete(roomId);
+        }
+
+        io.to(roomId).emit({
+            success: true,
+            status: "BYE",
+            match,
+            winner: byeToObj,
+        })
+
+        res
+        .status(200)
+        .json(new ApiResponse(200, "Successfully Gave Bye", match))
+
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)
+    }
+});
+
+export const customTieBreaker = asyncHandler(async (req, res) => {
+    try {
+        
+        const { tournamentId, matchId, customTieBreaker } = req.body;
+
+        if(!tournamentId) {
+            return res.json(new ApiResponse(404, "Tournament Id required!"))
+        }
+
+        if(!matchId) {
+            return res.json(new ApiResponse(404, "Match Id required!"))
+        }
+
+        if(!customTieBreaker) {
+            return res.json(new ApiResponse(404, "Please Specify the custom Tie Breaker!"))
+        }
+
+        const tournament = await Tournament.findById(tournamentId)
+
+        if(!tournament)
+            return res.json(new ApiResponse(404, "Tournament not Found!"))
+
+        const match = tournament.matches.find(match => match.id === matchId)
+
+        if(!match) 
+            return res.json(new ApiResponse(404, "Match Not found"))
+
+
+
+
+    } catch (error) {
+        
+    }
+});
