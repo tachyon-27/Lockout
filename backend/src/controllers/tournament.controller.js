@@ -542,7 +542,7 @@ export const endMatch = asyncHandler(async (req, res) => {
 
         res
             .status(200)
-            .json(new ApiResponse(200, "Match Ended!"));
+            .json(new ApiResponse(200, "Match Ended!", match));
 
     } catch (error) {
         return res
@@ -592,7 +592,7 @@ export const updateMatchDuration = asyncHandler(async (req, res) => {
 
         startMatchTimer(roomId, match.startTime, match.duration, tournament, match);
 
-        return res.status(200).json(new ApiResponse(200, "Match duration updated!", { duration }));
+        return res.status(200).json(new ApiResponse(200, "Match duration updated!", match));
     } catch (error) {
         console.log(error)
         return res.status(500).json(new ApiResponse(500, "Error updating match duration.", error.message));
@@ -659,10 +659,45 @@ export const giveBye = asyncHandler(async (req, res) => {
 
         res
         .status(200)
-        .json(new ApiResponse(200, "Successfully Gave Bye"))
+        .json(new ApiResponse(200, "Successfully Gave Bye", match))
 
     } catch (error) {
         console.log(error)
         throw new Error(error)
+    }
+});
+
+export const customTieBreaker = asyncHandler(async (req, res) => {
+    try {
+        
+        const { tournamentId, matchId, customTieBreaker } = req.body;
+
+        if(!tournamentId) {
+            return res.json(new ApiResponse(404, "Tournament Id required!"))
+        }
+
+        if(!matchId) {
+            return res.json(new ApiResponse(404, "Match Id required!"))
+        }
+
+        if(!customTieBreaker) {
+            return res.json(new ApiResponse(404, "Please Specify the custom Tie Breaker!"))
+        }
+
+        const tournament = await Tournament.findById(tournamentId)
+
+        if(!tournament)
+            return res.json(new ApiResponse(404, "Tournament not Found!"))
+
+        const match = tournament.matches.find(match => match.id === matchId)
+
+        if(!match) 
+            return res.json(new ApiResponse(404, "Match Not found"))
+
+
+
+
+    } catch (error) {
+        
     }
 });

@@ -6,14 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ClipLoader } from "react-spinners";
 
-const MatchSettingsActions = ({ setPopupType, loading }) => (
+const MatchSettingsActions = ({ setPopupType, loading, match }) => (
     <CardContent className="flex flex-col space-y-4">
         <Button onClick={() => setPopupType("start")} disabled={loading}>Start Match</Button>
         <Button onClick={() => setPopupType("restart")} disabled={loading} variant="outline">Restart Match</Button>
-        <Button onClick={() => setPopupType("end")} disabled={loading} variant="destructive">End Match</Button>
+        {match?.state === "RUNNING" && <Button onClick={() => setPopupType("end")} disabled={loading} variant="destructive">End Match</Button>}
         <Button onClick={() => setPopupType("tie")} disabled={loading} variant="secondary">Tie Handling</Button>
         <Button onClick={() => setPopupType("bye")} disabled={loading} variant="outline">Give Bye</Button>
-        <Button onClick={() => setPopupType("addDuration")} disabled={loading} variant="outline">Add Duration</Button>
+        {match?.state === "RUNNING" && <Button onClick={() => setPopupType("addDuration")} disabled={loading} variant="outline">Add Duration</Button>}
     </CardContent>
 );
 
@@ -205,12 +205,14 @@ const MatchSettings = () => {
                 toast({
                     title: `${action} successful`
                 });
+                setMatch(response.data.data)
                 if (action === "Add Duration") {
                     setMatch(prevMatch => ({
                         ...prevMatch,
                         duration: prevMatch.duration + parseInt(data.duration, 10),
                     }));
                 }
+                
             } else {
                 toast({
                     title: response.data.message,
@@ -238,7 +240,7 @@ const MatchSettings = () => {
                 <CardHeader>
                     <CardTitle className="text-center text-white">Match Settings</CardTitle>
                 </CardHeader>
-                <MatchSettingsActions setPopupType={setPopupType} loading={loading} />
+                <MatchSettingsActions setPopupType={setPopupType} loading={loading} match={match} />
             </Card>
             {popupType && (
                 <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[502]">
