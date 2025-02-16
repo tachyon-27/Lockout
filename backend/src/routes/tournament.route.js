@@ -7,6 +7,7 @@ import {
     getParticipantsList, 
     getTournament, 
     removeParticipant, 
+    showTournament, 
     startMatch, 
     startTournament, 
     tournamentRegister, 
@@ -36,7 +37,8 @@ router.route('/update-tournament/:tournamentId').post(
     updateTournament
 );
 router.route('/start-tournament').get(verifyAdmin, startTournament)
-router.route('/start-match').post(startMatch)
+router.route('/show-tournament').get(verifyAdmin, showTournament)
+router.route('/start-match').post(verifyAdmin, startMatch)
 router.route('/delete-tournament').post(verifyAdmin, deleteTournament)
 router.route('/remove-participant').post(verifyAdmin, removeParticipant)
 
