@@ -8,6 +8,8 @@ import {
     getParticipantsList, 
     getTournament, 
     giveBye, 
+    hideTournament, 
+    isTournamentShown, 
     removeParticipant, 
     showTournament, 
     startMatch, 
@@ -39,16 +41,14 @@ router.route('/update-tournament/:tournamentId').post(
     upload.single("coverImage"),
     updateTournament
 );
-router.route('/start-tournament').get(verifyAdmin, startTournament)
-<<<<<<< HEAD
-router.route('/show-tournament').get(verifyAdmin, showTournament)
+router.route('/start-tournament').post(verifyAdmin, startTournament)
+router.route('/show-tournament').post(verifyAdmin, showTournament)
+router.route('/hide-tournament').post(verifyAdmin, hideTournament)
+router.route('/is-tournament-shown').post(verifyAdmin, isTournamentShown)
 router.route('/start-match').post(verifyAdmin, startMatch)
-=======
-router.route('/start-match').post(startMatch)
-router.route('/end-match').post(endMatch)
-router.route('/add-duration').post(updateMatchDuration)
-router.route('/give-bye').post(giveBye)
->>>>>>> 62fa91662aeccaad2f2f4c9ef349d8f94bfe863c
+router.route('/end-match').post(verifyAdmin, endMatch)
+router.route('/add-duration').post(verifyAdmin, updateMatchDuration)
+router.route('/give-bye').post(verifyAdmin, giveBye)
 router.route('/delete-tournament').post(verifyAdmin, deleteTournament)
 router.route('/remove-participant').post(verifyAdmin, removeParticipant)
 

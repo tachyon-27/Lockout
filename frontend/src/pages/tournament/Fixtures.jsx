@@ -13,13 +13,13 @@ function Fixtures() {
   const [searchParams] = useSearchParams();
   const tournamentId = searchParams.get("id");
   const [matches, setMatches] = useState([])
+  const [show, setShow] = useState(false)
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast()
   const navigate = useNavigate()
 
   useEffect(() => {
     if (!tournamentId) {
-      console.log("Tournament ID is required in the query parameters.");
       toast({
         title: "Tournament not Specified!"
       })
@@ -35,14 +35,14 @@ function Fixtures() {
         if (!response.data.success) {
           throw new Error("Failed to fetch matches.");
         }
-        setMatches(response.data.data);
+        setShow(response.data.data.show) 
+        setMatches(response.data.data.matches);
         setIsLoading(false);
       } catch (error) {
         navigate('/tournaments')
         toast({
           title: "Error Fetching matches!"
         })
-        console.error("Error fetching matches:", error);
       }
     };
 
@@ -58,7 +58,11 @@ function Fixtures() {
   }
   
 
-  return (
+  return !show || !matches ? (
+    <div className=' w-full h-full flex items-center justify-center text-2xl'>
+      Fixtures not available yet.
+    </div>
+  ) : (
     <div className="overflow-x-auto p-4 rounded-lg">
       <div className="inline-block min-w-max">
         <SingleEliminationBracket

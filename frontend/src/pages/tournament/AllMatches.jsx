@@ -8,6 +8,7 @@ const AllMatches = ({isAdmin = false}) => {
   const [searchParams] = useSearchParams();
   const tournamentId = searchParams.get("id");
   const [matches, setMatchs] = useState([])
+  const [show, setShow] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -30,8 +31,8 @@ const AllMatches = ({isAdmin = false}) => {
         if (!response.data.success) {
           throw new Error("Failed to fetch matches.");
         }
-        setMatchs(response.data.data.filter(match => match.participants.length === 2));
-        console.log(response.data.data)
+        setShow(response.data.data.show)
+        setMatchs(response.data.data.matches.filter(match => match.participants.length === 2));
       } catch (error) {
         navigate('/tournaments')
         toast({
@@ -52,7 +53,11 @@ const AllMatches = ({isAdmin = false}) => {
     };
   }, [matches]);
 
-  return (
+  return !show ? (
+    <div className=' w-full h-full flex items-center justify-center text-2xl'>
+      No matches available yet.
+    </div>
+  ) : (
     <div className='p-2 md:p-5'>
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-4">Ongoing Matches</h2>

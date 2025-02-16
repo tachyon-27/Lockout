@@ -14,6 +14,7 @@ const ParticipantsList = ({ isAdmin = false }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [err, setErr] = useState("");
     const [isConfirming, setIsConfirming] = useState(false);
+    const [show, setShow] = useState(false)
     const [participantToRemove, setParticipantToRemove] = useState(null); 
 
     const filteredParticipants = useMemo(() => {
@@ -83,7 +84,11 @@ const ParticipantsList = ({ isAdmin = false }) => {
                 });
 
                 if (response.data.success) {
-                    const sortedParticipants = response.data.data.sort(
+                    setShow(response.data.data.show)
+                    if(isAdmin) {
+                        setShow(true)
+                    }
+                    const sortedParticipants = response.data.data.participants.sort(
                         (a, b) => b.maxRating - a.maxRating
                     );
                     setParticipants(sortedParticipants);
@@ -121,7 +126,11 @@ const ParticipantsList = ({ isAdmin = false }) => {
         );
     }
 
-    return (
+    return !show ? (
+        <div className=' w-full h-full flex items-center justify-center text-2xl'>
+          Participants not available yet.
+        </div>
+      ) : (
         <div className='flex flex-col items-center justify-center'>
             <div className="grid gap-y-4 p-3 sm:w-full md:w-[80%]">
                 <div className="bg-gradient-to-b from-gray-400 w-full via-gray-500 to-gray-700 p-[0.5px] rounded-2xl">
