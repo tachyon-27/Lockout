@@ -7,7 +7,6 @@ export default function HeroSection() {
     <div className="flex flex-col lg:flex-row h-screen w-full overflow-hidden">
       <Spotlight className="left-20" />
       
-      {/* Video Section - Appears on top in md/sm screens, right in lg */}
       <div className="w-full h-64 md:h-auto lg:w-1/2 lg:h-screen overflow-hidden lg:order-2">
         <video
           src={HomeAnimation}
@@ -19,7 +18,6 @@ export default function HeroSection() {
         />
       </div>
       
-      {/* Left Section - Text and Button */}
       <div className="flex flex-col justify-center items-center w-full lg:w-1/2 p-6 md:p-10 text-center lg:text-left lg:order-1">
         <h1 className="text-5xl md:text-8xl bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-600 font-sans font-bold">
           LOCKOUT
