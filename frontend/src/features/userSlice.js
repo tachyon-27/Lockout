@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    isAuthenticated: localStorage.getItem("role") == "verifiedUser",
+    isAuthenticated: localStorage.getItem("role") == "verifiedUser" || localStorage.getItem("role") == "admin",
     userRole: localStorage.getItem("role") || null,
     token: localStorage.getItem("token") || null
 };

@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import  { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input.tsx";
 import axios from "axios"
 import { useToast } from "@/hooks/use-toast"
@@ -15,7 +15,7 @@ import {
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { BeatLoader } from "react-spinners";
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { loginSuccess } from "@/features/userSlice";
 
 export default function AdminLogin() {
@@ -24,6 +24,7 @@ export default function AdminLogin() {
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const role =useSelector(state => state.user.userRole)
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -32,6 +33,12 @@ export default function AdminLogin() {
       password: ""
     }
   })
+
+  useEffect(() => {
+    if(role == "admin") {
+      navigate('/admin/dashboard')
+    }
+  }, [])
 
   const togglePassword = () => {
     setShowPassword((prev) => !prev);
