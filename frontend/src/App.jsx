@@ -1,6 +1,7 @@
 import { useEffect } from "react";
+import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { loginSuccess } from "./features/userSlice";
+import { loginSuccess, logout } from "./features/userSlice";
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
 import { 
   Layout,
@@ -98,12 +99,25 @@ function App() {
     )  
 
     useEffect(() => {
+      const isLoggedIn = async() => {
         const token = localStorage.getItem("token");
         const role = localStorage.getItem("role");
-
+        
         if (token && role) {
+          const res = await axios.post('/api/user/refresh', {
+            _id: token
+          })
+
+          if(res.data.success) {
             dispatch(loginSuccess({ token, role }));
+          }
+          else {
+            dispatch(logout())
+          }
         }
+      }
+
+      isLoggedIn()
     }, [dispatch]);
 
     useEffect(() => {

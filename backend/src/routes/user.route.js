@@ -12,7 +12,8 @@ import {
   resetOTP, 
   verifyEmail, 
   googleCallback,
-  getUsers
+  getUsers,
+  refresh
 } from "../controllers/user.controller.js";
 import { verifyUser } from "../middlewares/auth.middleware.js";
 
@@ -28,6 +29,7 @@ router.route("/google").post(googleCallback);
 router.route('/verify-email').post(verifyEmail)
 router.route('/reset-otp').post(resetOTP)
 router.route('/get-users').get(getUsers)
+router.route('/refresh').post(refresh)
 
 // secured routes
 router.route("/logout").get(verifyUser, logoutUser)

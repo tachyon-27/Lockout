@@ -52,6 +52,7 @@ function Settings() {
     try {
       await axios.post("/api/tournament/delete-tournament", { _id: tournamentId });
       toast({ title: "Tournament deleted successfully!" });
+      navigate('/admin/dashboard/tournaments')
     } catch (error) {
       toast({ title: "Error deleting tournament!", description: error.message });
     } finally {

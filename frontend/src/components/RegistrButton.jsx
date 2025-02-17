@@ -8,19 +8,33 @@ import {
 import { useState } from "react";
 import { FaLaptopCode } from "react-icons/fa";
 import VerifyCfID from "./VerifyCFID";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const RegistrButton = ({ tournamentId }) => {
     const [addID, setAddID] = useState(false);
     const [isAuth, setIsAuth] = useState(false);
     const [handle, setHandle] = useState("")
     const [verifyString, setVerifyString] = useState("")
+    const isLoggedIn = useSelector(state => state.user.isAuthenticated)
+    const navigate = useNavigate()
+
+    const handleClick = () => {
+      if(isLoggedIn) {
+        setAddID(false)
+        setIsAuth(false)
+      }
+      else {
+        navigate('/login')
+      }
+    }
 
     return (
     <Modal>
-      <div className="p-0" onClick={() => {
-        setAddID(false)
-        setIsAuth(false)
-        } }>
+      <div 
+        className="p-0" 
+        onClick={handleClick}
+      >
           <ModalTrigger className="bg-black text-white flex justify-center group/modal-btn border border-solid border-white">
             <span className="group-hover/modal-btn:translate-x-40 text-center transition duration-500" >
               Register

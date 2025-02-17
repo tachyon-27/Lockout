@@ -252,8 +252,6 @@ export const getUser = asyncHandler(async (req, res) => {
       return res.jso(new ApiResponse(401, "User does not exist!"))
     }
 
-    const token = generateToken(user._id, '1h')
-
     return res
       .status(201)
       .json(new ApiResponse(201, "User found.", user))
@@ -424,6 +422,45 @@ export const googleCallback = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     throw new Error(error);
+  }
+})
+
+export const refresh = asyncHandler(async (req, res) => {
+  try {
+    let token = req.cookies?.token
+
+    if(token) {
+      return res
+        .status(200)
+        .json(new ApiResponse(200, "Refresh not required!"));
+    }
+
+    const { _id } = req.body;
+
+    if(!_id) {
+      throw new Error("id is required!")
+    }
+    
+    const user = await User.findById(_id)
+    if(!user || !user.isVerified) {
+      return res.jso(new ApiResponse(401, "User does not exist!"))
+    }
+    
+    token = generateToken(_id)
+
+    const options = {
+      httpOnly: true,
+      secure: true
+    }
+
+    return res
+      .status(201)
+      .cookie("token", token, options)
+      .json(new ApiResponse(201, "User token refreshed."))
+  } catch {
+    return res
+      .status(400)
+      .json(new ApiResponse(401, "Error while refreshing"))
   }
 })
 
