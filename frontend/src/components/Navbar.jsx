@@ -10,7 +10,6 @@ function Navbar() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { toast } = useToast();
-    const location = useLocation();
     const [loading, setLoading] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -56,66 +55,56 @@ function Navbar() {
     };
 
     return (
-        <nav className="z-[500] bg-white border-gray-200 dark:bg-black w-full">
-            <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-                <Link to="/" className="flex items-center space-x-3 rtl:space-x-reverse">
-                    <img src="https://flowbite.com/docs/images/logo.svg" className="h-8" alt="Logo" />
-                    <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Lockout</span>
-                </Link>
+        <nav className="fixed top-5 left-1/2 transform -translate-x-1/2 w-[90%] md:w-[70%]  
+                backdrop-blur-3xl border border-white/20 shadow-lg 
+                rounded-[26px] py-[9px] px-4 flex items-center justify-between z-50 
+                bg-gradient-to-r from-white/40 via-white/60 to-white/10 
+                dark:from-gray-800/40 dark:via-gray-800/20 dark:to-gray-900/10">
 
-                <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-                    <button
-                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={() => (loggedIn ? logoutHandler() : navigate('/login'))}
-                        aria-label={loggedIn ? 'Logout Button' : 'Get Started Button'}
-                        disabled={loading}
-                    >
-                        {loading ? 'Processing...' : loggedIn ? 'Logout' : 'Get Started'}
-                    </button>
+            <Link to='/' className="text-xl font-bold">
+                Logo
+            </Link>
 
-                    <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        type="button"
-                        className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-                        aria-controls="navbar-cta"
-                        aria-expanded={isMenuOpen}
-                    >
-                        <span className="sr-only">Open main menu</span>
-                        <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h15M1 7h15M1 13h15" />
-                        </svg>
-                    </button>
-                </div>
+            <button
+                className="md:hidden mx-auto text-lg px-3 py-1 
+                rounded-lg 
+                hover:bg-white/20 hover:backdrop-blur-sm 
+                transition-all"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Toggle Menu"
+            >
+                ☰ Menu
+            </button>
 
-                <div
-                    className={`items-center justify-between w-full md:flex md:w-auto md:order-1 dark:bg-black ${
-                        isMenuOpen ? 'block' : 'hidden'
-                    }`}
-                    id="navbar-cta"
-                >
-                    <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-black md:dark:bg-black dark:border-gray-700">
-                        {navItems.map((item) =>
-                            item.active ? (
-                                <li key={item.name}>
-                                    <Link
-                                        to={item.slug}
-                                        className={`block py-2 px-3 md:p-0 md:px-5 rounded ${
-                                            location.pathname === item.slug
-                                                ? 'text-white bg-blue-700'
-                                                : 'text-gray-400 hover:text-blue-700'
-                                        }`}
-                                    >
-                                        {item.name}
-                                    </Link>
-                                </li>
-                            ) : null
-                        )}
-                    </ul>
-                </div>
-            </div>
+            <ul className={`md:flex gap-4 ${isMenuOpen ? "block" : "hidden"} 
+                    absolute md:static top-full left-0 w-full mt-2 md:w-auto 
+                    bg-white/20 md:bg-transparent shadow-md md:shadow-none 
+                    backdrop-blur-sm md:backdrop-blur-none rounded-3xl p-2 md:p-0`}>
+                {navItems.map((item) => (
+                    <li key={item.slug}
+                        className="hover:bg-white/20 hover:backdrop-blur-sm 
+                        rounded-lg px-3 transition-all mt-1 md:mt-0">
+                        <Link to={item.slug}>{item.name}</Link>
+                    </li>
+                ))}
+            </ul>
+
+            <button
+                className="block bg-white/20 backdrop-blur-md border border-white/30 
+                font-medium rounded-lg text-sm px-3 py-1 
+                hover:bg-white/30 transition dark:bg-gray-800/40 
+                dark:border-gray-600/50 dark:hover:bg-gray-800/60"
+                type="button"
+                onClick={() => (loggedIn ? logoutHandler() : navigate("/login"))}
+                aria-label={loggedIn ? "Logout Button" : "Get Started Button"}
+                disabled={loading}
+            >
+                {loading ? "Processing..." : loggedIn ? "Logout" : "Get Started"}
+            </button>
+
         </nav>
+
     );
-}
+};
 
 export default Navbar;
