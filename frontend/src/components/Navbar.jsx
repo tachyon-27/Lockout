@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
@@ -56,7 +56,7 @@ function Navbar() {
 
     return (
         <nav className="fixed top-5 left-1/2 transform -translate-x-1/2 w-[90%] md:w-[70%]  
-                backdrop-blur-3xl border border-white/20 shadow-lg 
+                backdrop-blur-[500px] border border-white/20 shadow-lg 
                 rounded-[26px] py-[9px] px-4 flex items-center justify-between z-50 
                 bg-gradient-to-r from-white/40 via-white/60 to-white/10 
                 dark:from-gray-800/40 dark:via-gray-800/20 dark:to-gray-900/10">
@@ -78,8 +78,8 @@ function Navbar() {
 
             <ul className={`md:flex gap-4 ${isMenuOpen ? "block" : "hidden"} 
                     absolute md:static top-full left-0 w-full mt-2 md:w-auto 
-                    bg-white/20 md:bg-transparent shadow-md md:shadow-none 
-                    backdrop-blur-sm md:backdrop-blur-none rounded-3xl p-2 md:p-0`}>
+                    bg-black/60 md:bg-transparent shadow-md md:shadow-none 
+                      rounded-3xl p-2 md:p-0`}>
                 {navItems.map((item) => (
                     <li key={item.slug}
                         className="hover:bg-white/20 hover:backdrop-blur-sm 

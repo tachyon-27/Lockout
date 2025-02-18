@@ -10,6 +10,7 @@ dotenv.config({
 
 // https://vite.dev/config/
 export default defineConfig({
+  assetsInclude: ["**/*.JPG"],
   server: {
     proxy: {
       '/api': `http://localhost:${process.env.VITE_BACKEND_PORT}`

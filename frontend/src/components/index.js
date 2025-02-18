@@ -2,7 +2,8 @@ import Footer from "./Footer";
 import Navbar from "./Navbar";
 import Timelines from "./Timeline";
 import HeroSection from "./HeroSection";
-import Features from "./Features";
+import WhatIsLockout from "./WhatIsLockout";
+import WhyToParticipate from "./WhyToParticipate";
 import { SideBar } from "./SideBar";
 import TournamentRegister from "./TournamentRegister";
 import AddCfID from "./AddCfID";
@@ -16,7 +17,8 @@ export {
     Navbar,
     Timelines,
     HeroSection,
-    Features,
+    WhatIsLockout,
+    WhyToParticipate,
     SideBar,
     TournamentRegister,
     AddCfID,

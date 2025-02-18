@@ -1,11 +1,18 @@
-import { Features, HeroSection, Timelines } from "../components";
+import { 
+  WhatIsLockout,
+  HeroSection, 
+  Timelines,
+  WhyToParticipate
+} from "@/components";
 
 export default function Home() {
   return (
     <>
       <HeroSection />
       <div className="w-full h-[0.1rem] bg-gray-700" ></div>
-      <Features />
+      <WhatIsLockout />
+      <div className="w-full h-[0.1rem] bg-gray-700" ></div>
+      <WhyToParticipate />
       <div className="w-full h-[0.1rem] bg-gray-700" ></div>
       <Timelines />
     </>
