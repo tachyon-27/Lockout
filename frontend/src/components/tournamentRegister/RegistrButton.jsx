@@ -1,5 +1,4 @@
-import { TournamentRegister } from "@/components";
-import { AddCfID } from "@/components";
+import { TournamentRegister, AddCfID, VerifyCfID } from "@/components";
 import {
     ModalBody,
     Modal,
@@ -7,7 +6,6 @@ import {
 } from '@/components/ui/animated-modal';
 import { useState } from "react";
 import { FaLaptopCode } from "react-icons/fa";
-import VerifyCfID from "./VerifyCFID";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 

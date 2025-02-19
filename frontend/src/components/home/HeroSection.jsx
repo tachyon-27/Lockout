@@ -1,6 +1,6 @@
-import { Button } from "./ui/moving-border";
+import { Button } from "@/components/ui/moving-border";
 import HomeAnimation from "@/assets/HomeAnimation.mp4";
-import { Spotlight } from "./ui/Spotlight";
+import { Spotlight } from "@/components/ui/Spotlight";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -18,7 +18,7 @@ export default function HeroSection() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen w-full overflow-hidden">
+    <div id="home" className="flex flex-col lg:flex-row h-screen w-full overflow-hidden">
       <Spotlight className="left-20" />
       
       <div className="w-full md:h-auto lg:w-1/2 lg:h-screen pt-[20%] md:pt-[10%] lg:pt-0 overflow-hidden lg:order-2">

@@ -1,4 +1,4 @@
-import { Timeline } from "./ui/timeline";
+import { Timeline } from "@/components/ui/timeline";
 import C2022 from "./Past/2022.jsx";
 import C2023 from "./Past/2023.jsx";
 export default function Timelines() {
@@ -24,7 +24,7 @@ export default function Timelines() {
   ];
 
   return (
-    <div className="w-full mt-0  ">
+    <div id="history" className="w-full mt-0  ">
       <Timeline data={data} />
     </div>
   );

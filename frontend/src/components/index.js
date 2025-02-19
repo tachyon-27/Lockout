@@ -1,13 +1,16 @@
-import Footer from "./Footer";
+import Footer from "./home/Footer";
+import Timelines from "./home/Timeline";
+import HeroSection from "./home/HeroSection";
+import WhatIsLockout from "./home/WhatIsLockout";
+import WhyToParticipate from "./home/WhyToParticipate";
+
+import RegistrButton from "./tournamentRegister/RegistrButton";
+import TournamentRegister from "./tournamentRegister/TournamentRegister";
+import AddCfID from "./tournamentRegister/AddCfID";
+import VerifyCfID from "./tournamentRegister/VerifyCFID";
+
 import Navbar from "./Navbar";
-import Timelines from "./Timeline";
-import HeroSection from "./HeroSection";
-import WhatIsLockout from "./WhatIsLockout";
-import WhyToParticipate from "./WhyToParticipate";
 import { SideBar } from "./SideBar";
-import TournamentRegister from "./TournamentRegister";
-import AddCfID from "./AddCfID";
-import RegistrButton from "./RegistrButton";
 import MatchCard from "./MatchCard";
 import ChangePassword from "./ChangePassword";
 import Cfid from "./Cfid";
@@ -22,6 +25,7 @@ export {
     SideBar,
     TournamentRegister,
     AddCfID,
+    VerifyCfID,
     RegistrButton,
     MatchCard,
     ChangePassword,
