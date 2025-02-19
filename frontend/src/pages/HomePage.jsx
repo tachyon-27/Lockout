@@ -2,7 +2,8 @@ import {
   WhatIsLockout,
   HeroSection, 
   Timelines,
-  WhyToParticipate
+  WhyToParticipate,
+  Footer
 } from "@/components";
 
 export default function Home() {
@@ -15,6 +16,7 @@ export default function Home() {
       <WhyToParticipate />
       <div className="w-full h-[0.1rem] bg-gray-700" ></div>
       <Timelines />
+      <Footer />
     </>
   );
 }

@@ -25,6 +25,16 @@ function Navbar() {
             active: true,
         },
         {
+            name: 'Benefits',
+            slug: '#',
+            active: true,
+        },
+        {
+            name: 'History',
+            slug: '#',
+            active: true,
+        },
+        {
             name: 'Tournaments',
             slug: '/tournaments',
             active: true,
@@ -55,7 +65,7 @@ function Navbar() {
     };
 
     return (
-        <nav className="fixed top-5 left-1/2 transform -translate-x-1/2 w-[90%] md:w-[70%]  
+        <nav className="fixed top-5 left-1/2 transform -translate-x-1/2 w-[90%] md:w-[85%] lg:w-[70%] 
                 backdrop-blur-[500px] border border-white/20 shadow-lg 
                 rounded-[26px] py-[9px] px-4 flex items-center justify-between z-50 
                 bg-gradient-to-r from-white/40 via-white/60 to-white/10 
@@ -77,7 +87,7 @@ function Navbar() {
             </button>
 
             <ul className={`md:flex gap-4 ${isMenuOpen ? "block" : "hidden"} 
-                    absolute md:static top-full left-0 w-full mt-2 md:w-auto 
+                    absolute md:static top-full left-0 w-full md:w-auto 
                     bg-black/60 md:bg-transparent shadow-md md:shadow-none 
                       rounded-3xl p-2 md:p-0`}>
                 {navItems.map((item) => (
