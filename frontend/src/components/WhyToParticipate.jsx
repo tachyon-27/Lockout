@@ -16,10 +16,10 @@ const WhyToParticipate = () => {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
 
   return (
-    <div ref={ref} className="py-16 bg-black text-white text-center">
+    <div ref={ref} className="py-[74px] px-3 bg-black text-white text-center">
       {/* Section Heading */}
       <motion.h2 
-        className="text-4xl font-extrabold tracking-tight sm:text-5xl mb-12"
+        className="text-5xl font-extrabold tracking-tight sm:text-6xl mb-12"
         initial={{ opacity: 0, y: 50 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.8 }}
@@ -29,7 +29,7 @@ const WhyToParticipate = () => {
 
       {/* Grid Animation Wrapper (Single Animation for All Cards) */}
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 px-6 lg:px-20"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 px-7 lg:px-21"
         initial={{ opacity: 0, y: 50 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.8, delay: 0.2 }}
@@ -49,7 +49,7 @@ const WhyToParticipate = () => {
             </div>
 
             {/* Text Below Image */}
-            <p className="mt-4 text-lg font-semibold text-gray-300 leading-relaxed">
+            <p className="mt-4 text-xl font-semibold text-gray-300 leading-relaxed">
               {reason.text}
             </p>
           </div>

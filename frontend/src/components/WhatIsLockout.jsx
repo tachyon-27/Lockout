@@ -23,7 +23,7 @@ function WhatIsLockout() {
                     animate={inView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.8 }}
                 >
-                    <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl text-white glow">
+                    <h2 className="text-5xl font-extrabold tracking-tight sm:text-6xl text-white glow">
                         What is Lockout?
                     </h2>
                 </motion.div>
@@ -52,11 +52,11 @@ function WhatIsLockout() {
                         <CardSpotlight 
                             className="p-6 bg-gray-800 rounded-2xl shadow-xl transition duration-300 hover:bg-gray-700 transform hover:-translate-y-2 hover:shadow-2xl"
                         >
-                            <p className="text-lg font-semibold text-gray-300 relative glow">
+                            <p className="text-xl font-semibold text-gray-300 relative glow">
                                 Lockout is an intense 1v1 coding battle where two participants compete to solve challenges before their opponent. Speed, strategy, and skill determine the champion in this high-stakes elimination showdown.
                             </p>
                             <div className="mt-4 border-t border-gray-600 pt-4 relative">
-                                <h3 className="text-xl font-bold text-gray-200 hover:text-white glow">How it Works?</h3>
+                                <h3 className="text-2xl font-bold text-gray-200 hover:text-white glow">How it Works?</h3>
                                 <ul className="mt-2 space-y-2 text-gray-400 hover:text-gray-200">
                                     <li>⚡ Each round features two participants.</li>
                                     <li>🧩 Both are presented with five coding questions.</li>
