@@ -1,11 +1,12 @@
 import  { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "./ui/sidebar";
 import {
-  ArrowLeft as IconArrowLeft,
-  Home as IconHome,
-  Settings as IconSettings,
-  Users as IconUsersPlus,
-  Gamepad2 as IconDeviceGamepad2,
+  ArrowLeft,
+  Home,
+  Settings,
+  Users,
+  Gamepad2,
+  LucideBadge,
 } from "lucide-react";
 import {Link} from "react-router-dom";
 import { motion } from "framer-motion";
@@ -18,42 +19,42 @@ export function SideBar() {
       label: "Back to main",
       href: "/",
       icon: (
-        <IconHome className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <Home className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Dashboard",
       href: "/admin/dashboard",
       icon: (
-        <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <LucideBadge className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Tournaments",
       href: "/admin/dashboard/tournaments",
       icon: (
-        <IconDeviceGamepad2 className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <Gamepad2 className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Add Tournament",
       href: "/admin/dashboard/add-tournament",
       icon: (
-        <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <Settings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Admins",
       href: "/admin/dashboard/admins",
       icon: (
-        <IconUsersPlus className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <Users className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Logout",
       href: "/admin/logout",
       icon: (
-        <IconArrowLeft className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <ArrowLeft className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
   ];
