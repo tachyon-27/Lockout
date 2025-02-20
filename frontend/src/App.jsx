@@ -7,7 +7,8 @@ import {
   Layout,
   AdminLayout,
   TournamentLayout,
-  ProtectedRoutes
+  ProtectedRoutes,
+  RegisterLayout
 } from "./layout";
 import { 
   Home, 
@@ -45,14 +46,19 @@ function App() {
             
             <Route element={<ProtectedRoutes allowed={role != "verifiedUser"} />} > 
               <Route path='/login' element={<Login />} />
-              <Route path='/register' element={<Register />} />
+              <Route element={<RegisterLayout />} >
+                <Route path='/register' element={<Register />} />
+              </Route>
               <Route path='/auth/github/callback' element={<AuthGithub />} />
               <Route path='/forgot-password' element={<ForgotPassword />} />
             </Route>
               <Route path='/user-settings' element={<UserSettings />} />
             
             <Route element={<ProtectedRoutes allowed={role == "unverifiedUser"} />} > 
-              <Route path='/verify/:what' element={<Verify />} />
+              <Route element={<RegisterLayout />} >
+                <Route path='/verify/email' element={<Verify what="email" />} />
+              </Route>
+              <Route path='/verify/password' element={<Verify what="password" />} />
             </Route>
                   
             <Route element={<ProtectedRoutes allowed={role == "changePassword"} />} > 

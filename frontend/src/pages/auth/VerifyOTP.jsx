@@ -2,7 +2,7 @@ import { BackgroundLines } from '@/components/ui/background-lines';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import ReactDOMServer from 'react-dom/server';
 import VerificationEmail from "@/emails/VerificationEmail";
 import { useForm } from 'react-hook-form';
@@ -21,8 +21,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 import { setRole, logout } from "@/features/userSlice";
 
-function Verify() {
-  const { what } = useParams()
+function Verify({ what }) {
   const dispatch = useDispatch()
   const id = useSelector((state) => state.user.token);
   const navigate = useNavigate();

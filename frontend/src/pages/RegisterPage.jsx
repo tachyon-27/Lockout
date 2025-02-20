@@ -132,18 +132,9 @@ const Register = () => {
     }
 
     return (
-        <BackgroundLines className="relative flex justify-center items-center min-h-[120vh]" >
-            <div className="relative z-10 flex items-center justify-center min-h-screen text-white mx-auto my-9">
+            <div className="flex pt-10 mb-5 md:mb-5 lg:mb-0 items-center justify-center min-h-screen text-white mx-auto">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submit)} className="flex flex-col gap-4 min-w-[50vh] max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
-                        <p className="text-2xl font-semibold tracking-wide flex items-center relative">
-                            <span className="absolute w-4 h-4 rounded-full bg-blue-400 left-0 animate-ping"></span>
-                            <span className="absolute w-4 h-4 rounded-full bg-blue-500 left-0"></span>
-                            <span className="pl-6">Register</span>
-                        </p>
-                        <p className="text-sm text-gray-400">
-                            Signup now and get full access to our app.
-                        </p>
 
                         <FormField 
                             name="name"
@@ -313,7 +304,6 @@ const Register = () => {
                     </form>     
                 </Form>
             </div>
-        </BackgroundLines>
     );
 };
 
