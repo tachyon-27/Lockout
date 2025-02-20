@@ -4,7 +4,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ClipLoader } from "react-spinners";
+import {Loader} from "@/components";
 
 const MatchSettingsActions = ({ setPopupType, loading, match }) => (
     <CardContent className="flex flex-col space-y-4">
@@ -237,7 +237,7 @@ const MatchSettings = () => {
         }
     };
 
-    if (isLoading) return <div className="flex justify-center p-10"><ClipLoader color="#fff" /></div>;
+    if (isLoading) return <div className="flex justify-center p-10"><Loader/></div>;
 
     return (
         <div className="flex flex-col items-center justify-center text-white min-h-screen p-5">

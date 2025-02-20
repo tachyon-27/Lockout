@@ -21,7 +21,7 @@ export default function HeroSection() {
     <div id="home" className="flex flex-col lg:flex-row h-screen w-full overflow-hidden">
       <Spotlight className="left-20" />
       
-      <div className="w-full md:h-auto lg:w-1/2 lg:h-screen overflow-hidden lg:order-2">
+      <div className="w-full md:h-auto lg:w-1/2 lg:h-screen overflow-hidden lg:order-2 pt-[20%] md:pt-[8%] lg:pt-0">
         <video
           src={HomeAnimation}
           autoPlay

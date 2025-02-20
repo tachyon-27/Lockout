@@ -2,12 +2,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast"
-import { RingLoader } from 'react-spinners';
 import axios from "axios";
 import {
   SingleEliminationBracket,
   Match,
 } from "@g-loot/react-tournament-brackets";
+import {Loader} from '@/components';
 
 function Fixtures() {
   const [searchParams] = useSearchParams();
@@ -52,7 +52,7 @@ function Fixtures() {
   if(isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <RingLoader size={100} color="#36D7B7" />
+        <Loader />
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useToast } from "@/hooks/use-toast"
 import axios from 'axios';
-import { RingLoader } from 'react-spinners';
+import {Loader} from '@/components';
 
 const Admins = () => {
     const { toast } = useToast();
@@ -109,9 +109,7 @@ const Admins = () => {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center">
-                <RingLoader size={100} color="#2563EB" />
-            </div>
+            <Loader />
         );
     }
 

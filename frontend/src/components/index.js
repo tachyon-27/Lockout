@@ -15,6 +15,8 @@ import MatchCard from "./MatchCard";
 import ChangePassword from "./ChangePassword";
 import Cfid from "./Cfid";
 
+import Loader from "./Loader";
+
 export {
     Footer,
     Navbar,
@@ -30,4 +32,5 @@ export {
     MatchCard,
     ChangePassword,
     Cfid,
+    Loader,
 }

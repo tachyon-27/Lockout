@@ -31,8 +31,10 @@ import {
   Settings,
   MatchSettings,
   Admins,
-  UserSettings
+  UserSettings,
+  NotFound404
 } from './pages'
+import { Loader } from '@/components';
 
 function App() {
     const role = useSelector((state) => state.user.userRole);
@@ -43,26 +45,24 @@ function App() {
         <>
           <Route path='/' element={ <Layout /> }>
             <Route path='' element = { <Home /> } />
-            
-            <Route element={<ProtectedRoutes allowed={role != "verifiedUser"} />} > 
-              <Route path='/login' element={<Login />} />
-              <Route element={<RegisterLayout />} >
+            <Route path='/user-settings' element={<UserSettings />} />
+
+            <Route element={<RegisterLayout />} >
+              <Route element={<ProtectedRoutes allowed={role != "verifiedUser"} />} > 
+                <Route path='/login' element={<Login />} />
                 <Route path='/register' element={<Register />} />
+                <Route path='/forgot-password' element={<ForgotPassword />} />
+                <Route path='/auth/github/callback' element={<AuthGithub />} />
               </Route>
-              <Route path='/auth/github/callback' element={<AuthGithub />} />
-              <Route path='/forgot-password' element={<ForgotPassword />} />
-            </Route>
-              <Route path='/user-settings' element={<UserSettings />} />
             
-            {/* <Route element={<ProtectedRoutes allowed={role == "unverifiedUser"} />} >  */}
-              <Route element={<RegisterLayout />} >
-                <Route path='/verify/email' element={<Verify what="email" />} />
+              <Route element={<ProtectedRoutes allowed={role == "unverifiedUser"} />} > 
+                  <Route path='/verify/email' element={<Verify what="email" />} />
+                  <Route path='/verify/password' element={<Verify what="password" />} />
               </Route>
-              <Route path='/verify/password' element={<Verify what="password" />} />
-            {/* </Route> */}
                   
-            <Route element={<ProtectedRoutes allowed={role == "changePassword"} />} > 
-              <Route path='/reset-password' element={<ResetPassword />} />
+              <Route element={<ProtectedRoutes allowed={role == "changePassword"} />} > 
+                <Route path='/reset-password' element={<ResetPassword />} />
+              </Route>
             </Route>
 
             <Route path='/dashboard' element={<Dashboard />} />+
@@ -99,7 +99,11 @@ function App() {
                 <Route path='settings' element= { <Settings /> } />
               </Route>
             </Route>
+
+
           </Route>
+          <Route path='loading' element={ <Loader /> } />
+          <Route path='*' element={ <NotFound404 />} />
         </>
       )
     )  

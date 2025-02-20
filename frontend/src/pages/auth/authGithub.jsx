@@ -1,9 +1,9 @@
 import { useToast } from "@/hooks/use-toast";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { RingLoader } from "react-spinners"; 
 import { loginSuccess } from "../../features/userSlice";
+import {Loader} from "@/components";
 
 
 const AuthGithub = () => {
@@ -63,7 +63,7 @@ const AuthGithub = () => {
   return (
     <div className="flex items-center justify-center min-h-screen">
       {loading ? (
-        <RingLoader size={100} color="#36D7B7" />
+        <Loader/>
       ) : (
         <p>Redirecting...</p>
       )}

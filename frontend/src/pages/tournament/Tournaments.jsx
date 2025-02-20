@@ -3,18 +3,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { RegistrButton } from "@/components";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import {Loader} from "@/components";
 
 export default function Tournament({ isAdmin = false }) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [tournaments, setTournaments] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const getTournaments = async () => {
@@ -26,10 +22,20 @@ export default function Tournament({ isAdmin = false }) {
           title: "Error",
           description: error.response?.data?.message || error.message,
         });
+      } finally {
+        setIsLoading(false);
       }
     };
     getTournaments();
   }, [toast]);
+
+  if(isLoading) {
+    return (
+      <div className="w-full h-full flex justify-center items-center">
+        <Loader />
+      </div>
+    )
+  }
 
   const handleDelete = async (tournamentId) => {
     if (!window.confirm("Are you sure you want to delete this tournament?")) return;
@@ -47,46 +53,56 @@ export default function Tournament({ isAdmin = false }) {
   };
 
   return (
-    <Accordion type="single" collapsible className="w-full px-10">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 p-10">
       {tournaments.map((tournament, idx) => (
-        <AccordionItem key={idx} value={idx}>
-          <AccordionTrigger> {tournament.title} </AccordionTrigger>
-          <AccordionContent>
-            <div>
-              <p> {tournament.summary} </p>
-              <div className="w-full flex items-center mt-2 gap-2">
-                <button
-                  className="px-4 py-2 rounded-md bg-black text-white flex justify-center border border-solid border-white hover:bg-neutral-900"
-                  onClick={() => navigate(isAdmin ? `/admin/dashboard/tournament/view?id=${tournament._id}` : `/tournament/view?id=${tournament._id}`)}
-                >
-                  View
-                </button>
-                {isAdmin ? (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => navigate(`/admin/dashboard/update-tournament?id=${tournament._id}`)}
-                      className="px-4 py-2 rounded-md bg-black text-white flex justify-center border border-solid border-white hover:bg-neutral-900"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(tournament._id)}
-                      className={`px-4 py-2 rounded-md text-white flex justify-center border border-solid border-white ${deletingId === tournament._id ? 'bg-gray-600 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
-                      disabled={deletingId === tournament._id}
-                    >
-                      {deletingId === tournament._id ? 'Deleting...' : 'Delete'}
-                    </button>
-                  </div>
+        <div key={idx} className="bg-gradient-to-br from-gray-900 to-purple-800 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl overflow-hidden">
+          <div className="p-6">
+            <h2 className="text-white text-2xl font-bold mb-4">{tournament.title}</h2>
+            <p className="text-gray-300 mb-4">{tournament.summary}</p>
+            <div className="w-full flex items-center justify-between gap-4 mt-4">
+              <button
+                className="px-6 py-3 rounded-md bg-black text-white border-2 border-transparent hover:bg-opacity-80 transition-colors"
+                onClick={() =>
+                  navigate(
+                    isAdmin
+                      ? `/admin/dashboard/tournament/view?id=${tournament._id}`
+                      : `/tournament/view?id=${tournament._id}`
+                  )
+                }
+              >
+                View
+              </button>
+              {isAdmin ? (
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => navigate(`/admin/dashboard/update-tournament?id=${tournament._id}`)}
+                    className="px-6 py-3 rounded-md bg-purple-700 text-white border-2 border-transparent hover:bg-purple-600 transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(tournament._id)}
+                    className={`px-6 py-3 rounded-md text-white border-2 border-transparent ${
+                      deletingId === tournament._id
+                        ? 'bg-gray-600 cursor-not-allowed'
+                        : 'bg-red-600 hover:bg-red-700 transition-colors'
+                    }`}
+                    disabled={deletingId === tournament._id}
+                  >
+                    {deletingId === tournament._id ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
+              ) : (
+                new Date(tournament.startDate) > new Date() ? (
+                  <RegistrButton tournamentId={tournament._id} />
                 ) : (
-                  new Date(tournament.startDate) > new Date() ? (
-                    <RegistrButton tournamentId={tournament._id} />
-                  ) : (<></>)
-                )}
-              </div>
+                  <></>
+                )
+              )}
             </div>
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </div>
       ))}
-    </Accordion>
+    </div>
   );
 }

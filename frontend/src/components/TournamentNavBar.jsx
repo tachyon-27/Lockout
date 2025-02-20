@@ -1,16 +1,5 @@
 import { useState, useEffect } from "react";
-import PropTypes from "prop-types";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Box from "@mui/material/Box";
-import { useLocation, Link, useSearchParams } from "react-router-dom";
-
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-}
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 
 export default function TournamentNavBar({ isAdmin }) {
   const [value, setValue] = useState(0);
@@ -61,40 +50,47 @@ export default function TournamentNavBar({ isAdmin }) {
     }
   }, [location.pathname]);
 
-  const handleChange = (event, newValue) => {
+  const handleChange = (newValue) => {
     setValue(newValue);
   };
 
   return (
-    <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-      <Tabs
-        variant="scrollable"
-        scrollButtons={false}
-        value={value}
-        onChange={handleChange}
-        aria-label="Tournament Navbar"
-        sx={{ color: "white" }}
+    <div
+      className="pt-2 left-0 w-full shadow-lg"
+      style={{
+        overflowX: "auto",
+        overflowY: "hidden",
+        whiteSpace: "nowrap",
+        scrollbarWidth: "none", // Firefox
+        msOverflowStyle: "none", // IE
+      }}
+    >
+      <div 
+        className="flex space-x-4"
+        style={{
+          overflowX: "auto",
+          overflowY: "hidden",
+          display: "flex",
+          scrollbarWidth: "none", // Firefox
+          msOverflowStyle: "none", // IE
+        }}
       >
         {routes
-          .filter((route) => route.active) // Ensure only active routes are displayed
+          .filter((route) => route.active) // Only show active routes
           .map((route, index) => (
-            <Tab
+            <Link
               key={index}
-              label={route.label}
-              component={Link}
               to={route.path}
-              sx={{
-                color: "white",
-                "&:hover": {
-                  color: "white",
-                  background: "#1976D2",
-                  borderRadius: "10px 10px 0px 0px",
-                },
-              }}
-              {...a11yProps(index)}
-            />
+              className={`px-5 rounded-lg text-white text-md font-medium transition-colors duration-300
+                ${value === index ? "bg-purple-700 shadow-lg" : "hover:bg-purple-600"} 
+                ${value === index ? "border-b-4 border-purple-500" : ""}
+                `}
+              onClick={() => handleChange(index)}
+            >
+              {route.label}
+            </Link>
           ))}
-      </Tabs>
-    </Box>
+      </div>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 import { logout } from '@/features/userSlice';
 import { useNavigate } from 'react-router-dom';
-import { RingLoader } from "react-spinners";
+import {Loader} from '@/components';
 
 const Logout = () => {
     const { toast } = useToast();
@@ -37,7 +37,7 @@ const Logout = () => {
     
     return (
         <div className="flex items-center justify-center">
-          <RingLoader size={100} color="#2563EB" />
+          <Loader />
         </div>
       );
 }

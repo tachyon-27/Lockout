@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 import { socket } from "../../socket";
+import {Loader} from "@/components";
 
 const Match = ({ isAdmin }) => {
     const { toast } = useToast();
@@ -221,7 +222,7 @@ const Match = ({ isAdmin }) => {
     };
 
     if (isLoading) {
-        return (<></>);
+        return (<Loader/>);
     }
 
     return (

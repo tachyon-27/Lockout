@@ -3,13 +3,18 @@ import { Outlet } from 'react-router-dom';
 import TournamentNavBar from "../components/TournamentNavBar";
 
 const TournamentLayout = ({ isAdmin }) => {
-  if(!isAdmin) isAdmin = false;
+  if (!isAdmin) isAdmin = false;
 
   return (
-    <div className={cn("grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4 rounded-md p-10 bg-gray-100 dark:bg-black w-full flex-1 mx-auto overflow-hidden h-screen")}>
+    <div
+      style={{ paddingTop: "80px" }}
+      className={cn(
+        "flex flex-col md:flex-col gap-4 rounded-md p-10 bg-gradient-to-br from-black via-gray-900 to-purple-900 w-full flex-1 mx-auto min-h-screen"
+      )}
+    >
       {/* Center the navbar */}
-      <div className="flex justify-center h-full w-full">
-        <TournamentNavBar className="md:w-64 w-full" isAdmin={isAdmin}/>
+      <div className="flex justify-center h-full w-full md:w-64">
+        <TournamentNavBar isAdmin={isAdmin} />
       </div>
       <main className="flex-grow mt-4 w-full">
         <Outlet />

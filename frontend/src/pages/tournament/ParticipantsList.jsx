@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast"
 import axios from 'axios'
-import { RingLoader } from 'react-spinners';
+import {Loader} from '@/components';
 
 const ParticipantsList = ({ isAdmin = false }) => {
     const { toast } = useToast();
@@ -113,7 +113,7 @@ const ParticipantsList = ({ isAdmin = false }) => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center">
-                <RingLoader size={100} color="#2563EB" />
+                <Loader />
             </div>
         );
     }

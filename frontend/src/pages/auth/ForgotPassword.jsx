@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router-dom";
-import { BackgroundLines } from "@/components/ui/background-lines";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from "react";
 import axios from "axios"
@@ -77,60 +76,58 @@ const ForgotPassword = () => {
     }
 
     return (
-        < BackgroundLines className="relative flex justify-center items-center min-h-[120vh]">
-            <div className="relative z-10 flex items-center justify-center min-h-screen text-white">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(submit)} className="flex flex-col gap-4 min-w-[50vh] max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
-                        <p className="text-2xl font-semibold tracking-wide flex items-center relative">
-                            <span className="absolute w-4 h-4 rounded-full bg-blue-400 left-0 animate-ping"></span>
-                            <span className="absolute w-4 h-4 rounded-full bg-blue-500 left-0"></span>
-                            <span className="pl-6"> Enter your email </span>
-                        </p>
+        <div className="relative z-10 flex items-center justify-center text-white">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(submit)} className="flex flex-col gap-4 min-w-[50vh] max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700">
+                    <p className="text-2xl font-semibold tracking-wide flex items-center relative">
+                        <span className="absolute w-4 h-4 rounded-full bg-blue-400 left-0 animate-ping"></span>
+                        <span className="absolute w-4 h-4 rounded-full bg-blue-500 left-0"></span>
+                        <span className="pl-6"> Enter your email </span>
+                    </p>
 
-                        <FormField 
-                            name="email"
-                            control={form.control}
-                            render={({ field }) => (
-                                <FormItem className="relative w-full">
-                                    <FormLabel> Email </FormLabel>
-                                    <Input
-                                        {...field}
-                                        name="name"
-                                        className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
-                                        placeholder="Email"
-                                        type="email"
-                                        required
-                                    />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                    <FormField 
+                        name="email"
+                        control={form.control}
+                        render={({ field }) => (
+                            <FormItem className="relative w-full">
+                                <FormLabel> Email </FormLabel>
+                                <Input
+                                    {...field}
+                                    name="name"
+                                    className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
+                                    placeholder="Email"
+                                    type="email"
+                                    required
+                                />
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition"
-                        >
-                            {isSubmitting ? (
-                                <div className="flex items-center justify-center">
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Please wait
-                                </div>
-                            ) : (
-                                'Continue'
-                            )}
-                        </button>
-                        
-                        <p className="text-center text-sm text-gray-400">
-                            Don't have an account?{" "}
-                            <Link to="/register" className="text-blue-400 hover:underline">
-                                Register
-                            </Link>
-                        </p>
-                    </form>     
-                </Form>
-            </div>
-        </BackgroundLines>
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition"
+                    >
+                        {isSubmitting ? (
+                            <div className="flex items-center justify-center">
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Please wait
+                            </div>
+                        ) : (
+                            'Continue'
+                        )}
+                    </button>
+                    
+                    <p className="text-center text-sm text-gray-400">
+                        Don't have an account?{" "}
+                        <Link to="/register" className="text-blue-400 hover:underline">
+                            Register
+                        </Link>
+                    </p>
+                </form>     
+            </Form>
+        </div>
     );
 };
 
