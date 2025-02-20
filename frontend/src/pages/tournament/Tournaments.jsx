@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { RegistrButton } from "@/components";
-import {Loader} from "@/components";
+import { Loader } from "@/components";
 
 export default function Tournament({ isAdmin = false }) {
   const { toast } = useToast();
@@ -11,6 +11,7 @@ export default function Tournament({ isAdmin = false }) {
   const [tournaments, setTournaments] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(null);
 
   useEffect(() => {
     const getTournaments = async () => {
@@ -29,13 +30,20 @@ export default function Tournament({ isAdmin = false }) {
     getTournaments();
   }, [toast]);
 
-  if(isLoading) {
+  if (isLoading) {
     return (
       <div className="w-full h-full flex justify-center items-center">
         <Loader />
       </div>
-    )
+    );
   }
+
+  if (tournaments.length === 0) {
+    return <p className="text-center text-white text-xl">No tournaments available.</p>;
+  }
+
+  const upcomingTournament = tournaments[0];
+  const pastTournaments = tournaments.slice(1);
 
   const handleDelete = async (tournamentId) => {
     if (!window.confirm("Are you sure you want to delete this tournament?")) return;
@@ -43,7 +51,7 @@ export default function Tournament({ isAdmin = false }) {
     setDeletingId(tournamentId);
     try {
       await axios.post("/api/tournament/delete-tournament", { _id: tournamentId });
-      setTournaments(tournaments.filter(t => t._id !== tournamentId));
+      setTournaments(tournaments.filter((t) => t._id !== tournamentId));
       toast({ title: "Tournament deleted successfully!" });
     } catch (error) {
       toast({ title: "Error deleting tournament!", description: error.message });
@@ -53,56 +61,84 @@ export default function Tournament({ isAdmin = false }) {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 p-10">
-      {tournaments.map((tournament, idx) => (
-        <div key={idx} className="bg-gradient-to-br from-gray-900 to-purple-800 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl overflow-hidden">
-          <div className="p-6">
-            <h2 className="text-white text-2xl font-bold mb-4">{tournament.title}</h2>
-            <p className="text-gray-300 mb-4">{tournament.summary}</p>
-            <div className="w-full flex items-center justify-between gap-4 mt-4">
+    <div className="p-2 md:p-10 mt-20 md:mt-14 bg-gradient-to-br from-black via-gray-950/80 to-purple-950/90 min-h-screen">
+
+      <div className="w-[90%] md:w-4/5 mx-auto bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 rounded-xl shadow-lg p-8 text-white mb-10 min-h-[85vh] flex flex-col justify-center items-center border border-gray-600 hover:shadow-2xl transition-all duration-300 ease-in-out">
+        {upcomingTournament.coverImage && (
+          <img src={upcomingTournament.coverImage} alt={upcomingTournament.title} className="w-full h-auto max-h-80 object-contain rounded-xl mb-4" />
+        )}
+        <h2 className="text-3xl font-bold mb-4">Upcoming Tournament</h2>
+        <h3 className="text-2xl font-semibold">{upcomingTournament.title}</h3>
+        <p className="text-gray-300 mb-4">{upcomingTournament.summary}</p>
+        <div className="flex items-center justify-between mt-4 gap-4">
+          <button
+            className="px-6 py-3 rounded-md bg-black text-white hover:bg-opacity-80 transition-colors"
+            onClick={() => navigate(`/tournament/view?id=${upcomingTournament._id}`)}
+          >
+            View
+          </button>
+          {new Date(upcomingTournament.startDate) > new Date() && <RegistrButton tournamentId={upcomingTournament._id} />}
+          {isAdmin && (
+            <>
               <button
-                className="px-6 py-3 rounded-md bg-black text-white border-2 border-transparent hover:bg-opacity-80 transition-colors"
-                onClick={() =>
-                  navigate(
-                    isAdmin
-                      ? `/admin/dashboard/tournament/view?id=${tournament._id}`
-                      : `/tournament/view?id=${tournament._id}`
-                  )
-                }
+                onClick={() => navigate(`/admin/dashboard/update-tournament?id=${upcomingTournament._id}`)}
+                className="px-4 py-2 bg-purple-700 text-white rounded-md hover:bg-purple-600"
               >
-                View
+                Edit
               </button>
+              <button
+                onClick={() => handleDelete(upcomingTournament._id)}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-500"
+              >
+                Delete
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="w-4/5 mx-auto bg-gray-900 rounded-lg p-6 shadow-lg">
+        <div className="grid grid-cols-2 md:grid-cols-3 bg-gray-800 text-white font-bold py-3 px-4 rounded-t-md text-center">
+          <div className="col-span-1">Title</div>
+          <div className="hidden md:block col-span-1">Summary</div>
+          <div className="col-span-1">Actions</div>
+        </div>
+        {pastTournaments.map((tournament) => (
+          <div key={tournament._id} className="grid grid-cols-2 md:grid-cols-3 items-center text-white border-b border-gray-700 py-3 px-4 hover:bg-gray-800 transition duration-300 text-center">
+            <div className="col-span-1 overflow-hidden text-ellipsis ">{tournament.title}</div>
+            <div className="hidden md:block col-span-1">{tournament.summary}</div>
+            <div className="col-span-1 relative">
               {isAdmin ? (
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => navigate(`/admin/dashboard/update-tournament?id=${tournament._id}`)}
-                    className="px-6 py-3 rounded-md bg-purple-700 text-white border-2 border-transparent hover:bg-purple-600 transition-colors"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(tournament._id)}
-                    className={`px-6 py-3 rounded-md text-white border-2 border-transparent ${
-                      deletingId === tournament._id
-                        ? 'bg-gray-600 cursor-not-allowed'
-                        : 'bg-red-600 hover:bg-red-700 transition-colors'
-                    }`}
-                    disabled={deletingId === tournament._id}
-                  >
-                    {deletingId === tournament._id ? 'Deleting...' : 'Delete'}
-                  </button>
-                </div>
+                <>
+                  <div className="hidden lg:flex gap-2 justify-center">
+                    <button onClick={() => navigate(`/tournament/view?id=${tournament._id}`)} className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600">View</button>
+                    <button onClick={() => navigate(`/admin/dashboard/update-tournament?id=${tournament._id}`)} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500">Edit</button>
+                    <button onClick={() => handleDelete(tournament._id)} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                  </div>
+
+                  <div className="block lg:hidden">
+                    <button
+                      onClick={() => setDropdownOpen(dropdownOpen === tournament._id ? null : tournament._id)}
+                      className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600"
+                    >
+                      Actions
+                    </button>
+                    {dropdownOpen === tournament._id && (
+                      <div className="absolute right-0 mt-2 w-40 bg-gray-800 rounded-md shadow-lg text-left z-10">
+                        <button onClick={() => navigate(`/tournament/view?id=${tournament._id}`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">View</button>
+                        <button onClick={() => navigate(`/admin/dashboard/update-tournament?id=${tournament._id}`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">Edit</button>
+                        <button onClick={() => handleDelete(tournament._id)} className="w-full text-left px-4 py-2 bg-red-600 hover:bg-red-700">Delete</button>
+                      </div>
+                    )}
+                  </div>
+                </>
               ) : (
-                new Date(tournament.startDate) > new Date() ? (
-                  <RegistrButton tournamentId={tournament._id} />
-                ) : (
-                  <></>
-                )
+                <button onClick={() => navigate(`/tournament/view?id=${tournament._id}`)} className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600">View</button>
               )}
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
