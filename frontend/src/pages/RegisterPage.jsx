@@ -130,8 +130,8 @@ const Register = () => {
     }
 
     return (
-        <div className="w-4/5 max-w-md flex flex-col justify-center bg-gray-900/90 p-4 rounded-xl shadow-lg border border-gray-700 backdrop-blur-md pt-16 lg:pt-0">
-            <h2 className="text-3xl font-semibold text-white text-center mb-4">Create an Account</h2>
+        <div className="w-4/5 max-w-md flex flex-col justify-center bg-gray-900/90 p-4 rounded-xl shadow-lg border border-gray-700 backdrop-blur-md mt-16 lg:mt-0">
+            <h2 className="text-3xl font-semibold text-white text-center mb-4 lg:pt-2">Create an Account</h2>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(submit)} className="space-y-4">
 

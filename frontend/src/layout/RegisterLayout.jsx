@@ -3,9 +3,9 @@ import Logo from '@/assets/Logo.svg';
 
 function RegisterLayout() {
   return (
-    <div style={{ paddingTop: "5.5%" }} className="w-screen min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-purple-900">
+    <div style={{ paddingTop: "5.5%" }} className="max-w-screen min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-purple-900">
 
-      <div className="w-full h-full flex flex-col md:flex-row items-center justify-center px-6 md:px-16 lg:px-24 pt-16"> 
+      <div className="w-full h-full flex flex-col md:flex-row items-center justify-center px-6 md:px-16 lg:px-24 "> 
 
         <div className="flex-col justify-center items-center text-center w-full md:w-1/2 mb-10 md:mb-0 hidden md:flex">
           <img 
