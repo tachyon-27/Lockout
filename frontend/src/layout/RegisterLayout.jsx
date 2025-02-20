@@ -3,12 +3,12 @@ import Logo from '@/assets/Logo.svg';
 
 function RegisterLayout() {
   return (
-    <div className="w-screen h-screen flex items-center justify-center
+    <div className="w-screen max-h-screen flex items-center justify-center
     bg-gradient-to-br from-black via-gray-900 to-purple-900">
 
       <div className="w-full h-full flex flex-col md:flex-row items-center justify-center px-6 md:px-16 lg:px-24">
 
-        <div className="flex flex-col justify-center items-center text-center w-full md:w-1/2 mb-10 md:mb-0">
+        <div className="flex-col justify-center items-center text-center w-full md:w-1/2 mb-10 md:mb-0 hidden md:flex">
           <img 
             src={Logo} 
             alt="BitLegion" 
@@ -19,7 +19,7 @@ function RegisterLayout() {
           </p>
         </div>
 
-        <div className="w-full md:w-1/2 flex justify-center">
+        <div className="w-full md:w-1/2 flex justify-center pt-20">
             <Outlet />
         </div>
 

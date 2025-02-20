@@ -101,8 +101,7 @@ function Verify({ what }) {
   };
 
   return (
-    <BackgroundLines className="relative flex justify-center items-center">
-      <div className="relative z-10 flex items-center justify-center min-h-screen text-white">
+      <div className="flex items-center justify-center text-white">
         <Form {...form}>
           <form 
             className="flex flex-col gap-4 max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700 w-full sm:w-auto"
@@ -170,7 +169,6 @@ function Verify({ what }) {
           </form>
         </Form>
       </div>
-    </BackgroundLines>
   );
 }
 

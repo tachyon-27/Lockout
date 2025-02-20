@@ -54,12 +54,12 @@ function App() {
             </Route>
               <Route path='/user-settings' element={<UserSettings />} />
             
-            <Route element={<ProtectedRoutes allowed={role == "unverifiedUser"} />} > 
+            {/* <Route element={<ProtectedRoutes allowed={role == "unverifiedUser"} />} >  */}
               <Route element={<RegisterLayout />} >
                 <Route path='/verify/email' element={<Verify what="email" />} />
               </Route>
               <Route path='/verify/password' element={<Verify what="password" />} />
-            </Route>
+            {/* </Route> */}
                   
             <Route element={<ProtectedRoutes allowed={role == "changePassword"} />} > 
               <Route path='/reset-password' element={<ResetPassword />} />
