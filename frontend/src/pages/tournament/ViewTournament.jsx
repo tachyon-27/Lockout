@@ -4,14 +4,17 @@ import { useToast } from "@/hooks/use-toast"
 import axios from "axios";
 import { RegistrButton } from "@/components";
 import {Loader} from "@/components";
+import { useSelector } from "react-redux";
 
 const ViewTournament = () => {
   const [searchParams] = useSearchParams();
   const tournamentId = searchParams.get("id");
   const [tournament, setTournament] = useState(null); 
   const [timeLeft, setTimeLeft] = useState(null);
+  const [isRegistered, setIsRegistered] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
+  const isLoggedIn = useSelector(state => state.user.isAuthenticated);
 
   useEffect(() => {
     if (!tournamentId) {
@@ -25,16 +28,27 @@ const ViewTournament = () => {
 
     const fetchTournament = async () => {
       try {
-        const response = await axios.post(`/api/tournament/get-tournament`, {
-          _id: tournamentId
-        });
+        let response, tournament;
+        if(isLoggedIn) {
+          response = await axios.post(`/api/tournament/get-tournament-user`, {
+            _id: tournamentId
+          });
+          tournament = response.data.data.tournament;
+          setIsRegistered(response.data.data.isRegistered)
+        }
+        else {
+          response = await axios.post(`/api/tournament/get-tournament`, {
+            _id: tournamentId
+          });
+          tournament = response.data.data;
+        }
 
         if (!response.data.success) {
           throw new Error("Failed to fetch tournament data.");
         }
-        setTournament(response.data.data);
+        setTournament(tournament);
 
-        setTimeLeft(calculateTimeLeft(new Date(response.data.data.startDate)));
+        setTimeLeft(calculateTimeLeft(new Date(tournament.startDate)));
       } catch (error) {
         navigate('/')
         toast({
@@ -110,7 +124,9 @@ const ViewTournament = () => {
 
 
       <div className="flex justify-center items-center">
-        <RegistrButton tournamentId={tournamentId} isRegistered={false}/>
+        {!tournament.startDate && 
+          <RegistrButton tournamentId={tournamentId} isRegistered={isRegistered}/>
+        }
       </div>
 
       <div

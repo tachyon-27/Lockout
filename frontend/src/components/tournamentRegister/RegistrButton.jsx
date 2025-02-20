@@ -4,13 +4,18 @@ import { useState } from "react";
 import { FaLaptopCode, FaSignOutAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import axios from "axios";
+import { useToast } from "@/hooks/use-toast"
 
-const RegistrButton = ({ tournamentId, isRegistered, onUnregister }) => {
+const RegistrButton = ({ tournamentId, isRegistered: initialIsRegistered }) => {
     const [addID, setAddID] = useState(false);
     const [isAuth, setIsAuth] = useState(false);
     const [handle, setHandle] = useState("");
     const [verifyString, setVerifyString] = useState("");
     const [showConfirm, setShowConfirm] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(initialIsRegistered);  
+    const [loading, setLoading] = useState(false);  // 🔥 Loading state for unregistering
+    const { toast } = useToast();
     
     const isLoggedIn = useSelector(state => state.user.isAuthenticated);
     const navigate = useNavigate();
@@ -28,11 +33,26 @@ const RegistrButton = ({ tournamentId, isRegistered, onUnregister }) => {
         }
     };
 
-    const handleUnregister = () => {
+    const handleUnregister = async () => {
         setShowConfirm(false);
-        if (onUnregister) {
-            onUnregister(tournamentId);
+        setLoading(true); // 🔥 Show loading while unregistering
+        try {
+            const res = await axios.post('/api/tournament/tournament-unregister', { _id: tournamentId });
+
+            toast({ title: res.data.message });
+
+            if (res.data.success) {
+                setIsRegistered(false);  // 🔥 Update state after successful unregister
+            }
+        } catch (error) {
+            toast({ title: error.message });
+        } finally {
+            setLoading(false); // 🔥 Stop loading after request completes
         }
+    };
+
+    const handleRegister = () => {
+        setIsRegistered(true);
     };
 
     return (
@@ -55,16 +75,18 @@ const RegistrButton = ({ tournamentId, isRegistered, onUnregister }) => {
                         ) : isAuth ? (
                             <VerifyCfID handle={handle} verifyString={verifyString} setIsAuth={setIsAuth} />
                         ) : (
-                            <TournamentRegister setAddID={setAddID} tournamentId={tournamentId} />
+                            <TournamentRegister setAddID={setAddID} tournamentId={tournamentId} onRegister={handleRegister} />
                         )}
                     </ModalBody>
                 </Modal>
             ) : (
                 <button 
-                    className="bg-red-700 text-white flex items-center justify-center border border-red-500 px-4 py-2 rounded-md transition duration-300 hover:bg-red-800"
+                    className={`flex items-center justify-center border border-red-500 px-4 py-2 rounded-md transition duration-300 
+                        ${loading ? "bg-red-500 cursor-not-allowed opacity-50" : "bg-red-700 hover:bg-red-800"} text-white`}
                     onClick={handleClick}
+                    disabled={loading}  // 🔥 Prevent multiple clicks
                 >
-                    <span className="mr-2">Unregister</span>
+                    <span className="mr-2">{loading ? "Unregistering..." : "Unregister"}</span>
                     <FaSignOutAlt />
                 </button>
             )}
@@ -76,12 +98,14 @@ const RegistrButton = ({ tournamentId, isRegistered, onUnregister }) => {
                         <button 
                             className="bg-red-600 text-white px-3 py-1 rounded-md text-sm transition duration-200 hover:bg-red-700"
                             onClick={handleUnregister}
+                            disabled={loading}  // 🔥 Prevent multiple clicks
                         >
-                            Yes, Unregister
+                            {loading ? "Processing..." : "Yes, Unregister"}
                         </button>
                         <button 
                             className="bg-gray-700 text-white px-3 py-1 rounded-md text-sm transition duration-200 hover:bg-gray-600"
                             onClick={() => setShowConfirm(false)}
+                            disabled={loading}  // 🔥 Disable if loading
                         >
                             Cancel
                         </button>

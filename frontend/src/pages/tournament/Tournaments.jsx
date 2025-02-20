@@ -97,7 +97,11 @@ export default function Tournament({ isAdmin = false }) {
         </div>
       </div>
 
-      <div className="w-4/5 mx-auto bg-gray-900 rounded-lg p-6 shadow-lg">
+      <div className="w-[90%] md:w-4/5 mx-auto text-5xl font-extrabold text-center p-6">
+        Past Tournaments
+      </div>
+
+      <div className="w-[90%] md:w-4/5 mx-auto bg-gray-900 rounded-lg p-6 shadow-lg">
         <div className="grid grid-cols-2 md:grid-cols-3 bg-gray-800 text-white font-bold py-3 px-4 rounded-t-md text-center">
           <div className="col-span-1">Title</div>
           <div className="hidden md:block col-span-1">Summary</div>

@@ -185,7 +185,6 @@ export const UpdateProblemStatus = asyncHandler(async (req, res) => {
     }
 });
 
-
 export const populateQuestions = asyncHandler(async (req, res) => {
     try {
         await Question.deleteMany({})
