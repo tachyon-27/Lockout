@@ -110,7 +110,7 @@ const ViewTournament = () => {
 
 
       <div className="flex justify-center items-center">
-        <RegistrButton tournamentId={tournamentId}/>
+        <RegistrButton tournamentId={tournamentId} isRegistered={false}/>
       </div>
 
       <div

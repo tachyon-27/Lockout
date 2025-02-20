@@ -169,6 +169,39 @@ export const getTournament = asyncHandler(async (req, res) => {
     }
 })
 
+export const getTournamentUser = asyncHandler(async (req, res) => {
+    try {
+        const { _id } = req.body;
+
+        if (!_id) {
+            res.status(400);
+            throw new Error("Tournament ID is required!");
+        }
+
+        const tournament = await Tournament.findById(_id);
+
+        if (!tournament) {
+            res.status(404);
+            throw new Error("Tournament not found!");
+        }
+
+        const userId = req.user._id;
+        const isParticipant = tournament.participants.some(participant =>
+            participant.user.toString() === userId.toString()
+        );
+
+        return res
+            .status(200)
+            .json(new ApiResponse(200, "Tournament fetched successfully!", {
+                tournament,
+                isRegistered: isParticipant
+            }));
+    } catch (error) {
+        res.status(res.statusCode !== 200 ? res.statusCode : 500);
+        throw new Error(error.message || "Something went wrong!");
+    }
+});
+
 export const tournamentRegister = asyncHandler(async (req, res) => {
     try {
         const { _id, cfid } = req.body;
@@ -211,6 +244,48 @@ export const tournamentRegister = asyncHandler(async (req, res) => {
     } catch (error) {
         console.log(error)
         return res.json(new ApiResponse(500, "An error occurred while registering for the tournament.", error));
+    }
+});
+
+export const tournamentUnregister = asyncHandler(async (req, res) => {
+    try {
+        const { _id } = req.body;
+
+        if (!_id) {
+            res.status(400);
+            throw new Error("Tournament ID is required!");
+        }
+
+        const tournament = await Tournament.findById(_id);
+
+        if (!tournament) {
+            res.status(404);
+            throw new Error("Tournament not found!");
+        }
+
+        const userId = req.user._id;
+
+        const isParticipant = tournament.participants.some(participant =>
+            participant.user.toString() === userId.toString()
+        );
+
+        if (!isParticipant) {
+            res.status(403);
+            throw new Error("You are not a participant in this tournament!");
+        }
+
+        tournament.participants = tournament.participants.filter(
+            participant => participant.user.toString() !== userId.toString()
+        );
+
+        await tournament.save();
+
+        return res
+            .status(200)
+            .json(new ApiResponse(200, "You have successfully unregistered!"));
+    } catch (error) {
+        res.status(res.statusCode !== 200 ? res.statusCode : 500);
+        throw new Error(error.message || "Something went wrong!");
     }
 });
 

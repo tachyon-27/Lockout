@@ -8,6 +8,7 @@ import {
     getMatches, 
     getParticipantsList, 
     getTournament, 
+    getTournamentUser, 
     giveBye, 
     hideTournament, 
     isTournamentShown, 
@@ -17,6 +18,7 @@ import {
     startTournament, 
     tournamentRegister, 
     tournaments, 
+    tournamentUnregister, 
     updateMatchDuration, 
     updateTournament 
 } from "../controllers/tournament.controller.js";
@@ -54,6 +56,8 @@ router.route('/give-bye').post(verifyAdmin, giveBye)
 router.route('/delete-tournament').post(verifyAdmin, deleteTournament)
 router.route('/remove-participant').post(verifyAdmin, removeParticipant)
 
+router.route('/get-tournament-user').post(verifyUser, getTournamentUser)
 router.route('/tournament-register').post(verifyUser, tournamentRegister)
+router.route('/tournament-unregister').post(verifyUser, tournamentUnregister)
 
 export default router
