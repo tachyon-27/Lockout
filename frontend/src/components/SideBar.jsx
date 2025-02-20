@@ -1,13 +1,12 @@
 import  { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "./ui/sidebar";
 import {
-  IconArrowLeft,
-  IconBrandTabler,
-  IconSettings,
-  IconHome,
-  IconUsersPlus,
-  IconDeviceGamepad2,
-} from "@tabler/icons-react";
+  ArrowLeft as IconArrowLeft,
+  Home as IconHome,
+  Settings as IconSettings,
+  Users as IconUsersPlus,
+  Gamepad2 as IconDeviceGamepad2,
+} from "lucide-react";
 import {Link} from "react-router-dom";
 import { motion } from "framer-motion";
 
