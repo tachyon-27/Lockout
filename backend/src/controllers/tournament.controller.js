@@ -347,8 +347,57 @@ export const startTournament = asyncHandler(async (req, res) => {
         tournament.showDetails = true;
 
         await tournament.save();
+        
+        await Question.deleteMany({})
+
+        const response = await axios.get('https://codeforces.com/api/problemset.problems');
+
+        if (response.data.status === 'OK') {
+            const problems = response.data.result.problems;
+
+            const questionsToInsert = problems
+                .filter(problem => problem.rating && typeof problem.rating === 'number')
+                .map(problem => ({
+                    contestId: problem.contestId,
+                    index: problem.index,
+                    name: problem.name,
+                    rating: problem.rating
+                }));
+
+            const result = await Question.insertMany(questionsToInsert);
+        }
 
         res.json(new ApiResponse(200, "Tournament Started!"));
+    } catch (error) {
+        console.error(error);
+        res.statusCode = 500;
+        throw new Error("Server Error!");
+    }
+}); 
+
+export const endTournament  = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId } = req.body;
+
+        if (!tournamentId) {
+            return res.json(new ApiResponse(404, "Tournament Id not specified!"));
+        }
+
+        const tournament = await Tournament.findById(tournamentId).populate({
+            path: "participants",
+            select: "name",
+        });
+
+        if (!tournament) {
+            return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
+        }
+
+        tournament.endDate = new Date();
+
+        await tournament.save()
+
+        res.json(new ApiResponse(200, "Tournament Ended!"));
+
     } catch (error) {
         console.error(error);
         res.statusCode = 500;
@@ -402,7 +451,11 @@ export const isTournamentShown = asyncHandler(async (req, res) => {
             return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
         }
 
-        res.json(new ApiResponse(200, "Tournament status fetched.", tournament.showDetails));
+        res.json(new ApiResponse(200, "Tournament status fetched.", {
+            isShown: tournament.showDetails,
+            endDate: tournament.endDate,
+            startDate: tournament.startDate,
+        }));
     } catch(error) {
         console.error(error);
         res.statusCode = 500;

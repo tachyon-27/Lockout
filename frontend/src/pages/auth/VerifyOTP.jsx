@@ -107,9 +107,7 @@ function Verify({ what }) {
             className="flex flex-col gap-4 max-w-md p-6 rounded-2xl bg-gray-900 border border-gray-700 w-full sm:w-auto"
             onSubmit={form.handleSubmit(verify)}
           >
-            <p className="text-2xl font-semibold tracking-wide flex items-center relative">
-              <span className="absolute w-4 h-4 rounded-full bg-blue-400 left-0 animate-ping"></span>
-              <span className="absolute w-4 h-4 rounded-full bg-blue-500 left-0"></span>
+            <p className="text-2xl font-semibold tracking-wide flex items-center relative self-center">
               <span className="pl-6">Enter OTP</span>
             </p>
             <p className="text-sm text-gray-400">
@@ -144,7 +142,7 @@ function Verify({ what }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition"
+              className="py-2 px-4 mt-4 bg-purple-600 hover:bg-purple-500 rounded-lg text-white font-medium transition"
             >
               {isSubmitting ? (
                 <div className="flex items-center justify-center">
@@ -161,7 +159,7 @@ function Verify({ what }) {
               <button 
                 type="button" 
                 onClick={resend} 
-                className="text-blue-400 hover:underline"
+                className="text-purple-400 hover:text-purple-500 hover:underline"
               >
                 Resend OTP
               </button>

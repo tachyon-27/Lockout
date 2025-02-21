@@ -71,8 +71,13 @@ const MatchCard = ({ isAdmin, tournamentId, match }) => {
                 >
                     {match.state === "DONE" ? "View Match" : "Enter Match"}
                 </button>
-            ) : (
-                <></>
+            ) : ( isAdmin &&
+                <button
+                    className={`w-full py-2 rounded-md font-semibold text-white bg-[#DB2137]`}
+                    onClick={() => navigate(`${isAdmin ? "/admin/dashboard/" : "/"}tournament/match/settings?tournamentId=${tournamentId}&matchId=${match.id}`)}
+                >
+                    Settings
+                </button>
             )}
         </div>
     );

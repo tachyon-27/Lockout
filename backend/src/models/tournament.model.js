@@ -100,6 +100,9 @@ const tournamentSchema = mongoose.Schema({
         type: Date,
         required: [true, 'Start date is required']
     },
+    endDate: {
+        type: Date,
+    },
     description: {
         type: String,
         required: [true, 'Description is required']

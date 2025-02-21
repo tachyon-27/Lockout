@@ -1,19 +1,20 @@
-import { Outlet } from "react-router-dom"
-import { SideBar } from "@/components"
+import { Outlet } from "react-router-dom";
+import { SideBar } from "@/components"; // Ensure you have a SideBar component
 import { cn } from "@/lib/utils";
 
 function AdminLayout() {
     return (
         <div
           className={cn(
-            "rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden min-h-screen"
-          )}>
+            "flex flex-col md:flex-row w-full flex-1 mx-auto border bg-gradient-to-br from-black via-gray-900 to-purple-900 text-white overflow-hidden min-h-screen relative"
+          )}
+        >
             <SideBar />
-             <main className="flex-grow">
-                 <Outlet />
-             </main>
+            <main className="flex-grow transition-all duration-300">
+                <Outlet />
+            </main>
         </div>
-    )
+    );
 }
 
-export default AdminLayout
+export default AdminLayout;

@@ -98,13 +98,10 @@ const Login = () => {
         <div className="relative z-10 flex items-center justify-center text-white">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(submit)} className="flex flex-col gap-4 min-w-[50vh] max-w-md p-8 rounded-2xl bg-gray-900 border border-gray-700">
-                    <p className="text-2xl font-semibold tracking-wide flex items-center relative text-center">
-                        <span className="absolute w-4 h-4 rounded-full bg-blue-400 left-0 animate-ping"></span>
-                        <span className="absolute w-4 h-4 rounded-full bg-blue-500 left-0"></span>
-                        <span className="pl-6">Login</span>
-                    </p>
-                    <p className="text-sm text-gray-400 text-center">
-                        Welcome back! Login to access your account.
+                    <p className="text-3xl font-semibold self-center tracking-wide flex items-center relative text-center">
+                        <span className="absolute w-4 h-4 rounded-full bg-purple-400 left-0 animate-ping"></span>
+                        <span className="absolute w-4 h-4 rounded-full bg-purple-500 left-0"></span>
+                        <span className="pl-6 text-center">Login</span>
                     </p>
 
                     <FormField 
@@ -188,7 +185,7 @@ const Login = () => {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="py-2 px-4 mt-4 bg-blue-500 rounded-lg text-white font-medium hover:bg-blue-400 transition"
+                        className="py-2 px-4 mt-4 rounded-lg text-white font-medium bg-purple-600 hover:bg-purple-500 transition"
                     >
                         {isSubmitting ? (
                             <div className="flex items-center justify-center">
@@ -202,7 +199,7 @@ const Login = () => {
 
                     <p className="text-center text-sm text-gray-400">
                         Don't have an account?{" "}
-                        <Link to="/register" className="text-blue-400 hover:underline">
+                        <Link to="/register" className="text-purple-400 hover:text-purple-500 hover:underline">
                             Register
                         </Link>
                     </p>

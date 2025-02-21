@@ -124,7 +124,7 @@ const ViewTournament = () => {
 
 
       <div className="flex justify-center items-center">
-        {tournament.startDate && 
+        {(timeLeft.total > 0) && 
           <RegistrButton tournamentId={tournamentId} isRegistered={isRegistered}/>
         }
       </div>

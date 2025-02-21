@@ -73,9 +73,7 @@ const ResetPassword = () => {
           onSubmit={form.handleSubmit(submit)}
           className="flex flex-col gap-6 min-w-[50vh] max-w-md p-8 rounded-2xl bg-gray-900 border border-gray-700 shadow-lg"
         >
-          <p className="text-3xl font-semibold tracking-wide flex items-center relative text-center">
-            <span className="absolute w-4 h-4 rounded-full bg-blue-400 left-0 animate-ping"></span>
-            <span className="absolute w-4 h-4 rounded-full bg-blue-500 left-0"></span>
+          <p className="text-3xl font-semibold tracking-wide flex items-center relative text-center self-center">
             <span className="pl-8">Reset Your Password</span>
           </p>
           <p className="text-sm text-gray-400 mb-4 text-center">
@@ -141,7 +139,7 @@ const ResetPassword = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="py-3 px-6 mt-6 bg-blue-600 rounded-lg text-white font-medium hover:bg-blue-500 transition duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-400"
+            className="py-3 px-6 mt-6 rounded-lg text-white font-medium bg-purple-600 hover:bg-purple-500 transition duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-400"
           >
             {isSubmitting ? (
               <div className="flex items-center justify-center">

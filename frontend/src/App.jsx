@@ -31,7 +31,8 @@ import {
   MatchSettings,
   Admins,
   UserSettings,
-  NotFound404
+  NotFound404,
+  AdminDashboard
 } from './pages'
 import { Loader } from '@/components';
 
@@ -84,7 +85,7 @@ function App() {
             <Route path='/admin/logout' element={<Logout />} />
 
             <Route path='/admin/dashboard' element={ <AdminLayout /> } >
-              <Route path='' element = { <Home /> } />
+              <Route path='' element = { <AdminDashboard /> } />
               <Route path='add-tournament' element={<AddTournament />} />
               <Route path='update-tournament' element={<AddTournament isEditing={true}/>} />
               <Route path='tournaments' element={<Tournament isAdmin={role == "admin"} />} />

@@ -6,13 +6,15 @@ import { useToast } from "@/hooks/use-toast"
 import { useEffect } from "react";
 import axios from "axios";
 import { useState } from "react";
-
+import { ClipLoader } from "react-spinners";
 const TournamentRegister = ({ setAddID, tournamentId, setIsRegistered }) => {
   const [cfids, setCfids] = useState([])
 
   const {setOpen} = useModal();
 
   const { toast } = useToast()
+
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect( () => {
     const getCFIDs = async () => {
@@ -25,6 +27,7 @@ const TournamentRegister = ({ setAddID, tournamentId, setIsRegistered }) => {
 
   const registerTournament = async (cfid) => {
     try {
+      setIsLoading(true);
       const res = await axios.post('/api/tournament/tournament-register', {
         _id: tournamentId,
         cfid,
@@ -43,29 +46,34 @@ const TournamentRegister = ({ setAddID, tournamentId, setIsRegistered }) => {
         title: "Error Registring!",
         description: error,
       })
+    } finally {
+      setIsLoading(false);
     }
   }
   
   return (
     <>
       <ModalContent>
-        <p className="text-sm md:text-sm text-neutral-600 dark:text-neutral-100 font-bold text-left mb-8">
-          Please add the Codeforces ID!
-        </p>
-        {/* Scrollable Container */}
-        <div className="grid grid-cols-1 gap-y-2 max-h-40 overflow-y-auto px-2 scrollbar-beautiful">
-          {cfids.map(
-            (cf, idx) =>
-              cf.isVerified && (
-                <div key={idx} >
-                  <div className="dark:hover:bg-neutral-800 px-2 py-2 rounded-lg" onClick={() => registerTournament(cf.cfid)}>
-                    {cf.cfid}
-                  </div>
-                  <div className="w-full h-[1px] bg-gray-200/[0.3]"></div>
-                </div>
-              )
-            )}
-        </div>
+        {isLoading ? <ClipLoader color="#FFFFFF" className="m-auto" /> : (
+          <>
+            <p className="text-sm md:text-sm text-neutral-600 dark:text-neutral-100 font-bold text-left mb-8">
+              Please add the Codeforces ID!
+            </p>
+            <div className="grid grid-cols-1 gap-y-2 max-h-40 overflow-y-auto px-2 scrollbar-beautiful">
+              {cfids.map(
+                (cf, idx) =>
+                  cf.isVerified && (
+                    <div key={idx} >
+                      <div className="dark:hover:bg-neutral-800 px-2 py-2 rounded-lg" onClick={() => registerTournament(cf.cfid)}>
+                        {cf.cfid}
+                      </div>
+                      <div className="w-full h-[1px] bg-gray-200/[0.3]"></div>
+                    </div>
+                  )
+                )}
+            </div>
+          </>
+        )}
       </ModalContent>
 
       <button

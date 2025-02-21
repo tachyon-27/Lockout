@@ -4,6 +4,7 @@ import {
     customTieBreaker, 
     deleteTournament, 
     endMatch, 
+    endTournament, 
     getMatch, 
     getMatches, 
     getParticipantsList, 
@@ -45,6 +46,7 @@ router.route('/update-tournament/:tournamentId').post(
     updateTournament
 );
 router.route('/start-tournament').post(verifyAdmin, startTournament)
+router.route('/end-tournament').post(verifyAdmin, endTournament)
 router.route('/show-tournament').post(verifyAdmin, showTournament)
 router.route('/hide-tournament').post(verifyAdmin, hideTournament)
 router.route('/is-tournament-shown').post(verifyAdmin, isTournamentShown)

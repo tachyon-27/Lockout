@@ -226,18 +226,17 @@ const Match = ({ isAdmin }) => {
     }
 
     return (
-        <div className="bg-cover bg-center opacity-70" style={{ backgroundImage: "url('../../../public/matchbg.jpg')" }}>
-            <div className="p-4 flex flex-col items-center min-h-screen bg-black/30">
+            <div className="p-4 flex flex-col items-center max-h-screen">
                 <div className="text-white text-4xl font-bold">Round {matchData.tournamentRoundText}</div>
                 <div className="text-white text-lg font-semibold">{timeLeft > 0 ? <span>Time: {formatTime(timeLeft)}</span> : <span>Match Ended</span>}</div>
 
-                <div className="flex min-w-full text-white pt-7">
+                <div className="flex justify-between flex-wrap min-w-full order-1 text-white pt-7">
                     <div className="w-[25%] flex flex-col items-center gap-y-3">
                         <span className="text-4xl">{matchData.participants[0].cfid}</span>
                         <span>Total Points: {totalPoints[matchData.participants[0].cfid]}</span>
                     </div>
 
-                    <div className="flex flex-grow items-center justify-center pt-[8%]">
+                    <div className="md:w-[50%] text-center w-full order-3 md:order-2 flex flex-grow items-center justify-center pt-[30%] md:pt-[8%]">
                         <div className="flex flex-col w-[90%] justify-center">
                             {matchData.problemList.map((problem, idx) => (
                                 <div key={idx} className="flex items-center justify-between py-2 px-4 border-b border-white hover:bg-gray-700">
@@ -263,9 +262,9 @@ const Match = ({ isAdmin }) => {
                                     }</div>
                                 </div>
                             ))}
-                            <div className="flex justify-between">
+                            <div className="flex justify-around">
                                 <button
-                                    className="w-[30%] self-center mt-2 p-2 font-semibold bg-white text-black rounded-xl"
+                                    className="w-[30%] self-center mt-2 p-2 font-semibold bg-gray-700 hover:bg-gray-600 disabled:bg-gray-500 text-white rounded-xl"
                                     onClick={handleProblemRefresh}
                                     disabled={!isRefreshActive}
                                 >
@@ -274,7 +273,7 @@ const Match = ({ isAdmin }) => {
 
                                 {isAdmin && (
                                     <button
-                                        className="w-[30%] self-center mt-2 p-2 font-semibold bg-white text-black rounded-xl"
+                                        className="w-[30%] self-center mt-2 p-2 font-semibold bg-gray-700 hover:bg-gray-600 disabled:bg-gray-500 text-white rounded-xl"
                                         onClick={() => navigate(`/admin/dashboard/tournament/match/settings?tournamentId=${tournamentId}&matchId=${matchId}`)}
                                     >
                                         Settings
@@ -284,7 +283,7 @@ const Match = ({ isAdmin }) => {
                         </div>
                     </div>
 
-                    <div className="w-[25%] flex flex-col items-center gap-y-3">
+                    <div className="w-[25%] order-2 md:order-3 flex flex-col items-center gap-y-3">
                         <span className="text-4xl">{matchData.participants[1].cfid}</span>
                         <span>Total Points: {totalPoints[matchData.participants[1].cfid]}</span>
                     </div>
@@ -304,7 +303,6 @@ const Match = ({ isAdmin }) => {
                 )}
 
             </div>
-        </div>
     );
 };
 

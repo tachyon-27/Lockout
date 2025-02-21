@@ -19,6 +19,7 @@ import MatchSettings from "./tournament/MatchSettings";
 import Admins from "./admin/Admins";
 import UserSettings from "./UserSettings";
 import NotFound404 from "./NotFound404";
+import AdminDashboard from "./admin/AdminDashboard";
 
 export {
     Home,
@@ -42,4 +43,5 @@ export {
     Admins,
     UserSettings,
     NotFound404,
+    AdminDashboard,
 }

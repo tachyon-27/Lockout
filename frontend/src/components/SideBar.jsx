@@ -60,20 +60,17 @@ export function SideBar() {
   ];
 
   return (
-    <Sidebar open={open} setOpen={setOpen}>
-    <SidebarBody className="z-[51] justify-between gap-10">
-        <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-        {open ? <Logo /> : <LogoIcon />}
-        <div className="mt-8 flex flex-col gap-2">
-            {links.map((link, idx) => (
-            <SidebarLink key={idx} link={link} />
-            ))}
-        </div>
-        </div>
-        <div>
-        
-        </div>
-    </SidebarBody>
+    <Sidebar open={open} setOpen={setOpen} >
+      <SidebarBody className=" min-h-screen justify-between gap-10">
+          <div className="z-[51] fixed flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+            {open ? <Logo /> : <LogoIcon />}
+            <div className="mt-8 flex flex-col gap-2">
+                {links.map((link, idx) => (
+                <SidebarLink key={idx} link={link} />
+                ))}
+            </div>
+          </div>
+      </SidebarBody>
     </Sidebar>
   );
 }

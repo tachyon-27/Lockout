@@ -12,19 +12,22 @@ function Settings() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(null);
   const [isShown, setIsShown] = useState(true);
+  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(null);
 
   useEffect(() => {
-    const isShownSet = async () => {
+    const fetchTournamentStatus = async () => {
       try {
-        const res = await axios.post('/api/tournament/is-tournament-shown', {tournamentId})
-        setIsShown(res.data.data)
-      } catch(error) {
-        toast({
-          title: error.message
-        })
+        const res = await axios.post('/api/tournament/is-tournament-shown', { tournamentId });
+        setIsShown(res.data.data.isShown);
+        setEndDate(res.data.data.endDate);
+        setStartDate(res.data.data.startDate);
+        console.log(res.data.data.startDate);
+      } catch (error) {
+        toast({ title: error.message });
       }
-    }
-    isShownSet()
+    };
+    fetchTournamentStatus();
   }, []);
 
   const handleAction = async (action, successMessage, errorMessage) => {
@@ -37,8 +40,10 @@ function Settings() {
     try {
       const res = await axios.post(`/api/tournament/${action}-tournament`, { tournamentId });
       toast({ title: res.data.message || successMessage });
+
       if (action === "show") setIsShown(true);
       if (action === "hide") setIsShown(false);
+      if (action === "end") setEndDate(new Date().toISOString()); // Mark tournament as ended
     } catch (error) {
       toast({ title: errorMessage, description: error.message });
     } finally {
@@ -52,7 +57,7 @@ function Settings() {
     try {
       await axios.post("/api/tournament/delete-tournament", { _id: tournamentId });
       toast({ title: "Tournament deleted successfully!" });
-      navigate('/admin/dashboard/tournaments')
+      navigate('/admin/dashboard/tournaments');
     } catch (error) {
       toast({ title: "Error deleting tournament!", description: error.message });
     } finally {
@@ -84,23 +89,39 @@ function Settings() {
               {loading === "show" ? "Showing..." : "Show Fixtures"}
             </Button>
           )}
-          <Button 
-            onClick={() => handleAction("start", "Tournament started!", "Error starting tournament!")}
-            disabled={loading === "start"}
-            className="bg-green-500 hover:bg-green-600 transition-all"
-          >
-            {loading === "start" ? "Starting..." : "Start Tournament"}
-          </Button>
+
+          {/* Show Start Tournament button only if it's not ended */}
+          {!endDate && new Date() < new Date(startDate)&& (
+            <Button 
+              onClick={() => handleAction("start", "Tournament started!", "Error starting tournament!")}
+              disabled={loading === "start"}
+              className="bg-green-500 hover:bg-green-600 transition-all"
+            >
+              {loading === "start" ? "Starting..." : "Start Tournament"}
+            </Button>
+          )}
+
+          {!endDate && new Date() >= new Date(startDate) && (
+            <Button 
+              onClick={() => handleAction("end", "Tournament ended!", "Error ending tournament!")}
+              disabled={loading === "end"}
+              className="bg-red-500 hover:bg-red-600 transition-all"
+            >
+              {loading === "end" ? "Ending..." : "End Tournament"}
+            </Button>
+          )}
+
           <Button 
             onClick={() => navigate(`/admin/dashboard/update-tournament?id=${tournamentId}`)}
             className="bg-purple-500 hover:bg-purple-600 transition-all"
           >
             Edit Tournament
           </Button>
+          
           <Button 
             onClick={handleDelete}
             disabled={loading === "delete"}
-            className="bg-red-500 hover:bg-red-600 transition-all"
+            className="bg-red-700 hover:bg-red-800 transition-all"
           >
             {loading === "delete" ? "Deleting..." : "Delete Tournament"}
           </Button>

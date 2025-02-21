@@ -46,7 +46,7 @@ const AddTournament = ({ isEditing }) => {
   const popoverRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [existingImage, setExistingImage] = useState(null);
-  let descriptionDefaultValue = ""
+  const descriptionRef = useRef("");
 
   useEffect(() => {
     if (isEditing && tournamentId) {
@@ -57,7 +57,7 @@ const AddTournament = ({ isEditing }) => {
           });
           const data = response.data;
           const startDateTime = dayjs(data.startDate);
-          descriptionDefaultValue = data.data.description
+          descriptionRef.current = data.data.description
           form.reset({
             title: data.data.title,
             summary: data.data.summary,
@@ -302,9 +302,9 @@ const AddTournament = ({ isEditing }) => {
               render={({ field: { onChange, value } }) => (
                 <Editor
                   apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
-                  initialValue={descriptionDefaultValue}
+                  initialValue={descriptionRef.current}
                   init={{
-                    initialValue: descriptionDefaultValue,
+                    initialValue: descriptionRef.current,
                     height: 500,
                     menubar: true,
                     skin: 'oxide-dark',
@@ -334,7 +334,9 @@ const AddTournament = ({ isEditing }) => {
                       "undo redo | blocks | image | bold italic forecolor | alignleft aligncenter bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent |removeformat | help",
                     content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }"
                   }}
-                  onEditorChange={onChange}
+                  onEditorChange={(content) => {
+                    onChange(content);
+                  }}
                 />
               )}
             />
