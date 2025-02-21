@@ -18,7 +18,6 @@ import {
   Verify, 
   ForgotPassword, 
   ResetPassword, 
-  Dashboard, 
   AdminLogin, 
   AddTournament, 
   ViewTournament, 
@@ -45,7 +44,6 @@ function App() {
         <>
           <Route path='/' element={ <Layout /> }>
             <Route path='' element = { <Home /> } />
-            <Route path='/user-settings' element={<UserSettings />} />
 
             <Route element={<RegisterLayout />} >
               <Route element={<ProtectedRoutes allowed={role != "verifiedUser"} />} > 
@@ -64,8 +62,11 @@ function App() {
                 <Route path='/reset-password' element={<ResetPassword />} />
               </Route>
             </Route>
+            
+            <Route element={<ProtectedRoutes allowed={role == "admin" || role == "verifiedUser"} />} >
+              <Route path='/user-settings' element={<UserSettings />} />
+            </Route>
 
-            <Route path='/dashboard' element={<Dashboard />} />+
             <Route path='/tournaments' element={ <Tournament />} />
 
             <Route path='/tournament' element={ <TournamentLayout />}>

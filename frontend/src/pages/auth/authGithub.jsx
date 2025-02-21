@@ -32,7 +32,7 @@ const AuthGithub = () => {
               title: 'Successfully Logged In'
             })
             dispatch(loginSuccess({ token: data.data._id, role: "verifiedUser" }));
-            navigate('/');
+            navigate('/tournaments');
           } else {
             const { message } = await response.json()
             toast({

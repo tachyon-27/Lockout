@@ -75,7 +75,7 @@ const RegistrButton = ({ tournamentId, isRegistered: initialIsRegistered }) => {
                         ) : isAuth ? (
                             <VerifyCfID handle={handle} verifyString={verifyString} setIsAuth={setIsAuth} />
                         ) : (
-                            <TournamentRegister setAddID={setAddID} tournamentId={tournamentId} onRegister={handleRegister} />
+                            <TournamentRegister setAddID={setAddID} tournamentId={tournamentId} setIsRegistered={setIsRegistered} />
                         )}
                     </ModalBody>
                 </Modal>

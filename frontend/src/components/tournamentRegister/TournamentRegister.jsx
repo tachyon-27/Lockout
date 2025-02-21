@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { useState } from "react";
 
-const TournamentRegister = ({ setAddID, tournamentId }) => {
+const TournamentRegister = ({ setAddID, tournamentId, setIsRegistered }) => {
   const [cfids, setCfids] = useState([])
 
   const {setOpen} = useModal();
@@ -35,6 +35,7 @@ const TournamentRegister = ({ setAddID, tournamentId }) => {
           toast({
             title: "User successfully registerd!",
           })
+          setIsRegistered(true)
       }
     } catch (error) {
       console.log(error)

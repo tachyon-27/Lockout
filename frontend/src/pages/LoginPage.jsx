@@ -50,7 +50,7 @@ const Login = () => {
                         title: 'Logged in Successfully!'
                     });
                     dispatch(loginSuccess({ token: data.data._id, role: "verifiedUser" }));
-                    navigate('/');
+                    navigate('/tournaments');
                 } else {
                     toast({
                         title: 'Login Failed',
@@ -82,7 +82,7 @@ const Login = () => {
 
             if (res.data.success) {
                 dispatch(loginSuccess({ token: res.data.data._id, role: "verifiedUser" }));
-                navigate('/dashboard');
+                navigate('/tournaments');
             }
         } catch (error) {
             toast({

@@ -1,17 +1,12 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
-import { logout } from '../features/userSlice';
+import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
+import { FaRegUser } from 'react-icons/fa';
 
 function Navbar() {
     const loggedIn = useSelector((state) => state.user.isAuthenticated);
     const navigate = useNavigate();
-    const location = useLocation(); // Get current page URL
-    const dispatch = useDispatch();
-    const { toast } = useToast();
-    const [loading, setLoading] = useState(false);
+    const location = useLocation(); 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const navItems = [
@@ -22,52 +17,26 @@ function Navbar() {
         { name: 'Tournaments', slug: '/tournaments', active: true } // Real route
     ];
 
-    const logoutHandler = async () => {
-        setLoading(true);
-        try {
-            const res = await axios.get('/api/user/logout');
-
-            toast({ title: res.data.message });
-
-            if (res.data.success) {
-                dispatch(logout());
-                navigate('/');
-            }
-        } catch (error) {
-            toast({
-                title: 'Error',
-                description: error.response?.data?.message || error.message,
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Function to handle smooth scrolling
     const handleScroll = (id) => {
         const section = document.querySelector(id);
         if (section) {
             section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        setIsMenuOpen(false); // Close menu on mobile after clicking
+        setIsMenuOpen(false); 
     };
 
-    // Handle clicks on navbar links
     const handleNavigation = (item) => {
         if (item.slug.startsWith("#")) {
             if (location.pathname !== "/") {
-                // If not on home page, navigate to home and scroll after load
                 navigate(`/${item.slug}`);
             } else {
-                // If already on home, just scroll
                 handleScroll(item.slug);
             }
         } else {
-            navigate(item.slug); // Navigate normally for other pages
+            navigate(item.slug); 
         }
     };
 
-    // Scroll to section if URL contains hash (when returning to home)
     useEffect(() => {
         if (location.hash) {
             handleScroll(location.hash);
@@ -114,16 +83,15 @@ function Navbar() {
             </ul>
 
             <button
-                className="block bg-white/20 backdrop-blur-md border border-white/30 
-                font-medium rounded-lg text-sm px-3 py-1 
+                className={`block bg-white/20 backdrop-blur-md border border-white/30 
+                font-medium text-sm ${loggedIn ? "rounded-full p-2" : "rounded-lg px-3 py-1"}
                 hover:bg-white/30 transition dark:bg-gray-800/40 
-                dark:border-gray-600/50 dark:hover:bg-gray-800/60"
+                dark:border-gray-600/50 dark:hover:bg-gray-800/60`}
                 type="button"
-                onClick={() => (loggedIn ? logoutHandler() : navigate("/login"))}
+                onClick={() => (loggedIn ? navigate('/user-settings') : navigate("/login"))}
                 aria-label={loggedIn ? "Logout Button" : "Get Started Button"}
-                disabled={loading}
             >
-                {loading ? "Processing..." : loggedIn ? "Logout" : "Get Started"}
+                { loggedIn ? <FaRegUser  /> : "Get Started"}
             </button>
 
         </nav>

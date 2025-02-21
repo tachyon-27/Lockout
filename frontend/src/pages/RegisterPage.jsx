@@ -65,7 +65,7 @@ const Register = () => {
                         title: 'Logged in Successfully!'
                     })
                     dispatch(loginSuccess({ token: data.data._id, role: "verifiedUser" }));
-                    navigate('/')
+                    navigate('/tournaments')
                 } else {
                     toast({
                         title: 'Login Failed',
