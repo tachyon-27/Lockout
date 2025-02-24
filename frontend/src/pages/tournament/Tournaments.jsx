@@ -104,8 +104,7 @@ export default function Tournament({ isAdmin = false }) {
           )}
         </div>
       </div>}
-          { isAdmin && 
-      <>
+    
       <div className="w-[90%] md:w-4/5 mx-auto text-5xl font-extrabold text-center p-6">
         Upcoming Tournaments
       </div>
@@ -161,8 +160,7 @@ export default function Tournament({ isAdmin = false }) {
       </p>
     </div>)
   
-    }</>
-          }
+    }
       <div className="w-[90%] md:w-4/5 mx-auto text-5xl font-extrabold text-center p-6">
         Past Tournaments
       </div>

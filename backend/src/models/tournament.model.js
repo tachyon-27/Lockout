@@ -1,4 +1,5 @@
 import mongoose, { mongo, Mongoose } from "mongoose";
+import { questionSchema } from "./question.model.js";
 
 const participantSchema = mongoose.Schema({
     user: {
@@ -38,8 +39,7 @@ participantSchema.virtual("name").get(function () {
 
 const problemSchema = mongoose.Schema({
     question: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Question"
+        type: questionSchema,
     },
     points: {
         type: Number

@@ -240,7 +240,7 @@ const MatchSettings = () => {
     if (isLoading) return <div className="flex justify-center p-10"><Loader/></div>;
 
     return (
-        <div className="flex flex-col items-center justify-center text-white min-h-screen p-5">
+        <div className="flex flex-col items-center justify-center text-white max-h-screen p-5">
             <Card className="w-full max-w-lg shadow-xl">
                 <CardHeader>
                     <CardTitle className="text-center text-white">Match Settings</CardTitle>

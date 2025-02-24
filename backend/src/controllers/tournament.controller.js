@@ -341,7 +341,7 @@ export const startTournament = asyncHandler(async (req, res) => {
         }
 
         tournament.startDate = new Date();
-        if(!tournament.matches) {
+        if(!tournament.matches || tournament.matches.length === 0) {
             tournament.matches = await generateMatches(tournament.participants);
         }
         tournament.showDetails = true;
@@ -422,7 +422,7 @@ export const showTournament = asyncHandler(async (req, res) => {
             return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
         }
 
-        if(!tournament.matches) {
+        if(!tournament.matches || tournament.matches.length === 0) {
             tournament.matches = await generateMatches(tournament.participants);
         }
         tournament.showDetails = true;
@@ -541,6 +541,7 @@ export const getMatches = asyncHandler(async (req, res) => {
         }
 
         return res.json(new ApiResponse(200, "Matches Retrieved successfully!", {
+            startDate: tournament.startDate,
             show: tournament.showDetails,
             matches: tournament.matches
         }))
@@ -567,7 +568,7 @@ export const getMatch = asyncHandler(async (req, res) => {
                 .json(new ApiResponse(400, "Invalid Tournament ID"));
         }
 
-        const tournament = await Tournament.findById(_id).populate("matches.problemList.question")
+        const tournament = await Tournament.findById(_id)
 
         if (!tournament) {
             return res.
@@ -631,11 +632,6 @@ export const startMatch = asyncHandler(async (req, res) => {
             throw new Error("All fields are required.")
         }
         const tournament = await Tournament.findById(tournamentId)
-            .populate({
-                path: 'matches.problemList.question', // Populating question
-                model: 'Question',                    // Ensure the model name is correct
-                select: 'name contestId index rating'  // Specify the fields to retrieve
-            })
 
 
         if (!tournament) {
@@ -653,44 +649,62 @@ export const startMatch = asyncHandler(async (req, res) => {
 
         if(!match.participants.length >= 1) return res.status(401).json(new ApiResponse(401, "Not Enough Participants to start a Match!"))
 
-        // generating problem list
+        match.participants.forEach(participant => {
+            participant.totalPoints = 0;
+            participant.resultText="";
+        });
+    
         startingRating = parseInt(startingRating);
         if (isNaN(startingRating) || startingRating < 800) {
-            return res.json(new ApiResponse(400, 'startingRating must be a number and at least 800'));
+            return res.status(400).json(new ApiResponse(400, 'startingRating must be a number and at least 800'));
         }
 
         let selectedQuestions = [];
 
-        for (let i = 0; i < 5; i++) {
+        const problemPromises = Array.from({ length: 5 }, async (_, i) => {
             const ratingThreshold = startingRating + (i * 100);
 
+            // Ensure question exists and has all required fields
             const question = await Question.aggregate([
                 { $match: { rating: ratingThreshold } },
                 { $sample: { size: 1 } }
             ]);
 
-            if (question.length === 0) {
-                return res
-                    .status(404)
-                    .json(new ApiResponse(404, `No question found for rating == ${ratingThreshold}`));
+            if (!question.length || !question[0].contestId || !question[0].index || !question[0].name || !question[0].rating) {
+                console.error(`No valid question found for rating ${ratingThreshold}`);
+                return null; // Skip invalid questions
             }
 
-            const problem = {
-                question: question[0],
-                points: 100 * (i + 1)
-            }
-            selectedQuestions.push(problem);
+            return {
+                question: {
+                    contestId: question[0].contestId,
+                    index: question[0].index,
+                    name: question[0].name,
+                    rating: question[0].rating
+                },
+                points: 100 * (i + 1),
+                solved: null
+            };
+        });
+
+        selectedQuestions = (await Promise.all(problemPromises)).filter(Boolean);
+
+        if (selectedQuestions.length < 5) {
+            return res.status(404).json(new ApiResponse(404, 'Not enough valid questions found!'));
         }
 
-        match.problemList = selectedQuestions
-        match.duration = duration
-        match.state = "RUNNING"
-        match.startTime = Date.now()
+        match.problemList = selectedQuestions;
+        match.duration = duration;
+        match.state = "RUNNING";
+        match.startTime = Date.now();
         match.endTime = null;
-        await tournament.save()
+        console.log(match.problemList[0])
+        await tournament.save();
+
+
 
         // Refetch with populated questions
-        const updatedTournament = await Tournament.findById(tournamentId).populate("matches.problemList.question");
+        const updatedTournament = await Tournament.findById(tournamentId)
         const updatedMatch = updatedTournament.matches.find(match => match.id == matchId);
 
         const io = getIo()
@@ -722,7 +736,7 @@ export const endMatch = asyncHandler(async (req, res) => {
             .json(new ApiResponse(404, "Winner not Specified"))
         }
 
-        const tournament = await Tournament.findById(tournamentId).populate("matches.problemList.question");
+        const tournament = await Tournament.findById(tournamentId)
 
         if (!tournament) {
             return res.
@@ -823,7 +837,7 @@ export const giveBye = asyncHandler(async (req, res) => {
             res.statusCode=500;
             throw new Error("All fields are required.")
         }
-        const tournament = await Tournament.findById(tournamentId).populate("matches.problemList.question");
+        const tournament = await Tournament.findById(tournamentId)
 
         if (!tournament) {
             return res.

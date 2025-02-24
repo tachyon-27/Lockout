@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const questionSchema = mongoose.Schema({
+export const questionSchema = mongoose.Schema({
     contestId: {
         type: String,
         required: true

@@ -1,3 +1,4 @@
+import Tournament from "../../models/tournament.model.js";
 import { UpdateProblemStatus } from "./UpdateProblemStatus.js";
 
 export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
@@ -49,6 +50,11 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
                     } )
                     nextMatch.participants.push(winner?.toObject ? winner.toObject() : winner);
                 }
+                await Tournament.findOneAndUpdate(
+                    { _id: tournament._id, "matches.id":nextMatch.id },
+                    { $set: { "matches.$": nextMatch } }, // Update the entire match object
+                    { new: true }
+                );
             }
 
             match.participants.find(p => p.cfid === winner.cfid).resultText = resultText;
@@ -60,7 +66,11 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
         match.endTime = Date.now()
         match.state = "DONE";
 
-        await tournament.save();
+        await Tournament.findOneAndUpdate(
+            { _id: tournament._id, "matches.id": match.id },
+            { $set: { "matches.$": match } }, // Update the entire match object
+            { new: true }
+        );
 
         io.to(roomId).emit("match-status", {
             success: true,

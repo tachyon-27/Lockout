@@ -9,6 +9,7 @@ const AllMatches = ({isAdmin = false}) => {
   const tournamentId = searchParams.get("id");
   const [matches, setMatchs] = useState([])
   const [show, setShow] = useState(false)
+  const [startDate, setStartDate] = useState(null);
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -31,8 +32,10 @@ const AllMatches = ({isAdmin = false}) => {
         if (!response.data.success) {
           throw new Error("Failed to fetch matches.");
         }
+        setStartDate(response.data.data.startDate)
         setShow(response.data.data.show)
         setMatchs(response.data.data.matches.filter(match => match.participants.length === 2));
+        console.log(response.data.data)
       } catch (error) {
         navigate('/tournaments')
         toast({
@@ -53,7 +56,7 @@ const AllMatches = ({isAdmin = false}) => {
     };
   }, [matches]);
 
-  return !show ? (
+  return (!show || matches.length === 0 || new Date(startDate) > new Date()) ? (
     <div className=' w-full h-full flex items-center justify-center text-2xl'>
       No matches available yet.
     </div>

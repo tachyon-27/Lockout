@@ -108,7 +108,7 @@ const ViewTournament = () => {
             Countdown to Tournament Start: <strong>{formatTime(timeLeft)}</strong>
           </>
         ) : (
-          <strong>The tournament has started!</strong>
+          <strong>The tournament has {tournament.endDate ? 'ended' : 'started'}!</strong>
         )}
       </div>
 

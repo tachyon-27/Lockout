@@ -81,7 +81,7 @@ import {
                   {error}
                 </span>
               </div>
-            ) : (<>S</>)}
+            ) : (<></>)}
   
           </ModalContent>
   
