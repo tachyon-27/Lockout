@@ -9,12 +9,13 @@ import TournamentRegister from "./tournamentRegister/TournamentRegister";
 import AddCfID from "./tournamentRegister/AddCfID";
 import VerifyCfID from "./tournamentRegister/VerifyCFID";
 
+import ChangePassword from "./userSettings/ChangePassword";
+import Cfid from "./userSettings/Cfid";
+import ProfileSettings from "./userSettings/ProfileSettings";
+
 import Navbar from "./Navbar";
 import { SideBar } from "./SideBar";
 import MatchCard from "./MatchCard";
-import ChangePassword from "./ChangePassword";
-import Cfid from "./Cfid";
-
 import Loader from "./Loader";
 
 export {
@@ -33,4 +34,5 @@ export {
     ChangePassword,
     Cfid,
     Loader,
+    ProfileSettings
 }

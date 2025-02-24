@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Loader2 } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { passwordSchema } from '../schemas/passwordSchema';
+import { passwordSchema } from '@/schemas/passwordSchema';
 
 const ChangePassword = () => {
     const [showPassword, setShowPassword] = useState(false);

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { FaTimes } from 'react-icons/fa';
 
 const Cfid = () => {
