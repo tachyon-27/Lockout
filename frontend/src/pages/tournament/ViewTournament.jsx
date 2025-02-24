@@ -72,13 +72,19 @@ const ViewTournament = () => {
       console.log("Tournament end");
       setTournament(data);
     };
+
+    const handleTournamentUpdate = (data) => {
+      setTournament(data);
+    };
   
     socket.on('tournament-start', handleTournamentStart);
     socket.on('tournament-end', handleTournamentEnd);
-  
+    socket.on('tournament-update', handleTournamentUpdate);
+    
     return () => {
       socket.off('tournament-start', handleTournamentStart);
       socket.off('tournament-end', handleTournamentEnd);
+      socket.off('tournament-update', handleTournamentUpdate);
     };
   }, []); 
 

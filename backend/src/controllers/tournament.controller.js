@@ -91,6 +91,9 @@ export const updateTournament = asyncHandler(async (req, res) => {
 
         await tournament.save();
 
+        const io = getIo()
+        io.to(tournamentId).emit('tournament-update', tournament);
+
         return res
             .status(200)
             .json(new ApiResponse(200, "Tournament Updated Successfully!", tournament));
@@ -233,6 +236,9 @@ export const tournamentRegister = asyncHandler(async (req, res) => {
 
         await tournament.save();
 
+        const io = getIo()
+        io.to(_id).emit('tournament-register', tournament);
+
         return res
             .status(201)
             .json(new ApiResponse(201, "User successfully registered to the tournament"));
@@ -275,6 +281,9 @@ export const tournamentUnregister = asyncHandler(async (req, res) => {
         );
 
         await tournament.save();
+
+        const io = getIo()
+        io.to(_id).emit('tournament-unregister', tournament);
 
         return res
             .status(200)
@@ -431,6 +440,9 @@ export const showTournament = asyncHandler(async (req, res) => {
 
         await tournament.save();
 
+        const io = getIo()
+        io.to(tournamentId).emit('tournament-show', tournament);
+
         res.json(new ApiResponse(200, "Tournament fixtures is now visible to all users!"));
     } catch(error) {
         console.error(error);
@@ -482,6 +494,9 @@ export const hideTournament = asyncHandler(async (req, res) => {
         tournament.showDetails = false;
         await tournament.save();
 
+        const io = getIo()
+        io.to(tournamentId).emit('tournament-hide', tournament);
+
         res.json(new ApiResponse(200, "Now users cannot see the fixtures and participants."));
     } catch(error) {
         console.error(error);
@@ -513,6 +528,9 @@ export const removeParticipant = asyncHandler(async (req, res) => {
 
         tournament.participants = updatedParticipants;
         await tournament.save();
+
+        const io = getIo()
+        io.to(tournamentId).emit('tournament-remove-participant', tournament)
         
         return res
             .status(200)
@@ -872,6 +890,7 @@ export const giveBye = asyncHandler(async (req, res) => {
 
         match.endTime = Date.now()
         match.state = "DONE";
+        match.winner = byeToObj.cfid;
 
         await tournament.save();
 
@@ -887,8 +906,10 @@ export const giveBye = asyncHandler(async (req, res) => {
             success: true,
             status: "BYE",
             match,
-            winner: byeToObj,
+            winner: byeToObj.cfid,
         })
+
+        io.to(tournamentId).emit('match-bye', tournament);
 
         res
         .status(200)

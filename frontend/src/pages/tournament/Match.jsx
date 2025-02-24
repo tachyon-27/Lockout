@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 import { socket } from "../../socket";
-import {Loader} from "@/components";
+import { Loader } from "@/components";
 
 const Match = ({ isAdmin }) => {
     const { toast } = useToast();
@@ -152,7 +152,7 @@ const Match = ({ isAdmin }) => {
         return () => {
             socket.off("match-status", handleMatchStatus);
         };
-    }, [toast]);
+    }, []);
 
     // TieBreaker
     useEffect(() => {
@@ -221,87 +221,92 @@ const Match = ({ isAdmin }) => {
     };
 
     if (isLoading) {
-        return (<Loader/>);
+        return (<Loader />);
     }
 
     return (
-            <div className="p-4 flex flex-col items-center max-h-screen">
-                <div className="text-white text-4xl font-bold">Round {matchData.tournamentRoundText}</div>
-                <div className="text-white text-lg font-semibold">{timeLeft > 0 ? <span>Time: {formatTime(timeLeft)}</span> : <span>Match Ended</span>}</div>
+        <div className="p-4 flex flex-col items-center max-h-screen">
+            {matchData.winner && (
+                <div className="text-white text-2xl font-semibold">
+                    {matchData.winner === "DRAW" ? "It is a Tie" : `${matchData.winner} won the Match`}
+                </div>
+            )}
+            <div className="text-white text-4xl font-bold">Round {matchData.tournamentRoundText}</div>
+            <div className="text-white text-lg font-semibold">{timeLeft > 0 ? <span>Time: {formatTime(timeLeft)}</span> : <span>Match Ended</span>}</div>
 
-                <div className="flex justify-between flex-wrap min-w-full order-1 text-white pt-7">
-                    <div className="w-[25%] flex flex-col items-center gap-y-3">
-                        <span className="text-4xl">{matchData.participants[0].cfid}</span>
-                        <span>Total Points: {totalPoints[matchData.participants[0].cfid]}</span>
-                    </div>
+            <div className="flex justify-between flex-wrap min-w-full order-1 text-white pt-7">
+                <div className="w-[25%] flex flex-col items-center gap-y-3">
+                    <span className="text-4xl">{matchData.participants[0].cfid}</span>
+                    <span>Total Points: {totalPoints[matchData.participants[0].cfid]}</span>
+                </div>
 
-                    <div className="md:w-[50%] text-center w-full order-3 md:order-2 flex flex-grow items-center justify-center pt-[30%] md:pt-[8%]">
-                        <div className="flex flex-col w-[90%] justify-center">
-                            {matchData.problemList.map((problem, idx) => (
-                                <div key={idx} className="flex items-center justify-between py-2 px-4 border-b border-white hover:bg-gray-700">
-                                    <div className="w-[20%] text-center">{
-                                        problem.solved ? (
-                                            renderProblemStatus(problem.solved === matchData.participants[0].cfid, problem)
-                                        ) : (problem.points)
-                                    }</div>
-                                    <div className="w-[60%] text-center">
-                                        <a
-                                            href={`https://codeforces.com/contest/${problem.question.contestId}/problem/${problem.question.index}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-yellow-300 hover:underline"
-                                        >
-                                            {problem.question.name || problem.question.index}
-                                        </a>
-                                    </div>
-                                    <div className="w-[20%] text-center">{
-                                        problem.solved ? (
-                                            renderProblemStatus(problem.solved === matchData.participants[1].cfid, problem)
-                                        ) : (problem.points)
-                                    }</div>
+                <div className="md:w-[50%] text-center w-full order-3 md:order-2 flex flex-grow items-center justify-center pt-[30%] md:pt-[8%]">
+                    <div className="flex flex-col w-[90%] justify-center">
+                        {matchData.problemList.map((problem, idx) => (
+                            <div key={idx} className="flex items-center justify-between py-2 px-4 border-b border-white hover:bg-gray-700">
+                                <div className="w-[20%] text-center">{
+                                    problem.solved ? (
+                                        renderProblemStatus(problem.solved === matchData.participants[0].cfid, problem)
+                                    ) : (problem.points)
+                                }</div>
+                                <div className="w-[60%] text-center">
+                                    <a
+                                        href={`https://codeforces.com/contest/${problem.question.contestId}/problem/${problem.question.index}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-yellow-300 hover:underline"
+                                    >
+                                        {problem.question.name || problem.question.index}
+                                    </a>
                                 </div>
-                            ))}
-                            <div className="flex justify-around">
+                                <div className="w-[20%] text-center">{
+                                    problem.solved ? (
+                                        renderProblemStatus(problem.solved === matchData.participants[1].cfid, problem)
+                                    ) : (problem.points)
+                                }</div>
+                            </div>
+                        ))}
+                        <div className="flex justify-around">
+                            <button
+                                className="w-[30%] self-center mt-2 p-2 font-semibold bg-gray-700 hover:bg-gray-600 disabled:bg-gray-500 text-white rounded-xl"
+                                onClick={handleProblemRefresh}
+                                disabled={!isRefreshActive}
+                            >
+                                {isRefreshActive ? <span>Refresh Status</span> : <span>Please Wait...</span>}
+                            </button>
+
+                            {isAdmin && (
                                 <button
                                     className="w-[30%] self-center mt-2 p-2 font-semibold bg-gray-700 hover:bg-gray-600 disabled:bg-gray-500 text-white rounded-xl"
-                                    onClick={handleProblemRefresh}
-                                    disabled={!isRefreshActive}
+                                    onClick={() => navigate(`/admin/dashboard/tournament/match/settings?tournamentId=${tournamentId}&matchId=${matchId}`)}
                                 >
-                                    {isRefreshActive ? <span>Refresh Status</span> : <span>Please Wait...</span>}
+                                    Settings
                                 </button>
-
-                                {isAdmin && (
-                                    <button
-                                        className="w-[30%] self-center mt-2 p-2 font-semibold bg-gray-700 hover:bg-gray-600 disabled:bg-gray-500 text-white rounded-xl"
-                                        onClick={() => navigate(`/admin/dashboard/tournament/match/settings?tournamentId=${tournamentId}&matchId=${matchId}`)}
-                                    >
-                                        Settings
-                                    </button>
-                                )}
-                            </div>
+                            )}
                         </div>
-                    </div>
-
-                    <div className="w-[25%] order-2 md:order-3 flex flex-col items-center gap-y-3">
-                        <span className="text-4xl">{matchData.participants[1].cfid}</span>
-                        <span>Total Points: {totalPoints[matchData.participants[1].cfid]}</span>
                     </div>
                 </div>
-                {matchData.tieBreaker && matchData.tieBreaker.length > 0 && (
-                    <div className="w-full mt-6 p-4 bg-gray-800 text-white rounded-xl shadow-lg">
-                        <h2 className="text-2xl font-bold text-center">Tie Breaker Questions</h2>
-                        <div className="mt-4 space-y-3">
-                            {matchData.tieBreaker.map((tb, idx) => (
-                                <div key={idx} className="p-3 bg-gray-700 rounded-lg border border-gray-600">
-                                    <h3 className="text-lg font-semibold text-yellow-300">{tb.title}</h3>
-                                    <p className="text-gray-300">{tb.question}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
 
+                <div className="w-[25%] order-2 md:order-3 flex flex-col items-center gap-y-3">
+                    <span className="text-4xl">{matchData.participants[1].cfid}</span>
+                    <span>Total Points: {totalPoints[matchData.participants[1].cfid]}</span>
+                </div>
             </div>
+            {matchData.tieBreaker && matchData.tieBreaker.length > 0 && (
+                <div className="w-full mt-6 p-4 bg-gray-800 text-white rounded-xl shadow-lg">
+                    <h2 className="text-2xl font-bold text-center">Tie Breaker Questions</h2>
+                    <div className="mt-4 space-y-3">
+                        {matchData.tieBreaker.map((tb, idx) => (
+                            <div key={idx} className="p-3 bg-gray-700 rounded-lg border border-gray-600">
+                                <h3 className="text-lg font-semibold text-yellow-300">{tb.title}</h3>
+                                <p className="text-gray-300">{tb.question}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+        </div>
     );
 };
 

@@ -77,6 +77,9 @@ const matchSchema = mongoose.Schema({
         required: true,
         default: 'SCHEDULED'
     },
+    winner: {
+        type: String,
+    },
     duration: {
         type: Number
     },

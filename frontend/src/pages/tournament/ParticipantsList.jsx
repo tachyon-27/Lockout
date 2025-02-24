@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast"
 import axios from 'axios'
-import {Loader} from '@/components';
+import { Loader } from '@/components';
+import { socket } from '../../socket';
 
 const ParticipantsList = ({ isAdmin = false }) => {
     const { toast } = useToast();
@@ -15,18 +16,18 @@ const ParticipantsList = ({ isAdmin = false }) => {
     const [err, setErr] = useState("");
     const [isConfirming, setIsConfirming] = useState(false);
     const [show, setShow] = useState(false)
-    const [participantToRemove, setParticipantToRemove] = useState(null); 
+    const [participantToRemove, setParticipantToRemove] = useState(null);
 
     const filteredParticipants = useMemo(() => {
         return participants
-            .filter((participant) => 
+            .filter((participant) =>
                 participant.name.toLowerCase().includes(search.toLowerCase()) // Search by name
             )
             .sort((a, b) => {
                 const lowerSearch = search.toLowerCase();
                 const aStarts = a.name.toLowerCase().startsWith(lowerSearch);
                 const bStarts = b.name.toLowerCase().startsWith(lowerSearch);
-    
+
                 return aStarts === bStarts ? 0 : aStarts ? -1 : 1;
             });
     }, [search, participants]);
@@ -68,6 +69,34 @@ const ParticipantsList = ({ isAdmin = false }) => {
     };
 
     useEffect(() => {
+
+        const handleParticipantShowHide = (data) => {
+            setParticipants(data.participants);
+            setShow(data.showDetails);
+        }
+
+        const handleParticipantUpdate = (data) => setParticipants(data.participants);
+
+        socket.on('tournament-show', handleParticipantShowHide);
+        socket.on('tournament-hide', handleParticipantShowHide);
+        socket.on('tournament-start', handleParticipantShowHide);
+        socket.on('tournament-register', handleParticipantUpdate);
+        socket.on('tournament-unregister', handleParticipantUpdate);
+        socket.on('tournament-remove-participant', handleParticipantUpdate);
+        
+        
+        return () => {
+            socket.off('tournament-show', handleParticipantShowHide);
+            socket.off('tournament-hide', handleParticipantShowHide);
+            socket.off('tournament-start', handleParticipantShowHide);
+            socket.off('tournament-register', handleParticipantUpdate);
+            socket.on('tournament-unregister', handleParticipantUpdate);
+            socket.off('tournament-remove-participant', handleParticipantUpdate);
+        }
+
+    }, [])
+
+    useEffect(() => {
         const fetchParticipants = async () => {
             if (!tournamentId) {
                 console.log("Tournament ID is required in the query parameters.");
@@ -85,7 +114,7 @@ const ParticipantsList = ({ isAdmin = false }) => {
 
                 if (response.data.success) {
                     setShow(response.data.data.show)
-                    if(isAdmin) {
+                    if (isAdmin) {
                         setShow(true)
                     }
                     const sortedParticipants = response.data.data.participants.sort(
@@ -128,9 +157,9 @@ const ParticipantsList = ({ isAdmin = false }) => {
 
     return !show ? (
         <div className=' w-full h-full flex items-center justify-center text-2xl'>
-          Participants not available yet.
+            Participants not available yet.
         </div>
-      ) : (
+    ) : (
         <div className='flex flex-col items-center justify-center'>
             <div className="grid gap-y-4 p-3 sm:w-full md:w-[80%]">
                 <div className="bg-gradient-to-b from-gray-400 w-full via-gray-500 to-gray-700 p-[0.5px] rounded-2xl">
@@ -150,7 +179,7 @@ const ParticipantsList = ({ isAdmin = false }) => {
                         <span>S.no.</span>
                         <span>Participant</span>
                         <span>Max Rating</span>
-                        {isAdmin && <span>Actions</span>} 
+                        {isAdmin && <span>Actions</span>}
                     </div>
                 </div>
 

@@ -8,6 +8,7 @@ import {
   Match,
 } from "@g-loot/react-tournament-brackets";
 import {Loader} from '@/components';
+import { socket } from '../../socket';
 
 function Fixtures() {
   const [searchParams] = useSearchParams();
@@ -48,6 +49,30 @@ function Fixtures() {
 
     (async () => await fetchMatches())();
   }, [navigate, toast, tournamentId]);
+
+  useEffect(() => {
+  
+      const handleMatchesUpdate = (data) => setMatches(data.matches);
+      const handleMatchShowHide = (data) => {
+        setMatches(data.matches);
+        setShow(data.showDetails);
+      }
+  
+      socket.on('match-end', handleMatchesUpdate);
+      socket.on('match-bye', handleMatchesUpdate);
+      socket.on('tournament-show', handleMatchShowHide);
+      socket.on('tournament-hide', handleMatchShowHide);
+      socket.on('tournament-start', handleMatchShowHide);
+      
+      return () => {
+        socket.off('match-end', handleMatchesUpdate);
+        socket.off('match-bye', handleMatchesUpdate);
+        socket.off('tournament-show', handleMatchShowHide);
+        socket.off('tournament-hide', handleMatchShowHide);
+        socket.off('tournament-start', handleMatchShowHide);
+      }
+  
+    }, [])
 
   if(isLoading) {
     return (

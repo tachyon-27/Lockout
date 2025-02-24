@@ -69,13 +69,18 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
 
         match.endTime = Date.now()
         match.state = "DONE";
+        match.winner = winner ? winner.cfid : "DRAW";
 
         await Tournament.findOneAndUpdate(
             { _id: tournament._id, "matches.id": match.id },
-            { $set: { "matches.$": match } },
+            {
+                $set: {
+                    "matches.$": match,
+                }
+            },
             { new: true }
-        );
-
+        );     
+        
         io.to(roomId).emit("match-status", {
             success: true,
             status: "DONE",

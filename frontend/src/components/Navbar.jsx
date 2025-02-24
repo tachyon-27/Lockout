@@ -12,7 +12,6 @@ function Navbar() {
     const navItems = [
         { name: 'Home', slug: '#home', active: true },
         { name: 'About', slug: '#about', active: true },
-        { name: 'Benefits', slug: '#benefits', active: true },
         { name: 'History', slug: '#history', active: true },
         { name: 'Tournaments', slug: '/tournaments', active: true } // Real route
     ];

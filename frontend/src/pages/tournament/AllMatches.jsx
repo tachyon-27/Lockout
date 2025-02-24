@@ -51,18 +51,28 @@ const AllMatches = ({isAdmin = false}) => {
 
   useEffect(() => {
 
-    const handleMatchStart = (data) => {
-      setMatches(data.matches.filter(match => match.participants.length === 2));
+    const handleMatchesUpdate = (data) => setMatches(data.matches.filter(match => match.participants.length === 2));
+
+    const handleMatchShowHide = (data) => {
+      setMatches(data.matches);
+      setShow(data.showDetails);
     }
 
-    const handleMatchEnd = (data) => setMatches(data.matches.filter(match => match.participants.length === 2));
+    socket.on('match-start', handleMatchesUpdate);
+    socket.on('match-end', handleMatchesUpdate);
+    socket.on('match-bye', handleMatchesUpdate);
+    socket.on('tournament-show', handleMatchShowHide);
+    socket.on('tournament-hide', handleMatchShowHide);
+    socket.on('tournament-start', handleMatchShowHide);
 
-    socket.on('match-start', handleMatchStart);
-    socket.on('match-end', handleMatchEnd);
     
     return () => {
-      socket.off('match-start', handleMatchStart);
-      socket.off('match-end', handleMatchEnd);
+      socket.off('match-start', handleMatchesUpdate);
+      socket.off('match-end', handleMatchesUpdate);
+      socket.off('match-bye', handleMatchesUpdate);
+      socket.off('tournament-show', handleMatchShowHide);
+      socket.off('tournament-hide', handleMatchShowHide);
+      socket.off('tournament-start', handleMatchShowHide);
     }
 
   }, [])
