@@ -193,7 +193,7 @@ const Login = () => {
                                 Please wait
                             </div>
                         ) : (
-                            'Sign Up'
+                            'Login'
                         )}
                     </button>
 

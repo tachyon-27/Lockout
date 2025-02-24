@@ -482,7 +482,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
 export const getCFIDs = asyncHandler(async (req, res) => {
   return res
     .status(201)
-    .json(new ApiResponse(201, "", {cfids: req.user.codeforcesID}))
+    .json(new ApiResponse(201, "", {cfids: req.user.codeforcesID.filter(cfid => cfid.isVerified)}))
 })
 
 export const getUsers = asyncHandler(async (req, res) => {

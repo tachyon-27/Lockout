@@ -48,9 +48,18 @@ export default function Tournament({ isAdmin = false }) {
     .filter(tournament => new Date(tournament.startDate) > now)
     .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 
-  const upcomingTournament = upcomingTournaments.length > 0 ? upcomingTournaments[0] : null;
+  let upcomingTournament = upcomingTournaments.length > 0 ? upcomingTournaments[0] : null;
+  let isOngoing = false;
 
-  const pastTournaments = tournaments.filter(tournament => new Date(tournament.startDate) <= now);
+  const pastTournaments = tournaments
+  .filter(tournament => new Date(tournament.startDate) <= now)
+  .sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+  if(pastTournaments.length > 0 && !pastTournaments[0].endDate) {
+    isOngoing = true;
+    upcomingTournament = pastTournaments[0]
+    pastTournaments.shift()
+  }
 
 
   const handleDelete = async (tournamentId) => {
@@ -75,7 +84,7 @@ export default function Tournament({ isAdmin = false }) {
         {upcomingTournament.coverImage && (
           <img src={upcomingTournament.coverImage} alt={upcomingTournament.title} className="w-full h-auto max-h-80 object-contain rounded-xl mb-4" />
         )}
-        <h2 className="text-3xl font-bold mb-4">Upcoming Tournament</h2>
+        <h2 className="text-3xl font-bold mb-4">{isOngoing ? "Ongoing" : "Upcoming"} Tournament</h2>
         <h3 className="text-2xl font-semibold">{upcomingTournament.title}</h3>
         <p className="text-gray-300 mb-4">{upcomingTournament.summary}</p>
         <div className="flex items-center justify-between mt-4 gap-4">
