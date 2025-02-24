@@ -5,6 +5,7 @@ import axios from "axios";
 import { RegistrButton } from "@/components";
 import {Loader} from "@/components";
 import { useSelector } from "react-redux";
+import { socket } from '../../socket';
 
 const ViewTournament = () => {
   const [searchParams] = useSearchParams();
@@ -16,6 +17,7 @@ const ViewTournament = () => {
   const navigate = useNavigate()
   const isLoggedIn = useSelector(state => state.user.isAuthenticated);
 
+  // Fetch Tournament on render
   useEffect(() => {
     if (!tournamentId) {
       console.log("Tournament ID is required in the query parameters.");
@@ -60,6 +62,25 @@ const ViewTournament = () => {
 
     fetchTournament();
   }, [tournamentId, navigate, toast]);
+
+  useEffect(() => {
+    const handleTournamentStart = (data) => {
+      setTournament(data);
+    };
+  
+    const handleTournamentEnd = (data) => {
+      console.log("Tournament end");
+      setTournament(data);
+    };
+  
+    socket.on('tournament-start', handleTournamentStart);
+    socket.on('tournament-end', handleTournamentEnd);
+  
+    return () => {
+      socket.off('tournament-start', handleTournamentStart);
+      socket.off('tournament-end', handleTournamentEnd);
+    };
+  }, []); 
 
   useEffect(() => {
     if (!timeLeft || !tournament) return;

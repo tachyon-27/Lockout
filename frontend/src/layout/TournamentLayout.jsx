@@ -1,9 +1,30 @@
 import { cn } from "@/lib/utils";
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import TournamentNavBar from "../components/TournamentNavBar";
+import { useEffect } from "react";
+import { socket } from '../socket';
 
 const TournamentLayout = ({ isAdmin }) => {
   if (!isAdmin) isAdmin = false;
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const tournamentId = searchParams.get("id") || searchParams.get("tournamentId");
+
+  useEffect(() => {
+    if (!tournamentId) {
+      toast({ title: "Tournament not specified!" });
+      navigate('/tournaments');
+      return;
+    }
+
+    socket.connect();
+    socket.emit("joinRoom", tournamentId);
+
+    return () => {
+      socket.emit("leaveRoom", tournamentId);
+      socket.disconnect();
+    };
+  }, [tournamentId, navigate]);
 
   return (
     <div

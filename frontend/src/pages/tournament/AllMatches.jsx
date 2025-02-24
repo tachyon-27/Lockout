@@ -3,11 +3,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast"
 import axios from "axios";
 import MatchCard from '@/components/MatchCard'
+import { socket } from '../../socket';
 
 const AllMatches = ({isAdmin = false}) => {
   const [searchParams] = useSearchParams();
   const tournamentId = searchParams.get("id");
-  const [matches, setMatchs] = useState([])
+  const [matches, setMatches] = useState([])
   const [show, setShow] = useState(false)
   const [startDate, setStartDate] = useState(null);
   const { toast } = useToast()
@@ -34,7 +35,7 @@ const AllMatches = ({isAdmin = false}) => {
         }
         setStartDate(response.data.data.startDate)
         setShow(response.data.data.show)
-        setMatchs(response.data.data.matches.filter(match => match.participants.length === 2));
+        setMatches(response.data.data.matches.filter(match => match.participants.length === 2));
         console.log(response.data.data)
       } catch (error) {
         navigate('/tournaments')
@@ -47,6 +48,24 @@ const AllMatches = ({isAdmin = false}) => {
 
     fetchMatches();
   }, []);
+
+  useEffect(() => {
+
+    const handleMatchStart = (data) => {
+      setMatches(data.matches.filter(match => match.participants.length === 2));
+    }
+
+    const handleMatchEnd = (data) => setMatches(data.matches.filter(match => match.participants.length === 2));
+
+    socket.on('match-start', handleMatchStart);
+    socket.on('match-end', handleMatchEnd);
+    
+    return () => {
+      socket.off('match-start', handleMatchStart);
+      socket.off('match-end', handleMatchEnd);
+    }
+
+  }, [])
 
   const filteredMatches = useMemo(() => {
     return {

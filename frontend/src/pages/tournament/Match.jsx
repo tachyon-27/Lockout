@@ -68,7 +68,6 @@ const Match = ({ isAdmin }) => {
 
     // Join Match
     useEffect(() => {
-        socket.connect()
         if (!matchId || !tournamentId) {
             toast({
                 title: "Match or Tournament not specified!"

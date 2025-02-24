@@ -90,7 +90,6 @@ function Settings() {
             </Button>
           )}
 
-          {/* Show Start Tournament button only if it's not ended */}
           {!endDate && new Date() < new Date(startDate)&& (
             <Button 
               onClick={() => handleAction("start", "Tournament started!", "Error starting tournament!")}

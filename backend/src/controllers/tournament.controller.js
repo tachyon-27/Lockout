@@ -37,8 +37,6 @@ export const addTournament = asyncHandler(async (req, res) => {
             coverImage: coverImage.url
         })
 
-        console.log(tournament)
-
         return res
             .status(201)
             .json(new ApiResponse(201, "Tournament Added Successfully!", tournament))
@@ -90,8 +88,6 @@ export const updateTournament = asyncHandler(async (req, res) => {
         tournament.startDate = startDate;
         tournament.description = description;
         tournament.coverImage = coverImageUrl;
-
-        console.log(tournament)
 
         await tournament.save();
 
@@ -367,6 +363,9 @@ export const startTournament = asyncHandler(async (req, res) => {
             const result = await Question.insertMany(questionsToInsert);
         }
 
+        const io = getIo()
+        io.to(tournamentId).emit('tournament-start', tournament);
+
         res.json(new ApiResponse(200, "Tournament Started!"));
     } catch (error) {
         console.error(error);
@@ -395,6 +394,9 @@ export const endTournament  = asyncHandler(async (req, res) => {
         tournament.endDate = new Date();
 
         await tournament.save()
+
+        const io = getIo()
+        io.to(tournamentId).emit('tournament-end', tournament);
 
         res.json(new ApiResponse(200, "Tournament Ended!"));
 
@@ -698,7 +700,6 @@ export const startMatch = asyncHandler(async (req, res) => {
         match.state = "RUNNING";
         match.startTime = Date.now();
         match.endTime = null;
-        console.log(match.problemList[0])
         await tournament.save();
 
 
@@ -709,6 +710,7 @@ export const startMatch = asyncHandler(async (req, res) => {
 
         const io = getIo()
         io.to(`${tournamentId}_${matchId}`).emit('match-start',match);
+        io.to(tournamentId).emit('match-start', tournament);
 
         startMatchTimer(`${tournamentId}_${matchId}`, match.startTime, match.duration, tournament, match);
 
@@ -768,6 +770,8 @@ export const endMatch = asyncHandler(async (req, res) => {
         await handleMatchEnd(tournament, match, io, roomId, winnerObj);
 
         await tournament.save();
+
+        io.to(tournamentId).emit('match-end', tournament);
 
         res
             .status(200)
@@ -899,7 +903,6 @@ export const giveBye = asyncHandler(async (req, res) => {
 export const customTieBreaker = asyncHandler(async (req, res) => {
     try {
         const { tournamentId, matchId, title, question } = req.body;
-        console.log(tournamentId, matchId)
         const customTieBreaker = {title, question};
         
         if (!tournamentId) {

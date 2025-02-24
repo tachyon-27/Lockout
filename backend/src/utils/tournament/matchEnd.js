@@ -3,9 +3,9 @@ import { UpdateProblemStatus } from "./UpdateProblemStatus.js";
 
 export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
     try {
-        
+
         const updatedMatchData = await UpdateProblemStatus(tournament, match);
-        
+
         if (!updatedMatchData.success) {
             return io.to(roomId).emit("match-status", {
                 success: false,
@@ -22,7 +22,7 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
 
         let resultText = "DRAW";
 
-        if(!winner) {
+        if (!winner) {
             if (p1Points > p2Points) {
                 winner = match.participants[0];
                 resultText = "WON";
@@ -38,24 +38,28 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
             if (match.nextMatchId) {
                 const nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
                 if (nextMatch) {
-                    nextMatch.participants = nextMatch.participants.filter(participant => {
-                        participant.cfid != match.participants[0].cfid && match.participants.length > 1 && participant.cfid != match.participants[1].cfid
-                        if(match.participants[0].cfid === participant.cfid) return false;
-                        else {
-                            if(match.participants.length > 1) {
-                                if(match.participants[1].cfid === participant.cfid) return false;
-                                else return true;
-                            } else return true;
-                        }
-                    } )
-                    nextMatch.participants.push(winner?.toObject ? winner.toObject() : winner);
+                    nextMatch.participants = nextMatch.participants.filter(participant =>
+                        participant.cfid !== match.participants[0].cfid &&
+                        (match.participants.length <= 1 || participant.cfid !== match.participants[1].cfid)
+                    );
+            
+                    if (!nextMatch.participants.some(p => p.cfid === winner.cfid)) {
+                        nextMatch.participants.push(winner?.toObject ? winner.toObject() : winner);
+                    }
+            
+                    nextMatch.participants = nextMatch.participants.filter((participant, index, self) =>
+                        index === self.findIndex((p) => p.cfid === participant.cfid)
+                    );
+            
+            
+                    await Tournament.findOneAndUpdate(
+                        { _id: tournament._id, "matches.id": nextMatch.id },
+                        { $set: { "matches.$.participants": nextMatch.participants } }, 
+                        { new: true }
+                    );
+            
                 }
-                await Tournament.findOneAndUpdate(
-                    { _id: tournament._id, "matches.id":nextMatch.id },
-                    { $set: { "matches.$": nextMatch } }, // Update the entire match object
-                    { new: true }
-                );
-            }
+            }                        
 
             match.participants.find(p => p.cfid === winner.cfid).resultText = resultText;
         } else {
@@ -68,7 +72,7 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
 
         await Tournament.findOneAndUpdate(
             { _id: tournament._id, "matches.id": match.id },
-            { $set: { "matches.$": match } }, // Update the entire match object
+            { $set: { "matches.$": match } },
             { new: true }
         );
 

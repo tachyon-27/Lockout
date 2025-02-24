@@ -6,7 +6,6 @@ export const UpdateProblemStatus = async (tournament, match) => {
         const cfid1 = match.participants[0].cfid;
         const cfid2 = match.participants[1].cfid;
         const startTimestamp = new Date(match.startTime).getTime();
-        console.log(match)
         const p1Response = await axios.get(`https://codeforces.com/api/user.status?handle=${cfid1}`);
         if (p1Response.data.status !== "OK") {
             throw new Error("Failed to fetch submissions from Codeforces for Player 1");
