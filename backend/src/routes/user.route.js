@@ -13,9 +13,12 @@ import {
   verifyEmail, 
   googleCallback,
   getUsers,
-  refresh
+  refresh,
+  editName,
+  removeCFID,
+  getLoggedinUser
 } from "../controllers/user.controller.js";
-import { verifyUser } from "../middlewares/auth.middleware.js";
+import { checkCurrentPassword, verifyUser } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 router.route("/register").post(registerUser);
@@ -34,5 +37,9 @@ router.route('/refresh').post(refresh)
 // secured routes
 router.route("/logout").get(verifyUser, logoutUser)
 router.route("/get-cfids").get(verifyUser, getCFIDs)
+router.route('/set-password').post(verifyUser, checkCurrentPassword, resetPassword)
+router.route('/edit-name').post(verifyUser, editName)
+router.route('/remove-cfid').post(verifyUser, removeCFID)
+router.route('/get-loggedin-user').get(verifyUser, getLoggedinUser)
 
 export default router;

@@ -45,7 +45,7 @@ export const verifyUser = asyncHandler(async (req, res, next) => {
 
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await User.findById(decodedToken?._id).select("-password");
+        const user = await User.findById(decodedToken?._id);
 
         if (!user) {
             throw new Error("Invalid Token")
@@ -62,41 +62,33 @@ export const verifyUser = asyncHandler(async (req, res, next) => {
 
 export const checkCurrentPassword = asyncHandler(async (req, res, next) => {
     try {
-        const { currentPassword, _id } = req.body;
-        
-        if (!_id || currentPassword === undefined) {
-            return res.status(400).json(new ApiResponse(400, "User ID and Current Password are required!"));
-        }
+        const { currentPassword } = req.body;
+        const user = req.user;
 
-        const user = await User.findById(_id);
-        
-        if (!user) {
-            return res.status(404).json(new ApiResponse(404, "User not found!"));
-        }
-        
-        if (!user.isVerified) {
-            return res.status(403).json(new ApiResponse(403, "User is not verified!"));
-        }
-        
-        if (currentPassword === "" && user.canChangePassword) {
+        if (!currentPassword && !user.password) {
+            user.verifyCodeExpiry = new Date(Date.now() + 60 * 60 * 1000);
+            user.canChangePassword = true;
+            await user.save();
             return next();
         }
 
         if (!currentPassword) {
-            return res.status(400).json(new ApiResponse(400, "Current Password is required!"));
+            return res.json(new ApiResponse(400, "Current password is required!"));
         }
 
         const isMatch = await bcrypt.compare(currentPassword, user.password);
-        
         if (!isMatch) {
-            return res.status(401).json(new ApiResponse(401, "Incorrect Current Password!"));
+            return res.json(new ApiResponse(401, "Incorrect current password!"));
         }
-        
+
+        user.verifyCodeExpiry = new Date(Date.now() + 60 * 60 * 1000);
         user.canChangePassword = true;
         await user.save();
         next();
+        
     } catch (error) {
         console.error("Error in checkCurrentPassword:", error);
-        throw new Error(error);
+        return res.status(500).json(new ApiResponse(500, "Internal Server Error"));
     }
 });
+
