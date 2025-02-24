@@ -307,7 +307,7 @@ export const passwordOTP = asyncHandler(async (req, res) => {
 export const resetPassword = asyncHandler(async (req, res) => {
   try {
     const { password, _id } = req.body;
-    const user = await User.findById(_id)
+    const user = req.user || await User.findById(_id)
 
     if(  !password) {
       throw new Error("All fields are required!")
@@ -495,4 +495,50 @@ export const getUsers = asyncHandler(async (req, res) => {
   } catch(error) {
     return res.json(new ApiResponse(501, "Error while getting users", error))
   }
+})
+
+export const editName = asyncHandler(async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if(!name) {
+      throw new Error("Name is required.")
+    }
+
+    req.user.name = name;
+    await req.user.save();
+
+    return res
+      .status(201)
+      .json(201, "Name updated Successfully.", req.user)
+  } catch(error) {
+    throw new Error(error)
+  }
+})
+
+export const removeCFID = asyncHandler(async (req, res) => {
+    try {
+      const { cfid } = req.body; 
+      const user = req.user;
+  
+      const updatedCodeforcesIDs = user.codeforcesID.filter(entry => entry.cfid !== cfid);
+  
+      if (updatedCodeforcesIDs.length === user.codeforcesID.length) {
+        throw new Error("CFID not found!")
+      }
+  
+      user.codeforcesID = updatedCodeforcesIDs;
+      await user.save();
+  
+      return res
+        .status(201)
+        .json(new ApiResponse(201, "Codeforces ID removed."))
+    } catch (error) {
+      throw new Error(error)
+    }
+});
+
+export const getLoggedinUser = asyncHandler(async (req, res) => {
+  return res
+    .json(new ApiResponse(201, "User fetched.", req.user))
 })

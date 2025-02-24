@@ -41,7 +41,6 @@ export const getGithubUser = async (access_token) => {
         if(userExists) {
             userExists.isVerified = true;
             userExists.githubAccessToken = access_token;
-            userExists.canChangePassword = true;
 
             await userExists.save();
 
