@@ -6,7 +6,8 @@ export const getOrCreateGoogleUser = async (email, name) => {
 
         if (userExists) {
 
-            userExists.isVerified = true
+            userExists.isVerified = true;
+            userExists.canChangePassword = true;
 
             await userExists.save();
 

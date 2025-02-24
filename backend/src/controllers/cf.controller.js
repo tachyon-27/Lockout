@@ -61,7 +61,7 @@ export const verifyCFID = asyncHandler(async (req, res) => {
         else {
             return res
                 .status(201)
-                .json(new ApiResponse(201, "Codeforces handle authorized successfully."))
+                .json(new ApiResponse(201, "Codeforces handle authorized successfully.", cfid))
         }
     } catch (error) {
         res.status(501)

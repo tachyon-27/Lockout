@@ -39,8 +39,9 @@ export const getGithubUser = async (access_token) => {
         }
         const userExists = await User.findOne({email})
         if(userExists) {
-            userExists.isVerified = true,
+            userExists.isVerified = true;
             userExists.githubAccessToken = access_token;
+            userExists.canChangePassword = true;
 
             await userExists.save();
 
