@@ -11,7 +11,6 @@ const ProfileSettings = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
 
-  // Fetch user data
   const fetchUser = async () => {
     try {
       setLoading(true);
@@ -41,7 +40,6 @@ const ProfileSettings = () => {
       toast({ title: res.data.message });
 
       if (res.data.success) {
-        // Refetch user data to ensure update is reflected
         fetchUser();
       }
     } catch (error) {
@@ -60,7 +58,7 @@ const ProfileSettings = () => {
   }
 
   return (
-    <div className="flex flex-col items-center p-6 bg-gray-900 text-white rounded-lg shadow-md w-full max-w-md">
+    <div className="flex flex-col items-center p-6 text-white w-full max-w-md">
       <h2 className="text-2xl font-bold mb-4">Profile Settings</h2>
 
       <div className="w-full flex flex-col items-center bg-gray-800 p-4 rounded-lg shadow">

@@ -56,7 +56,7 @@ export const verifyCFID = asyncHandler(async (req, res) => {
         );
 
         if (!updatedUser) {
-            return res.json(new ApiResponse(401, "Unable to authorize the codeforces handle, please try again."))
+            return res.json(new ApiResponse(401, "Unable to authorize the codeforces handle, please try again.\n( This may be due to a Codeforces error. Try again after a few seconds.If the problem persists, try repeating the process. )"))
         }
         else {
             return res

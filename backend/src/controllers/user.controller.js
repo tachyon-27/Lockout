@@ -510,7 +510,7 @@ export const editName = asyncHandler(async (req, res) => {
 
     return res
       .status(201)
-      .json(201, "Name updated Successfully.", req.user)
+      .json(new ApiResponse(201, "Name updated Successfully.", req.user))
   } catch(error) {
     throw new Error(error)
   }
