@@ -72,6 +72,7 @@ function Settings() {
           <CardTitle className="text-center">Tournament Settings</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col space-y-4">
+          
           {isShown ? (
             <Button 
               onClick={() => handleAction("hide", "Fixtures are now hidden!", "Error hiding fixtures!")}
@@ -124,6 +125,13 @@ function Settings() {
           >
             {loading === "delete" ? "Deleting..." : "Delete Tournament"}
           </Button>
+          <Button
+            onClick={()=>handleAction("restart", "Tournament Restarted", "Error Restarting Tournament")}
+            disabled={loading==="restart"}
+            className = "bg-red-800 hover:bg-red-900 transition-all"
+            >
+              {loading === "restart" ? "Restarting..." : "Restart Tournaments!"}
+            </Button>
         </CardContent>
       </Card>
     </div>

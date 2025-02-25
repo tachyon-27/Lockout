@@ -346,13 +346,13 @@ export const startTournament = asyncHandler(async (req, res) => {
         }
 
         tournament.startDate = new Date();
-        if(!tournament.matches || tournament.matches.length === 0) {
+        if (!tournament.matches || tournament.matches.length === 0) {
             tournament.matches = await generateMatches(tournament.participants);
         }
         tournament.showDetails = true;
 
         await tournament.save();
-        
+
         await Question.deleteMany({})
 
         const response = await axios.get('https://codeforces.com/api/problemset.problems');
@@ -381,9 +381,46 @@ export const startTournament = asyncHandler(async (req, res) => {
         res.statusCode = 500;
         throw new Error("Server Error!");
     }
-}); 
+});
 
-export const endTournament  = asyncHandler(async (req, res) => {
+export const restartTournament = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId } = req.body;
+
+        if (!tournamentId) {
+            return res.json(new ApiResponse(404, "Tournament Id not specified!"));
+        }
+
+        const tournament = await Tournament.findById(tournamentId).populate({
+            path: "participants",
+            select: "name",
+        });
+
+        if (!tournament) {
+            return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
+        }
+
+        tournament.endDate = undefined;
+        tournament.startDate = new Date();
+
+        tournament.matches = await generateMatches(tournament.participants);
+        tournament.showDetails = true;
+
+        await tournament.save();
+
+        const io = getIo();
+        io.to(tournamentId).emit('tournament-restart', tournament);
+
+        res.json(new ApiResponse(200, "Tournament Restarted!"));
+    } catch (error) {
+        console.error(error);
+        res.statusCode = 500;
+        throw new Error("Server Error!");
+    }
+});
+
+
+export const endTournament = asyncHandler(async (req, res) => {
     try {
         const { tournamentId } = req.body;
 
@@ -414,7 +451,7 @@ export const endTournament  = asyncHandler(async (req, res) => {
         res.statusCode = 500;
         throw new Error("Server Error!");
     }
-}); 
+});
 
 export const showTournament = asyncHandler(async (req, res) => {
     try {
@@ -433,7 +470,7 @@ export const showTournament = asyncHandler(async (req, res) => {
             return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
         }
 
-        if(!tournament.matches || tournament.matches.length === 0) {
+        if (!tournament.matches || tournament.matches.length === 0) {
             tournament.matches = await generateMatches(tournament.participants);
         }
         tournament.showDetails = true;
@@ -444,7 +481,7 @@ export const showTournament = asyncHandler(async (req, res) => {
         io.to(tournamentId).emit('tournament-show', tournament);
 
         res.json(new ApiResponse(200, "Tournament fixtures is now visible to all users!"));
-    } catch(error) {
+    } catch (error) {
         console.error(error);
         res.statusCode = 500;
         throw new Error("Error while showing tournament!");
@@ -470,7 +507,7 @@ export const isTournamentShown = asyncHandler(async (req, res) => {
             endDate: tournament.endDate,
             startDate: tournament.startDate,
         }));
-    } catch(error) {
+    } catch (error) {
         console.error(error);
         res.statusCode = 500;
         throw new Error("Error while fetching tournament show status!");
@@ -498,7 +535,7 @@ export const hideTournament = asyncHandler(async (req, res) => {
         io.to(tournamentId).emit('tournament-hide', tournament);
 
         res.json(new ApiResponse(200, "Now users cannot see the fixtures and participants."));
-    } catch(error) {
+    } catch (error) {
         console.error(error);
         res.statusCode = 500;
         throw new Error("Error while hiding tournament!");
@@ -531,7 +568,7 @@ export const removeParticipant = asyncHandler(async (req, res) => {
 
         const io = getIo()
         io.to(tournamentId).emit('tournament-remove-participant', tournament)
-        
+
         return res
             .status(200)
             .json(new ApiResponse(200, "Participant removed successfully."));
@@ -638,7 +675,10 @@ const startMatchTimer = (roomId, startTime, duration, tournament, match) => {
             });
         });
         const timeoutId = setTimeout(updateStatus, Math.min(90 * 1000, remainingTime));
-        roomTimers.set(roomId, { startTime, endTime, timeoutId });
+        if (!roomTimers.has(roomId)) {
+            roomTimers.set(roomId, new Map());
+        }
+        roomTimers.get(roomId).set(match.id, { startTime, endTime, timeoutId });
     }
 
     updateStatus();
@@ -667,13 +707,13 @@ export const startMatch = asyncHandler(async (req, res) => {
                 .json(new ApiResponse(404, "Match not Found!"));
         }
 
-        if(!match.participants.length >= 1) return res.status(401).json(new ApiResponse(401, "Not Enough Participants to start a Match!"))
+        if (!match.participants.length >= 1) return res.status(401).json(new ApiResponse(401, "Not Enough Participants to start a Match!"))
 
         match.participants.forEach(participant => {
             participant.totalPoints = 0;
-            participant.resultText="";
+            participant.resultText = "";
         });
-    
+
         startingRating = parseInt(startingRating);
         if (isNaN(startingRating) || startingRating < 800) {
             return res.status(400).json(new ApiResponse(400, 'startingRating must be a number and at least 800'));
@@ -727,7 +767,7 @@ export const startMatch = asyncHandler(async (req, res) => {
         const updatedMatch = updatedTournament.matches.find(match => match.id == matchId);
 
         const io = getIo()
-        io.to(`${tournamentId}_${matchId}`).emit('match-start',match);
+        io.to(`${tournamentId}_${matchId}`).emit('match-start', match);
         io.to(tournamentId).emit('match-start', tournament);
 
         startMatchTimer(`${tournamentId}_${matchId}`, match.startTime, match.duration, tournament, match);
@@ -750,10 +790,10 @@ export const endMatch = asyncHandler(async (req, res) => {
             throw new Error("All fields are required.")
         }
 
-        if(!winner) {
+        if (!winner) {
             return res.
-            status(404)
-            .json(new ApiResponse(404, "Winner not Specified"))
+                status(404)
+                .json(new ApiResponse(404, "Winner not Specified"))
         }
 
         const tournament = await Tournament.findById(tournamentId)
@@ -773,10 +813,10 @@ export const endMatch = asyncHandler(async (req, res) => {
 
         const winnerObj = match.participants.find(participant => participant._id.toString() === winner)
 
-        if(!winnerObj) {
+        if (!winnerObj) {
             return res.
-            status(404)
-            .json(new ApiResponse(404, "Winner not found! Please check the Id!"));
+                status(404)
+                .json(new ApiResponse(404, "Winner not found! Please check the Id!"));
         }
 
         const roomId = `${tournamentId}_${matchId}`;
@@ -824,7 +864,7 @@ export const updateMatchDuration = asyncHandler(async (req, res) => {
             return res.status(400).json(new ApiResponse(400, "Match is not running."));
         }
 
-        if(match.duration) {
+        if (match.duration) {
             match.duration += duration;
         } else {
             match.duration = duration;
@@ -852,11 +892,11 @@ export const updateMatchDuration = asyncHandler(async (req, res) => {
 
 export const giveBye = asyncHandler(async (req, res) => {
     try {
-        
-        const {tournamentId, matchId, byeTo} = req.body;
 
-        if (!tournamentId || !matchId ||!byeTo) {
-            res.statusCode=500;
+        const { tournamentId, matchId, byeTo } = req.body;
+
+        if (!tournamentId || !matchId || !byeTo) {
+            res.statusCode = 500;
             throw new Error("All fields are required.")
         }
         const tournament = await Tournament.findById(tournamentId)
@@ -877,12 +917,12 @@ export const giveBye = asyncHandler(async (req, res) => {
         const byeToObj = match.participants.find(participant => participant._id.toString() === byeTo);
 
         match.participants[0].resultText = null;
-        if(match.participants.length > 1) match.participants[1].resultText = null;
-        
+        if (match.participants.length > 1) match.participants[1].resultText = null;
+
         if (match.nextMatchId) {
             const nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
             if (nextMatch) {
-                nextMatch.participants = nextMatch.participants.filter(participant => participant.cfid != match.participants[0].cfid && match.participants.length > 1 && participant.cfid != match.participants[1].cfid )
+                nextMatch.participants = nextMatch.participants.filter(participant => participant.cfid != match.participants[0].cfid && match.participants.length > 1 && participant.cfid != match.participants[1].cfid)
                 nextMatch.participants.push(byeToObj.toObject());
             }
         }
@@ -912,8 +952,8 @@ export const giveBye = asyncHandler(async (req, res) => {
         io.to(tournamentId).emit('match-bye', tournament);
 
         res
-        .status(200)
-        .json(new ApiResponse(200, "Successfully Gave Bye", match))
+            .status(200)
+            .json(new ApiResponse(200, "Successfully Gave Bye", match))
 
     } catch (error) {
         console.log(error)
@@ -924,33 +964,33 @@ export const giveBye = asyncHandler(async (req, res) => {
 export const customTieBreaker = asyncHandler(async (req, res) => {
     try {
         const { tournamentId, matchId, title, question } = req.body;
-        const customTieBreaker = {title, question};
-        
+        const customTieBreaker = { title, question };
+
         if (!tournamentId) {
             return res.status(400).json(new ApiResponse(400, "Tournament Id required!"));
         }
-        
+
         if (!matchId) {
             return res.status(400).json(new ApiResponse(400, "Match Id required!"));
         }
-        
+
         if (!customTieBreaker || !customTieBreaker.title || !customTieBreaker.question) {
             return res.status(400).json(new ApiResponse(400, "Please specify a valid custom tie-breaker with title and question!"));
         }
-        
+
         const tournament = await Tournament.findById(tournamentId);
-        
+
         if (!tournament) {
             return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
         }
-        
+
         const match = tournament.matches.find(m => m.id == matchId);
         console.log(match)
         if (!match) {
             return res.status(404).json(new ApiResponse(404, "Match not found!"));
         }
         console.log(customTieBreaker)
-        
+
         if (!match.tieBreaker) {
             match.tieBreaker = [];
         }

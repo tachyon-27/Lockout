@@ -146,8 +146,8 @@ const MatchSettings = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [loading, setLoading] = useState(false);
     const [popupType, setPopupType] = useState(null);
-    const [startingRating, setStartingRating] = useState(1500);
-    const [duration, setDuration] = useState(60);
+    const [startingRating, setStartingRating] = useState(800);
+    const [duration, setDuration] = useState(15);
     const [tieOption, setTieOption] = useState("restart");
     const [customTieBreaker, setCustomTieBreaker] = useState("");
     const [customTitle, setCustomTitle] = useState("");

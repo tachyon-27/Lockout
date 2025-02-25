@@ -14,6 +14,7 @@ import {
     hideTournament, 
     isTournamentShown, 
     removeParticipant, 
+    restartTournament, 
     showTournament, 
     startMatch, 
     startTournament, 
@@ -46,6 +47,7 @@ router.route('/update-tournament/:tournamentId').post(
     updateTournament
 );
 router.route('/start-tournament').post(verifyAdmin, startTournament)
+router.route('/restart-tournament').post(verifyAdmin, restartTournament)
 router.route('/end-tournament').post(verifyAdmin, endTournament)
 router.route('/show-tournament').post(verifyAdmin, showTournament)
 router.route('/hide-tournament').post(verifyAdmin, hideTournament)
