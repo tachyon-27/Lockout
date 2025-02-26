@@ -39,7 +39,7 @@ const AllMatches = ({isAdmin = false}) => {
         setStartDate(response.data.data.startDate)
         setShow(response.data.data.show)
         setMatches(response.data.data.matches.filter(match => match.participants.length === 2));
-        console.log(response.data.data)
+        console.log(response.data.data.matches.filter(match => match.participants.length === 2));
       } catch (error) {
         navigate('/tournaments')
         toast({

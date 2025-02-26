@@ -40,35 +40,37 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
             if (match.nextMatchId) {
                 const nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
                 if (nextMatch) {
+                    nextMatch = nextMatch.toObject();
                     nextMatch.participants = nextMatch.participants.filter(participant =>
                         participant.cfid !== match.participants[0].cfid &&
                         (match.participants.length <= 1 || participant.cfid !== match.participants[1].cfid)
                     );
-            
+
                     if (!nextMatch.participants.some(p => p.cfid === winner.cfid)) {
                         nextMatch.participants.push(winner?.toObject ? winner.toObject() : winner);
                     }
-            
+
                     nextMatch.participants = nextMatch.participants.filter((participant, index, self) =>
                         index === self.findIndex((p) => p.cfid === participant.cfid)
                     );
-            
+
                     await Tournament.updateOne(
                         { _id: tournamentId },
-                        { 
-                            $set: { 
-                                "matches.$[elem].participants": nextMatch.participants,
-                            } 
+                        {
+                            $set: {
+                                "matches.$[matchElem].participants.$[partElem]": nextMatch.participants[nextMatch.participants.length - 1],
+                            }
                         },
-                        { 
-                            arrayFilters: [{ "elem.id": nextMatch.id }],
-                            new: true
+                        {
+                            arrayFilters: [
+                                { "matchElem.id": nextMatch.id }, 
+                                { "partElem.cfid": nextMatch.participants[nextMatch.participants.length - 1].cfid }
+                            ]
                         }
                     );
-                    
-            
+
                 }
-            }                        
+            }
 
             match.participants.find(p => p.cfid === winner.cfid).resultText = resultText;
         } else {
@@ -82,8 +84,8 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
 
         await Tournament.updateOne(
             { _id: tournamentId },
-            { 
-                $set: { 
+            {
+                $set: {
                     "matches.$[matchElem].participants.$[partElem0].totalPoints": match.participants[0].totalPoints,
                     "matches.$[matchElem].participants.$[partElem0].resultText": match.participants[0].resultText,
                     "matches.$[matchElem].participants.$[partElem1].totalPoints": match.participants[1].totalPoints,
@@ -91,9 +93,9 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
                     "matches.$[matchElem].endTime": Date.now(),
                     "matches.$[matchElem].state": "DONE",
                     "matches.$[matchElem].winner": winner ? winner.cfid : "DRAW"
-                } 
+                }
             },
-            { 
+            {
                 arrayFilters: [
                     { "matchElem.id": match.id },
                     { "partElem0.cfid": match.participants[0].cfid },
@@ -101,8 +103,8 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
                 ],
                 new: true
             }
-        );                  
-        
+        );
+
         if (roomTimers.has(roomId)) {
             clearTimeout(roomTimers.get(roomId));
             roomTimers.delete(roomId);

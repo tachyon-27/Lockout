@@ -683,6 +683,11 @@ const startMatchTimer = (roomId, startTime, duration, tournamentId, match) => {
             roomTimers.delete(roomId);
             return;
         }
+        const timeoutId = setTimeout(updateStatus, Math.min(90 * 1000, remainingTime));
+        if(roomTimers.has(roomId)) {
+            clearTimeout(roomTimers.get(roomId));
+        }
+        roomTimers.set(roomId, timeoutId)
         UpdateProblemStatus(tournamentId, match).then(score => {
             io.to(roomId).emit("match-status", {
                 success: true,
@@ -691,8 +696,6 @@ const startMatchTimer = (roomId, startTime, duration, tournamentId, match) => {
                 updatedMatchScore: score
             });
         });
-        const timeoutId = setTimeout(updateStatus, Math.min(90 * 1000, remainingTime));
-        roomTimers.set(roomId, timeoutId)
     }
 
     updateStatus();
