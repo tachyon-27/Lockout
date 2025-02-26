@@ -8,11 +8,11 @@ import {Loader} from "@/components";
 
 const MatchSettingsActions = ({ setPopupType, loading, match }) => (
     <CardContent className="flex flex-col space-y-4">
-        <Button onClick={() => setPopupType("start")} disabled={loading}>Start Match</Button>
-        <Button onClick={() => setPopupType("restart")} disabled={loading} variant="outline">Restart Match</Button>
+        {match?.state === "SCHEDULED" && <Button onClick={() => setPopupType("start")} disabled={loading}>Start Match</Button>}
+        {(match?.state === "RUNNING" || match?.state === "DONE") &&  <Button onClick={() => setPopupType("restart")} disabled={loading} variant="outline">Restart Match</Button>}
         {match?.state === "RUNNING" && <Button onClick={() => setPopupType("end")} disabled={loading} variant="destructive">End Match</Button>}
-        <Button onClick={() => setPopupType("tie")} disabled={loading} variant="secondary">Tie Handling</Button>
-        <Button onClick={() => setPopupType("bye")} disabled={loading} variant="outline">Give Bye</Button>
+        {match?.state === "DONE" && (!match?.winner || match.winner === "DRAW") && <Button onClick={() => setPopupType("tie")} disabled={loading} variant="secondary">Tie Handling</Button>}
+        {match?.state === "SCHEDULED" && <Button onClick={() => setPopupType("bye")} disabled={loading} variant="outline">Give Bye</Button>}
         {match?.state === "RUNNING" && <Button onClick={() => setPopupType("addDuration")} disabled={loading} variant="outline">Add Duration</Button>}
     </CardContent>
 );
@@ -138,7 +138,7 @@ const EndMatchPopup = ({ selectedWinner, setSelectedWinner, match, err, setErr, 
     </>
 );
 
-const MatchSettings = () => {
+const MatchSettings = ({setOpenMatchSettings}) => {
     const [searchParams] = useSearchParams();
     const tournamentId = searchParams.get("tournamentId");
     const matchId = searchParams.get("matchId");
@@ -162,6 +162,7 @@ const MatchSettings = () => {
             try {
                 const response = await axios.post("/api/tournament/get-match", { _id: tournamentId, matchId });
                 setMatch(response.data.data);
+                console.log(response.data.data)
             } catch (error) {
                 toast({ title: "Error fetching match data" });
             } finally {
@@ -231,16 +232,17 @@ const MatchSettings = () => {
                 description: "Server Error!"
             });
         } finally {
+            setOpenMatchSettings(false);
             setLoading(false);
             setPopupType(null);
             setErr("");
         }
     };
 
-    if (isLoading) return <div className="flex justify-center p-10"><Loader/></div>;
+    if (isLoading) return <Loader/>;
 
     return (
-        <div className="flex flex-col items-center justify-center text-white max-h-screen p-5">
+        <div className="flex flex-col items-center justify-center text-white p-5">
             <Card className="w-full max-w-lg shadow-xl">
                 <CardHeader>
                     <CardTitle className="text-center text-white">Match Settings</CardTitle>

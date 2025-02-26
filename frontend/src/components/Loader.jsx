@@ -1,8 +1,7 @@
 const Loader = () => {
   return (
     <div
-      className="flex justify-center items-center w-screen h-screen bg-transparent"
-      style={{ height: "100vh" }} // Adjusting background color and full-screen height
+      className="flex justify-center items-center min-h-full bg-transparent"
     >
       <svg
         width="100"  // Increased size
@@ -15,6 +14,7 @@ const Loader = () => {
           display: "block",
           margin: "auto",
         }}
+        className="min-h-full flex justify-center items-center"
       >
         <path
           fillRule="evenodd"

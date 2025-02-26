@@ -28,11 +28,11 @@ import {
   AllMatches,
   Match,
   Settings,
-  MatchSettings,
   Admins,
   UserSettings,
   NotFound404,
-  AdminDashboard
+  AdminDashboard,
+  ErrorBoundary
 } from './pages'
 import { Loader } from '@/components';
 
@@ -43,7 +43,11 @@ function App() {
     const router = createBrowserRouter(
       createRoutesFromElements(
         <>
-          <Route path='/' element={ <Layout /> }>
+          <Route path='/' element={ 
+            <ErrorBoundary>
+              <Layout /> 
+            </ErrorBoundary>
+        }>
             <Route path='' element = { <Home /> } />
 
             <Route element={<RegisterLayout />} >
@@ -81,7 +85,11 @@ function App() {
 
           <Route path='/admin' element={<AdminLogin />} />
 
-          <Route element={<ProtectedRoutes allowed={role == "admin"} />} >
+          <Route element={
+            <ErrorBoundary>
+              <ProtectedRoutes allowed={role == "admin"} />
+            </ErrorBoundary>
+            } >
             <Route path='/admin/logout' element={<Logout />} />
 
             <Route path='/admin/dashboard' element={ <AdminLayout /> } >
@@ -97,7 +105,6 @@ function App() {
                 <Route path='all-matches' element={ <AllMatches isAdmin={ role == "admin" } /> } />
                 <Route path='fixtures' element={ <Fixtures /> } />
                 <Route path='match' element= { <Match isAdmin={ role == "admin" } /> } />
-                <Route path='match/settings' element= { <MatchSettings /> } />
                 <Route path='settings' element= { <Settings /> } />
               </Route>
             </Route>

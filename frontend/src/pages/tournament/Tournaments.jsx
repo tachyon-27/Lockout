@@ -32,7 +32,7 @@ export default function Tournament({ isAdmin = false }) {
 
   if (isLoading) {
     return (
-      <div className="w-full h-full flex justify-center items-center">
+      <div className="flex items-center justify-center min-h-screen min-w-screen">
         <Loader />
       </div>
     );

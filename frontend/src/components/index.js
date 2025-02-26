@@ -16,6 +16,7 @@ import ProfileSettings from "./userSettings/ProfileSettings";
 import Navbar from "./Navbar";
 import { SideBar } from "./SideBar";
 import MatchCard from "./MatchCard";
+import MatchSettings from "./MatchSettings";
 import Loader from "./Loader";
 
 export {
@@ -34,5 +35,6 @@ export {
     ChangePassword,
     Cfid,
     Loader,
+    MatchSettings,
     ProfileSettings
 }

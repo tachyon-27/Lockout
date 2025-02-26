@@ -3,7 +3,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 import { socket } from "../../socket";
-import { Loader } from "@/components";
+import { 
+    Loader,
+    MatchSettings
+} from "@/components";
 
 const Match = ({ isAdmin }) => {
     const { toast } = useToast();
@@ -16,6 +19,7 @@ const Match = ({ isAdmin }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState(0);
     const [isRefreshActive, setIsRefreshActive] = useState(true);
+    const [openMatchSettings, setOpenMatchSettings] = useState(false);
 
     const calculateTimeLeft = () => {
         const start = new Date(matchData.startTime).getTime();
@@ -89,6 +93,8 @@ const Match = ({ isAdmin }) => {
                             [response.data.data.participants[0].cfid]: response.data.data.participants[0].totalPoints | 0,
                             [response.data.data.participants[1].cfid]: response.data.data.participants[1].totalPoints | 0,
                         })
+
+                        if(response.data.data?.state === "SCHEDULED" && isAdmin) setOpenMatchSettings(true);
 
                         socket.emit("joinRoom", `${tournamentId}_${matchId}`);
                     } else {
@@ -198,6 +204,7 @@ const Match = ({ isAdmin }) => {
 
     // Timer
     useEffect(() => {
+        console.log(timeLeft);
         const interval = setInterval(() => {
             const updatedTimeLeft = calculateTimeLeft();
             setTimeLeft(updatedTimeLeft);
@@ -220,7 +227,11 @@ const Match = ({ isAdmin }) => {
     };
 
     if (isLoading) {
-        return (<Loader />);
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+              <Loader />
+            </div>
+          );
     }
 
     return (
@@ -231,7 +242,7 @@ const Match = ({ isAdmin }) => {
                 </div>
             )}
             <div className="text-white text-4xl font-bold">Round {matchData.tournamentRoundText}</div>
-            <div className="text-white text-lg font-semibold">{timeLeft > 0 ? <span>Time: {formatTime(timeLeft)}</span> : <span>Match Ended</span>}</div>
+            <div className="text-white text-lg font-semibold">{matchData?.state !== "DONE" ? (timeLeft > 0 ?  <span>Time: {formatTime(timeLeft)}</span> : <></>) : <span>Match Ended</span>}</div>
 
             <div className="flex justify-between flex-wrap min-w-full order-1 text-white pt-7">
                 <div className="w-[25%] flex flex-col items-center gap-y-3">
@@ -241,30 +252,36 @@ const Match = ({ isAdmin }) => {
 
                 <div className="md:w-[50%] text-center w-full order-3 md:order-2 flex flex-grow items-center justify-center pt-[30%] md:pt-[8%]">
                     <div className="flex flex-col w-[90%] justify-center">
-                        {matchData.problemList.map((problem, idx) => (
-                            <div key={idx} className="flex items-center justify-between py-2 px-4 border-b border-white hover:bg-gray-700">
-                                <div className="w-[20%] text-center">{
-                                    problem.solved ? (
-                                        renderProblemStatus(problem.solved === matchData.participants[0].cfid, problem)
-                                    ) : (problem.points)
-                                }</div>
-                                <div className="w-[60%] text-center">
-                                    <a
-                                        href={`https://codeforces.com/contest/${problem.question.contestId}/problem/${problem.question.index}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-yellow-300 hover:underline"
-                                    >
-                                        {problem.question.name || problem.question.index}
-                                    </a>
-                                </div>
-                                <div className="w-[20%] text-center">{
-                                    problem.solved ? (
-                                        renderProblemStatus(problem.solved === matchData.participants[1].cfid, problem)
-                                    ) : (problem.points)
-                                }</div>
+                        {openMatchSettings ? 
+                            <MatchSettings setOpenMatchSettings={setOpenMatchSettings} />
+                        :
+                            <div>
+                                {matchData.problemList && matchData.problemList.map((problem, idx) => (
+                                    <div key={idx} className="flex items-center justify-between py-2 px-4 border-b border-white hover:bg-gray-700">
+                                        <div className="w-[20%] text-center">{
+                                            problem.solved ? (
+                                                renderProblemStatus(problem.solved === matchData.participants[0].cfid, problem)
+                                            ) : (problem.points)
+                                        }</div>
+                                        <div className="w-[60%] text-center">
+                                            <a
+                                                href={`https://codeforces.com/contest/${problem.question.contestId}/problem/${problem.question.index}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-yellow-300 hover:underline"
+                                            >
+                                                {problem.question.name || problem.question.index}
+                                            </a>
+                                        </div>
+                                        <div className="w-[20%] text-center">{
+                                            problem.solved ? (
+                                                renderProblemStatus(problem.solved === matchData.participants[1].cfid, problem)
+                                            ) : (problem.points)
+                                        }</div>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        }
                         <div className="flex justify-around">
                             <button
                                 className="w-[30%] self-center mt-2 p-2 font-semibold bg-gray-700 hover:bg-gray-600 disabled:bg-gray-500 text-white rounded-xl"
@@ -277,7 +294,7 @@ const Match = ({ isAdmin }) => {
                             {isAdmin && (
                                 <button
                                     className="w-[30%] self-center mt-2 p-2 font-semibold bg-gray-700 hover:bg-gray-600 disabled:bg-gray-500 text-white rounded-xl"
-                                    onClick={() => navigate(`/admin/dashboard/tournament/match/settings?tournamentId=${tournamentId}&matchId=${matchId}`)}
+                                    onClick={() => setOpenMatchSettings(!openMatchSettings)}
                                 >
                                     Settings
                                 </button>

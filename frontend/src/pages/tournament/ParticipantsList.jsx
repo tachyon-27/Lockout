@@ -141,10 +141,10 @@ const ParticipantsList = ({ isAdmin = false }) => {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center">
-                <Loader />
+            <div className="flex items-center justify-center min-h-screen">
+              <Loader />
             </div>
-        );
+          );
     }
 
     if (err) {

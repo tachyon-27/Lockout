@@ -47,6 +47,12 @@ const AddCfID = ({ setAddID, setIsAuth, setHandle, setVerifyString }) => {
               type="text"
               required
               onChange = {(e) => { setCfid(e.target.value) }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  onSubmit();
+                }
+              }}
             />
           </LabelInputContainer>
 

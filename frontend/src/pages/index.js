@@ -15,11 +15,12 @@ import AllMatches from "./tournament/AllMatches";
 import Fixtures from "./tournament/Fixtures";
 import Match from "./tournament/Match";
 import Settings from "./tournament/Settings";
-import MatchSettings from "./tournament/MatchSettings";
+import MatchSettings from "../components/MatchSettings";
 import Admins from "./admin/Admins";
 import UserSettings from "./UserSettings";
 import NotFound404 from "./NotFound404";
 import AdminDashboard from "./admin/AdminDashboard";
+import ErrorBoundary from "./ErrorBoundary";
 
 export {
     Home,
@@ -44,4 +45,5 @@ export {
     UserSettings,
     NotFound404,
     AdminDashboard,
+    ErrorBoundary
 }
