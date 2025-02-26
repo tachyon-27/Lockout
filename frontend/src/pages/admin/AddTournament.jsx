@@ -18,18 +18,21 @@ import { Calendar } from "@/components/ui/calendar"
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { MobileTimePicker } from "@mui/x-date-pickers/MobileTimePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-
 import { BeatLoader } from 'react-spinners';
-
 import axios from "axios";
 import { useSearchParams } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 
 const AddTournament = ({ isEditing }) => {
-
   const [searchParams] = useSearchParams();
   const tournamentId = searchParams.get("id");
-
+  const { toast } = useToast()
+  const [popOverOpen, setPopOverOpen] = useState(false);
+  const popoverRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [existingImage, setExistingImage] = useState(null);
+  const descriptionRef = useRef("");
+  const navigate = useNavigate()
   const form = useForm({
     defaultValues: {
       title: '',
@@ -40,13 +43,6 @@ const AddTournament = ({ isEditing }) => {
       coverImage: null,
     },
   });
-
-  const { toast } = useToast()
-  const [popOverOpen, setPopOverOpen] = useState(false);
-  const popoverRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [existingImage, setExistingImage] = useState(null);
-  const descriptionRef = useRef("");
 
   useEffect(() => {
     if (isEditing && tournamentId) {
@@ -80,7 +76,6 @@ const AddTournament = ({ isEditing }) => {
 
   const submit = async (data) => {
     setIsLoading(true);
-    console.log(data)
     const dateObject = dayjs(data.startDate).format('YYYY-MM-DD') + ' ' + dayjs(data.startTime).format('HH:mm');
     const date = dayjs(dateObject).toDate();
     const formData = new FormData();
@@ -93,20 +88,23 @@ const AddTournament = ({ isEditing }) => {
       if (data.coverImage && data.coverImage[0]) {
         formData.append('coverImage', data.coverImage[0]);
       } else formData.append('coverImage', existingImage);
+      
       const endpoint = isEditing ? `/api/tournament/update-tournament/${tournamentId}` : `/api/tournament/add-tournament`;
+
       const response = await axios.post(endpoint, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log(response)
       setIsLoading(false);
+
       toast({
         title: 'Success!',
         description: isEditing ? 'Event updated successfully.' : 'Event created successfully.',
       });
+      
+      navigate(`/admin/dashboard/tournament/view?id=${isEditing ? tournamentId : response.data.data._id}`)
     } catch (error) {
-      console.log(error)
       setIsLoading(false);
       const errorMessage = error.response?.data?.message || error.message || 'Something went wrong!';
       toast({
@@ -129,7 +127,6 @@ const AddTournament = ({ isEditing }) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
 
   return (
     <>

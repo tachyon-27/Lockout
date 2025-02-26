@@ -92,7 +92,7 @@ const ForgotPassword = () => {
                                 <FormLabel> Email </FormLabel>
                                 <Input
                                     {...field}
-                                    name="name"
+                                    name="email"
                                     className="w-full bg-gray-700 text-white py-2 px-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 peer"
                                     placeholder="Email"
                                     type="email"

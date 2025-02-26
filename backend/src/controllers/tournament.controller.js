@@ -10,6 +10,8 @@ import { getIo } from "../socket.js";
 import { UpdateProblemStatus } from "../utils/tournament/UpdateProblemStatus.js";
 import { handleMatchEnd } from "../utils/tournament/matchEnd.js";
 
+const roomTimers = new Map();
+
 export const addTournament = asyncHandler(async (req, res) => {
     try {
         const { title, summary, startDate, description } = req.body;
@@ -353,6 +355,11 @@ export const startTournament = asyncHandler(async (req, res) => {
 
         await tournament.save();
 
+        for (const [roomId, timeoutId] of roomTimers.entries()) {
+            clearTimeout(timeoutId);
+            roomTimers.delete(roomId); 
+        }
+
         await Question.deleteMany({})
 
         const response = await axios.get('https://codeforces.com/api/problemset.problems');
@@ -408,6 +415,12 @@ export const restartTournament = asyncHandler(async (req, res) => {
 
         await tournament.save();
 
+        for (const [roomId, timeoutId] of roomTimers.entries()) {
+            clearTimeout(timeoutId);
+            roomTimers.delete(roomId); 
+        }
+        
+
         const io = getIo();
         io.to(tournamentId).emit('tournament-restart', tournament);
 
@@ -440,6 +453,11 @@ export const endTournament = asyncHandler(async (req, res) => {
         tournament.endDate = new Date();
 
         await tournament.save()
+
+        for (const [roomId, timeoutId] of roomTimers.entries()) {
+            clearTimeout(timeoutId);
+            roomTimers.delete(roomId); 
+        }
 
         const io = getIo()
         io.to(tournamentId).emit('tournament-end', tournament);
@@ -650,9 +668,8 @@ export const getMatch = asyncHandler(async (req, res) => {
     }
 });
 
-const roomTimers = new Map();
 
-const startMatchTimer = (roomId, startTime, duration, tournament, match) => {
+const startMatchTimer = (roomId, startTime, duration, tournamentId, match) => {
     duration = parseInt(duration);
     const io = getIo();
     const startTim = new Date(startTime);
@@ -662,11 +679,11 @@ const startMatchTimer = (roomId, startTime, duration, tournament, match) => {
         const now = new Date();
         const remainingTime = endTime - now.getTime();
         if (remainingTime <= 0) {
-            handleMatchEnd(tournament, match, io, roomId);
+            handleMatchEnd(tournamentId, match, io, roomId, roomTimers);
             roomTimers.delete(roomId);
             return;
         }
-        UpdateProblemStatus(tournament, match).then(score => {
+        UpdateProblemStatus(tournamentId, match).then(score => {
             io.to(roomId).emit("match-status", {
                 success: true,
                 status: "RUNNING",
@@ -675,10 +692,7 @@ const startMatchTimer = (roomId, startTime, duration, tournament, match) => {
             });
         });
         const timeoutId = setTimeout(updateStatus, Math.min(90 * 1000, remainingTime));
-        if (!roomTimers.has(roomId)) {
-            roomTimers.set(roomId, new Map());
-        }
-        roomTimers.get(roomId).set(match.id, { startTime, endTime, timeoutId });
+        roomTimers.set(roomId, timeoutId)
     }
 
     updateStatus();
@@ -732,7 +746,7 @@ export const startMatch = asyncHandler(async (req, res) => {
 
             if (!question.length || !question[0].contestId || !question[0].index || !question[0].name || !question[0].rating) {
                 console.error(`No valid question found for rating ${ratingThreshold}`);
-                return null; // Skip invalid questions
+                return null;
             }
 
             return {
@@ -762,7 +776,6 @@ export const startMatch = asyncHandler(async (req, res) => {
 
 
 
-        // Refetch with populated questions
         const updatedTournament = await Tournament.findById(tournamentId)
         const updatedMatch = updatedTournament.matches.find(match => match.id == matchId);
 
@@ -770,12 +783,13 @@ export const startMatch = asyncHandler(async (req, res) => {
         io.to(`${tournamentId}_${matchId}`).emit('match-start', match);
         io.to(tournamentId).emit('match-start', tournament);
 
-        startMatchTimer(`${tournamentId}_${matchId}`, match.startTime, match.duration, tournament, match);
+        startMatchTimer(`${tournamentId}_${matchId}`, match.startTime, match.duration, tournamentId, match.toObject());
 
         return res
             .status(201)
             .json(new ApiResponse(201, "Match Started!", updatedMatch));
     } catch (error) {
+        console.log(error)
         return res
             .status(501)
             .json(new ApiResponse(501, "Error while starting match.", error.message));
@@ -821,11 +835,11 @@ export const endMatch = asyncHandler(async (req, res) => {
 
         const roomId = `${tournamentId}_${matchId}`;
         if (roomTimers.has(roomId)) {
-            clearTimeout(roomTimers.get(roomId).timeoutId);
+            clearTimeout(roomTimers.get(roomId));
             roomTimers.delete(roomId);
         }
         const io = getIo()
-        await handleMatchEnd(tournament, match, io, roomId, winnerObj);
+        await handleMatchEnd(tournamentId, match, io, roomId, roomTimers, winnerObj);
 
         await tournament.save();
 
@@ -874,7 +888,7 @@ export const updateMatchDuration = asyncHandler(async (req, res) => {
         const roomId = `${tournamentId}_${matchId}`;
 
         if (roomTimers.has(roomId)) {
-            clearTimeout(roomTimers.get(roomId).timeoutId);
+            clearTimeout(roomTimers.get(roomId));
             roomTimers.delete(roomId);
         }
 
@@ -938,7 +952,8 @@ export const giveBye = asyncHandler(async (req, res) => {
 
         const roomId = `${tournamentId}_${matchId}`;
         if (roomTimers.has(roomId)) {
-            clearTimeout(roomTimers.get(roomId).timeoutId);
+            console.log(roomTimers.get(roomId))
+            clearTimeout(roomTimers.get(roomId));
             roomTimers.delete(roomId);
         }
 

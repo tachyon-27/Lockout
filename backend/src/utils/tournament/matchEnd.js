@@ -1,10 +1,10 @@
 import Tournament from "../../models/tournament.model.js";
 import { UpdateProblemStatus } from "./UpdateProblemStatus.js";
 
-export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
+export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers, winner) => {
     try {
 
-        const updatedMatchData = await UpdateProblemStatus(tournament, match);
+        const updatedMatchData = await UpdateProblemStatus(tournamentId, match);
 
         if (!updatedMatchData.success) {
             return io.to(roomId).emit("match-status", {
@@ -34,6 +34,8 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
             resultText = "WON";
         }
 
+        const tournament = await Tournament.findById(tournamentId);
+
         if (winner) {
             if (match.nextMatchId) {
                 const nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
@@ -51,12 +53,19 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
                         index === self.findIndex((p) => p.cfid === participant.cfid)
                     );
             
-            
-                    await Tournament.findOneAndUpdate(
-                        { _id: tournament._id, "matches.id": nextMatch.id },
-                        { $set: { "matches.$.participants": nextMatch.participants } }, 
-                        { new: true }
+                    await Tournament.updateOne(
+                        { _id: tournamentId },
+                        { 
+                            $set: { 
+                                "matches.$[elem].participants": nextMatch.participants,
+                            } 
+                        },
+                        { 
+                            arrayFilters: [{ "elem.id": nextMatch.id }],
+                            new: true
+                        }
                     );
+                    
             
                 }
             }                        
@@ -72,12 +81,33 @@ export const handleMatchEnd = async (tournament, match, io, roomId, winner) => {
         match.winner = winner ? winner.cfid : "DRAW";
 
         await Tournament.updateOne(
-            { _id: tournament._id, "matches.id": match.id },
+            { _id: tournamentId },
             { 
-                $set: { "matches.$": match } 
+                $set: { 
+                    "matches.$[matchElem].participants.$[partElem0].totalPoints": match.participants[0].totalPoints,
+                    "matches.$[matchElem].participants.$[partElem0].resultText": match.participants[0].resultText,
+                    "matches.$[matchElem].participants.$[partElem1].totalPoints": match.participants[1].totalPoints,
+                    "matches.$[matchElem].participants.$[partElem1].resultText": match.participants[1].resultText,
+                    "matches.$[matchElem].endTime": Date.now(),
+                    "matches.$[matchElem].state": "DONE",
+                    "matches.$[matchElem].winner": winner ? winner.cfid : "DRAW"
+                } 
+            },
+            { 
+                arrayFilters: [
+                    { "matchElem.id": match.id },
+                    { "partElem0.cfid": match.participants[0].cfid },
+                    { "partElem1.cfid": match.participants[1].cfid },
+                ],
+                new: true
             }
-        );           
+        );                  
         
+        if (roomTimers.has(roomId)) {
+            clearTimeout(roomTimers.get(roomId));
+            roomTimers.delete(roomId);
+        }
+
         io.to(roomId).emit("match-status", {
             success: true,
             status: "DONE",

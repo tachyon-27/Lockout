@@ -4,11 +4,13 @@ import { useToast } from "@/hooks/use-toast"
 import axios from "axios";
 import MatchCard from '@/components/MatchCard'
 import { socket } from '../../socket';
-
+import {Loader} from '@/components';
+ 
 const AllMatches = ({isAdmin = false}) => {
   const [searchParams] = useSearchParams();
   const tournamentId = searchParams.get("id");
   const [matches, setMatches] = useState([])
+  const [isLoading, setIsLoading] = useState(false);
   const [show, setShow] = useState(false)
   const [startDate, setStartDate] = useState(null);
   const { toast } = useToast()
@@ -25,6 +27,7 @@ const AllMatches = ({isAdmin = false}) => {
     }
 
     const fetchMatches = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.post(`/api/tournament/get-matches`, {
           _id: tournamentId
@@ -43,6 +46,8 @@ const AllMatches = ({isAdmin = false}) => {
           title: "Error Fetching matches!"
         })
         console.error("Error fetching matches:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -84,6 +89,14 @@ const AllMatches = ({isAdmin = false}) => {
       pastMatches: matches.filter((match) => match.state === "DONE")
     };
   }, [matches]);
+
+  if(isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader />
+      </div>
+    )
+  }
 
   return (!show || matches.length === 0 || new Date(startDate) > new Date()) ? (
     <div className=' w-full h-full flex items-center justify-center text-2xl'>

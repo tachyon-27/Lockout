@@ -173,7 +173,6 @@ const Match = ({ isAdmin }) => {
         };
     }, []);
 
-
     useEffect(() => {
         const handleMatchStart = (data) => {
             console.log(data)

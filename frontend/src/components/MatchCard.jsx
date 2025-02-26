@@ -51,7 +51,11 @@ const MatchCard = ({ isAdmin, tournamentId, match }) => {
     }
 
     return (
-        <div className="p-4 border rounded-md shadow-md w-full bg-transparent bg-gradient-to-tr from-black via-gray-400/30 to-gray-500/50 transition-transform duration-300 hover:scale-105 hover:shadow-lg">
+        <div 
+            className="p-4 border rounded-md shadow-md w-full bg-transparent bg-gradient-to-tr from-black via-gray-400/30 to-gray-500/50 transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:cursor-pointer"
+            onClick={() => match.state != "SCHEDULED" ? navigate(`${isAdmin ? "/admin/dashboard/" : "/"}tournament/match?tournamentId=${tournamentId}&matchId=${match.id}`) :
+            navigate(`${isAdmin ? "/admin/dashboard/" : "/"}tournament/match/settings?tournamentId=${tournamentId}&matchId=${match.id}`) }
+        >
             <div className="flex justify-between items-center mb-2 pb-2 border-b-2 border-slate-700">
                 <h3 className="text-lg font-semibold">Round: {match.tournamentRoundText}</h3>
                 <ShowStatus status={match.state} />

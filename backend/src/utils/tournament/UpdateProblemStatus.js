@@ -1,6 +1,6 @@
 import axios from 'axios'
 import Tournament from '../../models/tournament.model.js';
-export const UpdateProblemStatus = async (tournament, match) => {
+export const UpdateProblemStatus = async (tournamentId, match) => {
     try {
         const problemList = match.problemList;
         const cfid1 = match.participants[0].cfid;
@@ -68,11 +68,41 @@ export const UpdateProblemStatus = async (tournament, match) => {
         match.participants[0].totalPoints = p1TotalPoints;
         match.participants[1].totalPoints = p2TotalPoints;
 
-        await Tournament.findOneAndUpdate(
-            { _id: tournament._id }, 
-            { $set: { matches: tournament.matches } }, 
-            { new: true, runValidators: true }
+        await Tournament.updateOne(
+            { _id: tournamentId },
+            { 
+                $set: { 
+                    "matches.$[matchElem].participants.$[partElem0].totalPoints": match.participants[0].totalPoints,
+                    "matches.$[matchElem].participants.$[partElem0].resultText": match.participants[0].resultText,
+                    "matches.$[matchElem].participants.$[partElem1].totalPoints": match.participants[1].totalPoints,
+                    "matches.$[matchElem].participants.$[partElem1].resultText": match.participants[1].resultText 
+                }
+            },
+            { 
+                arrayFilters: [
+                    { "matchElem.id": match.id },
+                    { "partElem0.cfid": match.participants[0].cfid },
+                    { "partElem1.cfid": match.participants[1].cfid },
+                ],
+                new: true, 
+                runValidators: true
+            }
         );
+        
+        for (let problem of match.problemList) {
+            await Tournament.updateOne(
+                { _id: tournamentId, "matches.id": match.id },
+                { 
+                    $set: { "matches.$.problemList.$[probElem].solved": problem.solved }
+                },
+                { 
+                    arrayFilters: [
+                        { "probElem.question.contestId": problem.question.contestId, "probElem.question.index": problem.question.index }
+                    ]
+                }
+            );
+        }
+        
         
 
         return {
