@@ -144,7 +144,7 @@ const ViewTournament = () => {
           <img
             src={tournament.coverImage}
             alt="Tournament Cover"
-            className="rounded-lg shadow-lg w-full h-64 object-cover"
+            className="min-w-full h-auto object-contain rounded-xl mb-4"
           />
         </div>
       )}
@@ -158,7 +158,7 @@ const ViewTournament = () => {
 
       <div
         dangerouslySetInnerHTML={{ __html: tournament.description }}
-        className="text-white"
+        className="text-white space-y-4"
       ></div>
     </div>
   );

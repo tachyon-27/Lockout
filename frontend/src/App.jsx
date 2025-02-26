@@ -115,7 +115,7 @@ function App() {
         const token = localStorage.getItem("token");
         const role = localStorage.getItem("role");
         
-        if (token && role) {
+        if (token && (role=='admin' || role == 'verifiedUser')) {
           const res = await axios.post('/api/user/refresh', {
             _id: token
           })
