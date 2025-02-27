@@ -80,43 +80,108 @@ const ByePopup = ({ participants, selectedParticipant, setSelectedParticipant, h
     </>
 );
 
-const TieHandlingPopup = ({ tieOption, setTieOption, customTieBreaker, setCustomTieBreaker, customTitle, setCustomTitle, err, setErr, handleMatchAction, loading, setPopupType, startingRating, setStartingRating, duration, setDuration }) => (
-    <>
-        <h3 className="text-lg font-bold mb-4">Tie Handling</h3>
-        <div className="flex space-x-4 mb-4">
-            <label>
-                <input type="radio" value="restart" checked={tieOption === "restart"} onChange={() => setTieOption("restart")} /> Restart Match
-            </label>
-            <label>
-                <input type="radio" value="custom" checked={tieOption === "custom"} onChange={() => setTieOption("custom")} /> Custom Tie Breaker
-            </label>
-        </div>
-        {tieOption === "custom" ? (
-            <>
-                <InputField label="Title" type="text" value={customTitle} onChange={(e) => setCustomTitle(e.target.value)} />
-                <textarea
-                    value={customTieBreaker}
-                    onChange={(e) => setCustomTieBreaker(e.target.value)}
-                    className="w-full p-2 rounded bg-gray-800 border border-gray-700 mb-4"
-                    placeholder="Enter tie breaker details"
-                    rows="4"
-                ></textarea>
-            </>
-        ) : (
-            <>
-                <InputField label="Starting Rating" value={startingRating} onChange={(e) => setStartingRating(e.target.value)} />
-                <InputField label="Duration (minutes)" value={duration} onChange={(e) => setDuration(e.target.value)} />
-            </>
-        )}
-        <p className="text-sm text-red-600 mb-2">{err}</p>
-        <div className="flex justify-between">
-            <Button onClick={() => { setPopupType(null); setErr(""); }} variant="outline">Cancel</Button>
-            <Button onClick={() => handleMatchAction("Tie Handling", tieOption === "custom" ? "/api/tournament/tie-break" : "/api/tournament/start-match", tieOption === "custom" ? { title: customTitle, question: customTieBreaker } : { startingRating, duration })} disabled={loading}>
-                Confirm
-            </Button>
-        </div>
-    </>
-);
+const TieHandlingPopup = ({ 
+    tieOption, 
+    setTieOption, 
+    customTieBreaker, 
+    setCustomTieBreaker, 
+    customTitle, 
+    setCustomTitle, 
+    err, 
+    setErr, 
+    handleMatchAction, 
+    loading, 
+    setPopupType, 
+    startingRating, 
+    setStartingRating, 
+    duration, 
+    setDuration, 
+    availableTieBreakers 
+}) => {
+    const [selectedTieBreaker, setSelectedTieBreaker] = useState(""); 
+
+    const handleTieBreakerChange = (e) => {
+        const selectedId = e.target.value;
+        setSelectedTieBreaker(selectedId);
+
+        if (selectedId) {
+            const selected = availableTieBreakers.find(tb => tb.title === selectedId);
+            setCustomTitle(selected?.title || "");
+            setCustomTieBreaker(selected?.question || "");
+        } else {
+            setCustomTitle("");
+            setCustomTieBreaker("");
+        }
+    };
+
+    return (
+        <>
+            <h3 className="text-lg font-bold mb-4">Tie Handling</h3>
+            <div className="flex space-x-4 mb-4">
+                <label>
+                    <input type="radio" value="restart" checked={tieOption === "restart"} onChange={() => setTieOption("restart")} /> Restart Match
+                </label>
+                <label>
+                    <input type="radio" value="custom" checked={tieOption === "custom"} onChange={() => setTieOption("custom")} /> Custom Tie Breaker
+                </label>
+            </div>
+
+            {tieOption === "custom" ? (
+                <>
+                    <label className="block mb-2">Select an Existing Tie-Breaker:</label>
+                    <select 
+                        value={selectedTieBreaker} 
+                        onChange={handleTieBreakerChange} 
+                        className="w-full p-2 rounded bg-gray-800 border border-gray-700 mb-4"
+                    >
+                        <option value="">-- Select Tie-Breaker --</option>
+                        {availableTieBreakers.map((tb, index) => (
+                            <option key={index} value={tb.title}>{tb.title}</option>
+                        ))}
+                    </select>
+
+                    <InputField 
+                        label="Title" 
+                        type="text" 
+                        value={customTitle} 
+                        onChange={(e) => setCustomTitle(e.target.value)} 
+                        disabled={selectedTieBreaker !== ""}
+                    />
+                    <textarea
+                        value={customTieBreaker}
+                        onChange={(e) => setCustomTieBreaker(e.target.value)}
+                        className="w-full p-2 rounded bg-gray-800 border border-gray-700 mb-4"
+                        placeholder="Enter tie breaker details"
+                        rows="4"
+                        disabled={selectedTieBreaker !== ""}
+                    ></textarea>
+                </>
+            ) : (
+                <>
+                    <InputField label="Starting Rating" value={startingRating} onChange={(e) => setStartingRating(e.target.value)} />
+                    <InputField label="Duration (minutes)" value={duration} onChange={(e) => setDuration(e.target.value)} />
+                </>
+            )}
+
+            <p className="text-sm text-red-600 mb-2">{err}</p>
+            <div className="flex justify-between">
+                <Button onClick={() => { setPopupType(null); setErr(""); }} variant="outline">Cancel</Button>
+                <Button 
+                    onClick={() => handleMatchAction(
+                        "Tie Handling", 
+                        tieOption === "custom" ? "/api/tournament/tie-break" : "/api/tournament/start-match", 
+                        tieOption === "custom" 
+                            ? { title: customTitle, question: customTieBreaker } 
+                            : { startingRating, duration }
+                    )} 
+                    disabled={loading}
+                >
+                    Confirm
+                </Button>
+            </div>
+        </>
+    );
+};
 
 const EndMatchPopup = ({ selectedWinner, setSelectedWinner, match, err, setErr, handleMatchAction, loading, setPopupType }) => (
     <>
@@ -149,6 +214,7 @@ const MatchSettings = ({setOpenMatchSettings}) => {
     const [duration, setDuration] = useState(15);
     const [tieOption, setTieOption] = useState("restart");
     const [customTieBreaker, setCustomTieBreaker] = useState("");
+    const [availableTieBreakers, setAvailableTieBreakers] = useState([]);
     const [customTitle, setCustomTitle] = useState("");
     const [selectedParticipant, setSelectedParticipant] = useState("");
     const [selectedWinner, setSelectedWinner] = useState("");
@@ -159,8 +225,9 @@ const MatchSettings = ({setOpenMatchSettings}) => {
     useEffect(() => {
         const fetchMatch = async () => {
             try {
-                const response = await axios.post("/api/tournament/get-match", { _id: tournamentId, matchId });
-                setMatch(response.data.data);
+                const response = await axios.post("/api/tournament/get-match", { _id: tournamentId, matchId, tieBreaker: true });
+                setMatch(response.data.data.match);
+                setAvailableTieBreakers(response.data.data.tieBreakers);
                 console.log(response.data.data)
             } catch (error) {
                 toast({ title: "Error fetching match data" });
@@ -279,6 +346,7 @@ const MatchSettings = ({setOpenMatchSettings}) => {
                                 err={err}
                                 handleMatchAction={handleMatchAction}
                                 loading={loading}
+                                availableTieBreakers={availableTieBreakers}
                             />
                         ) : popupType === "end" ? (
                             <EndMatchPopup

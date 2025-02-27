@@ -49,6 +49,17 @@ const problemSchema = mongoose.Schema({
     }
 })
 
+const tieBreakerSchema = mongoose.Schema({
+    title: {
+        type: String,
+        required: true,
+    },
+    question: {
+        type: String,
+        required: true,
+    },
+})
+
 const matchSchema = mongoose.Schema({
     id: {
         type: Number,
@@ -83,6 +94,7 @@ const matchSchema = mongoose.Schema({
     duration: {
         type: Number
     },
+    tieBreakers: [tieBreakerSchema],
     participants: [participantSchema],
     problemList: {
         type: [problemSchema],
@@ -122,8 +134,15 @@ const tournamentSchema = mongoose.Schema({
     showDetails: {
         type: Boolean,
         default: false
-    }
+    },
+},{
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
 })
+
+tournamentSchema.virtual("tieBreakers").get(function () {
+    return this.matches.flatMap(match => match.tieBreakers || []);
+});
 
 const Tournament = mongoose.model('Tournament', tournamentSchema)
 export default Tournament
