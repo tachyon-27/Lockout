@@ -14,6 +14,7 @@ import {
     hideTournament, 
     isTournamentShown, 
     removeParticipant, 
+    removeTieBreaker, 
     restartTournament, 
     showTournament, 
     startMatch, 
@@ -55,6 +56,7 @@ router.route('/is-tournament-shown').post(verifyAdmin, isTournamentShown)
 router.route('/start-match').post(verifyAdmin, startMatch)
 router.route('/end-match').post(verifyAdmin, endMatch)
 router.route('/tie-break').post(verifyAdmin, customTieBreaker)
+router.route('/remove-tie-breaker').post(verifyAdmin, removeTieBreaker)
 router.route('/add-duration').post(verifyAdmin, updateMatchDuration)
 router.route('/give-bye').post(verifyAdmin, giveBye)
 router.route('/delete-tournament').post(verifyAdmin, deleteTournament)

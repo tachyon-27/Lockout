@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 import { socket } from "../../socket";
-import { 
+import {
     Loader,
     MatchSettings
 } from "@/components";
@@ -14,7 +14,7 @@ const Match = ({ isAdmin }) => {
     const matchId = searchParams.get('matchId')
     const tournamentId = searchParams.get('tournamentId')
     const navigate = useNavigate()
-    const [matchData, setMatchData] = useState({})
+    const [matchData, setMatchData] = useState({ tieBreakers: [] });
     const [totalPoints, setTotalPoints] = useState()
     const [isLoading, setIsLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState(0);
@@ -94,7 +94,7 @@ const Match = ({ isAdmin }) => {
                             [response.data.data.participants[1].cfid]: response.data.data.participants[1].totalPoints | 0,
                         })
 
-                        if(response.data.data?.state === "SCHEDULED" && isAdmin) setOpenMatchSettings(true);
+                        if (response.data.data?.state === "SCHEDULED" && isAdmin) setOpenMatchSettings(true);
 
                         socket.emit("joinRoom", `${tournamentId}_${matchId}`);
                     } else {
@@ -167,7 +167,7 @@ const Match = ({ isAdmin }) => {
             if (data.success) {
                 setMatchData((prevMatchData) => ({
                     ...prevMatchData,
-                    tieBreaker: data.tieBreaker,
+                    tieBreakers: data.tieBreakers,
                 }));
             }
         };
@@ -178,6 +178,7 @@ const Match = ({ isAdmin }) => {
             socket.off("tieBreakerUpdated", handleTieBreakerUpdate);
         };
     }, []);
+
 
     useEffect(() => {
         const handleMatchStart = (data) => {
@@ -226,23 +227,53 @@ const Match = ({ isAdmin }) => {
         return solved ? "✔️" : problem.points;
     };
 
+    const handleRemoveTieBreaker = async (questionId) => {
+        const confirmRemove = window.confirm("Are you sure you want to remove this tie-breaker?");
+        if (!confirmRemove) return;
+
+        try {
+            const response = await axios.post("/api/tournament/remove-tie-breaker", {
+                tournamentId,
+                matchId,
+                questionId,
+            });
+
+            if (response.data.success) {
+                setMatchData((prevMatchData) => {
+                    console.log(prevMatchData);
+                    console.log(matchData);
+                    return {
+                    ...prevMatchData,
+                    tieBreakers: prevMatchData.tieBreakers.filter((tb) => tb._id !== questionId),
+                }});
+                toast({ title: "Tie-breaker removed successfully!" });
+            } else {
+                toast({ title: response.data.message });
+            }
+        } catch (error) {
+            console.error(error);
+            toast({ title: "Error removing tie-breaker. Try again later!" });
+        }
+    };
+
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-              <Loader />
+                <Loader />
             </div>
-          );
+        );
     }
 
     return (
-        <div className="p-4 flex flex-col items-center max-h-screen">
+        <div className="p-4 flex flex-col items-center min-h-full">
             {matchData.winner && (
                 <div className="text-white text-2xl font-semibold">
                     {matchData.winner === "DRAW" ? "It is a Tie" : `${matchData.winner} won the Match`}
                 </div>
             )}
             <div className="text-white text-4xl font-bold">Round {matchData.tournamentRoundText}</div>
-            <div className="text-white text-lg font-semibold">{matchData?.state !== "DONE" ? (timeLeft > 0 ?  <span>Time: {formatTime(timeLeft)}</span> : <></>) : <span>Match Ended</span>}</div>
+            <div className="text-white text-lg font-semibold">{matchData?.state !== "DONE" ? (timeLeft > 0 ? <span>Time: {formatTime(timeLeft)}</span> : <></>) : <span>Match Ended</span>}</div>
 
             <div className="flex justify-between flex-wrap min-w-full order-1 text-white pt-7">
                 <div className="w-[25%] flex flex-col items-center gap-y-3">
@@ -252,9 +283,9 @@ const Match = ({ isAdmin }) => {
 
                 <div className="md:w-[50%] text-center w-full order-3 md:order-2 flex flex-grow items-center justify-center pt-[30%] md:pt-[8%]">
                     <div className="flex flex-col w-[90%] justify-center">
-                        {openMatchSettings ? 
+                        {openMatchSettings ?
                             <MatchSettings setOpenMatchSettings={setOpenMatchSettings} />
-                        :
+                            :
                             <div>
                                 {matchData.problemList && matchData.problemList.map((problem, idx) => (
                                     <div key={idx} className="flex items-center justify-between py-2 px-4 border-b border-white hover:bg-gray-700">
@@ -308,14 +339,24 @@ const Match = ({ isAdmin }) => {
                     <span>Total Points: {totalPoints[matchData.participants[1].cfid]}</span>
                 </div>
             </div>
-            {matchData.tieBreaker && matchData.tieBreaker.length > 0 && (
-                <div className="w-full mt-6 p-4 bg-gray-800 text-white rounded-xl shadow-lg">
+            {!openMatchSettings && matchData.tieBreakers && matchData.tieBreakers.length > 0 && (
+                <div className="w-full mt-6 p-4 order-4 text-white rounded-xl shadow-lg">
                     <h2 className="text-2xl font-bold text-center">Tie Breaker Questions</h2>
                     <div className="mt-4 space-y-3">
-                        {matchData.tieBreaker.map((tb, idx) => (
-                            <div key={idx} className="p-3 bg-gray-700 rounded-lg border border-gray-600">
-                                <h3 className="text-lg font-semibold text-yellow-300">{tb.title}</h3>
-                                <p className="text-gray-300">{tb.question}</p>
+                        {matchData.tieBreakers.map((tb, idx) => (
+                            <div key={idx} className="p-3 bg-gray-700 rounded-lg border border-gray-600 flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-yellow-300">{tb.title}</h3>
+                                    <p className="text-gray-300">{tb.question}</p>
+                                </div>
+                                {isAdmin && (
+                                    <button
+                                        className="ml-4 text-red-500 hover:text-red-700"
+                                        onClick={() => handleRemoveTieBreaker(tb._id)}
+                                    >
+                                        ❌
+                                    </button>
+                                )}
                             </div>
                         ))}
                     </div>

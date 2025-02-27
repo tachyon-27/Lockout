@@ -357,7 +357,7 @@ export const startTournament = asyncHandler(async (req, res) => {
 
         for (const [roomId, timeoutId] of roomTimers.entries()) {
             clearTimeout(timeoutId);
-            roomTimers.delete(roomId); 
+            roomTimers.delete(roomId);
         }
 
         await Question.deleteMany({})
@@ -417,9 +417,9 @@ export const restartTournament = asyncHandler(async (req, res) => {
 
         for (const [roomId, timeoutId] of roomTimers.entries()) {
             clearTimeout(timeoutId);
-            roomTimers.delete(roomId); 
+            roomTimers.delete(roomId);
         }
-        
+
 
         const io = getIo();
         io.to(tournamentId).emit('tournament-restart', tournament);
@@ -456,7 +456,7 @@ export const endTournament = asyncHandler(async (req, res) => {
 
         for (const [roomId, timeoutId] of roomTimers.entries()) {
             clearTimeout(timeoutId);
-            roomTimers.delete(roomId); 
+            roomTimers.delete(roomId);
         }
 
         const io = getIo()
@@ -629,7 +629,7 @@ export const getMatches = asyncHandler(async (req, res) => {
 
 export const getMatch = asyncHandler(async (req, res) => {
     try {
-        const { _id, matchId } = req.body;
+        const { _id, matchId, tieBreaker } = req.body;
 
         if (!_id) {
             return res
@@ -658,9 +658,20 @@ export const getMatch = asyncHandler(async (req, res) => {
                 .json(new ApiResponse(404, "Match not Found!"));
         }
 
-        return res
-            .status(200)
-            .json(new ApiResponse(200, "Match Retrieved successfully!", match));
+        if (tieBreaker) {
+            return res
+                .status(200)
+                .json(new ApiResponse(200, "Match Retrieved successfully!", {
+                    match,
+                    tieBreakers: tournament.tieBreakers,
+                }));
+
+        } else {
+            return res
+                .status(200)
+                .json(new ApiResponse(200, "Match Retrieved successfully!", match));
+        }
+
     } catch (error) {
         return res
             .status(500)
@@ -684,7 +695,7 @@ const startMatchTimer = (roomId, startTime, duration, tournamentId, match) => {
             return;
         }
         const timeoutId = setTimeout(updateStatus, Math.min(90 * 1000, remainingTime));
-        if(roomTimers.has(roomId)) {
+        if (roomTimers.has(roomId)) {
             clearTimeout(roomTimers.get(roomId));
         }
         roomTimers.set(roomId, timeoutId)
@@ -992,45 +1003,74 @@ export const customTieBreaker = asyncHandler(async (req, res) => {
             return res.status(400).json(new ApiResponse(400, "Match Id required!"));
         }
 
-        if (!customTieBreaker || !customTieBreaker.title || !customTieBreaker.question) {
+        if (!customTieBreaker.title || !customTieBreaker.question) {
             return res.status(400).json(new ApiResponse(400, "Please specify a valid custom tie-breaker with title and question!"));
         }
 
         const tournament = await Tournament.findById(tournamentId);
-
         if (!tournament) {
             return res.status(404).json(new ApiResponse(404, "Tournament not found!"));
         }
 
         const match = tournament.matches.find(m => m.id == matchId);
-        console.log(match)
         if (!match) {
             return res.status(404).json(new ApiResponse(404, "Match not found!"));
         }
-        console.log(customTieBreaker)
 
-        if (!match.tieBreaker) {
-            match.tieBreaker = [];
-        }
+        match.tieBreakers = match.tieBreakers || [];
+        match.tieBreakers.push(customTieBreaker);
 
-        match.tieBreaker.push(customTieBreaker);
+        tournament.markModified("matches");
 
         await tournament.save();
 
-        const io = getIo()
+        console.log("Updated tournament:", tournament);
 
+        const io = getIo();
         const roomId = `${tournamentId}_${matchId}`;
         io.to(roomId).emit("tieBreakerUpdated", {
             success: true,
-            status: "RUNNING",
-            match,
-            tieBreaker: match.tieBreaker
+            tieBreakers:match.tieBreakers,
         });
 
-        return res.status(200).json(new ApiResponse(200, "Tie-breaker added successfully!", match.tieBreaker));
+        return res.status(200).json(new ApiResponse(200, "Tie-breaker added successfully!", match.tieBreakers));
 
     } catch (error) {
         console.error("Error in customTieBreaker:", error);
         return res.status(500).json(new ApiResponse(500, "Internal Server Error"));
+    }
+});
+
+export const removeTieBreaker = asyncHandler(async (req, res) => {
+    try {
+        const { tournamentId, matchId, questionId } = req.body;
+
+        if (!matchId || !questionId) {
+            return res.json({ success: false, message: "Match ID and Question ID required!" });
+        }
+
+        const tournament = await Tournament.findById(tournamentId);
+
+        if (!tournament) {
+            return res.json({ success: false, message: "Match not found!" });
+        }
+
+        const match = tournament.matches.find(m => m.id == matchId);
+        if (!match) {
+            return res.status(404).json(new ApiResponse(404, "Match not found!"));
+        }
+        match.tieBreakers = match.tieBreakers.filter((q) => q._id.toString() !== questionId);
+
+        await tournament.save();
+
+        req.io.to(`${tournament._id}_${matchId}`).emit("tieBreakerUpdated", {
+            success: true,
+            tieBreakers: match.tieBreakers,
+        });
+
+        res.json({ success: true, message: "Tie-breaker removed!", tieBreakers: match.tieBreakers });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server error!" });
     }
 });
