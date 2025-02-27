@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { FaRegUser } from 'react-icons/fa';
+import Logo from '@/assets/Logo.svg';
 
 function Navbar() {
     const loggedIn = useSelector((state) => state.user.isAuthenticated);
@@ -49,7 +50,13 @@ function Navbar() {
                 bg-gradient-to-r from-white/40 via-white/60 to-white/10 
                 dark:from-gray-800/40 dark:via-gray-800/20 dark:to-gray-900/10">
 
-            <Link to="/" className="text-xl font-bold">Logo</Link>
+            <Link to="/" className="text-xl font-bold">
+                <img 
+                    src={Logo} 
+                    alt="BitLegion" 
+                    className="w-7 h-7" 
+                />
+            </Link>
 
             <button
                 className="md:hidden mx-auto text-lg px-3 py-1 

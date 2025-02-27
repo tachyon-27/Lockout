@@ -110,7 +110,7 @@ const AllMatches = ({ isAdmin = false }) => {
     return {
       upcomingMatches: filtered.filter((match) => match.state === "SCHEDULED"),
       ongoingMatches: filtered.filter((match) => match.state === "RUNNING"),
-      pastMatches: filtered.filter((match) => match.state === "DONE")
+      pastMatches: filtered.filter((match) => match.state === "DONE").reverse()
     };
   }, [matches, searchKey]);
 

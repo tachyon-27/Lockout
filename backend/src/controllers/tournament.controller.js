@@ -91,6 +91,10 @@ export const updateTournament = asyncHandler(async (req, res) => {
         tournament.description = description;
         tournament.coverImage = coverImageUrl;
 
+        if(tournament.startDate >= tournament.endDate) {
+            tournament.endDate = undefined;
+        }
+
         await tournament.save();
 
         const io = getIo()
@@ -783,6 +787,8 @@ export const startMatch = asyncHandler(async (req, res) => {
         match.state = "RUNNING";
         match.startTime = Date.now();
         match.endTime = null;
+        match.tieBreakers = [];
+        match.winner = undefined;
         await tournament.save();
 
 
@@ -963,7 +969,6 @@ export const giveBye = asyncHandler(async (req, res) => {
 
         const roomId = `${tournamentId}_${matchId}`;
         if (roomTimers.has(roomId)) {
-            console.log(roomTimers.get(roomId))
             clearTimeout(roomTimers.get(roomId));
             roomTimers.delete(roomId);
         }
@@ -1021,8 +1026,6 @@ export const customTieBreaker = asyncHandler(async (req, res) => {
 
         await tournament.save();
 
-        console.log("Updated tournament:", tournament);
-
         const io = getIo();
         const roomId = `${tournamentId}_${matchId}`;
         io.to(roomId).emit("tieBreakerUpdated", {
@@ -1041,6 +1044,7 @@ export const customTieBreaker = asyncHandler(async (req, res) => {
 export const sortParticipants = asyncHandler(async (req, res) => {
     try {
         const { tournamentId, order } = req.body;
+        console.log(tournamentId, order)
         if (!tournamentId) {
             return res.json(new ApiResponse(400, "Tournament ID is required."));
         }
@@ -1062,6 +1066,7 @@ export const sortParticipants = asyncHandler(async (req, res) => {
         });
 
         await tournament.save();
+        console.log(tournament.participants)
 
         return res.json(new ApiResponse(200, "Participants updated Successfully!", tournament.participants));
     } catch (error) {
@@ -1127,11 +1132,10 @@ export const generateFixtures = asyncHandler(async (req, res) => {
         if (!tournament) {
             return res.json(new ApiResponse(400, "Tournament not found!"));
         }
-        
         tournament.matches = await generateMatches(tournament.participants);
         await tournament.save();
 
-        return res.json(200, "Fixtures Generated successfully!")
+        return res.json(new ApiResponse(200, "Fixtures Generated successfully!"))
     } catch(error) {
         return res.json(new ApiResponse(500, "Error while generating fixtures", error))
     }

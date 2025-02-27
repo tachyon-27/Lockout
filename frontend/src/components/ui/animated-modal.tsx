@@ -71,12 +71,15 @@ export const ModalBody = ({
   const { open } = useModal();
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
+      if (open) {
+          document.body.style.overflow = "hidden";
+      } 
+
+      return () => {
+          document.body.style.overflow = "auto";
+      };
   }, [open]);
+
 
   const modalRef = useRef(null);
   const { setOpen } = useModal();

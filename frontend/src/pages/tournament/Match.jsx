@@ -199,7 +199,7 @@ const Match = ({ isAdmin }) => {
             socket.off("match-start", handleMatchStart);
         };
 
-    }, [toast])
+    }, [])
 
     socket.on('add-duration', (data) => { setMatchData(data); console.log(data) })
 

@@ -234,10 +234,10 @@ const Register = () => {
                     </div>
 
                     <div className="flex justify-center space-x-4">
-                        <button onClick={googleLogin} className="p-3 bg-transparent rounded-md border border-gray-600 hover:border-white">
+                        <button type="button" onClick={googleLogin} className="p-3 bg-transparent rounded-md border border-gray-600 hover:border-white">
                             <FaGoogle className="text-white text-lg" />
                         </button>
-                        <button onClick={githubLogin} className="p-3 bg-transparent rounded-md border border-gray-600 hover:border-white">
+                        <button type="button" onClick={githubLogin} className="p-3 bg-transparent rounded-md border border-gray-600 hover:border-white">
                             <FaGithub className="text-white text-lg" />
                         </button>
                     </div>

@@ -31,6 +31,9 @@ const Login = () => {
         setShowPassword((prev) => !prev);
     };
 
+    const githubOauthURL = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_REDIRECT_URI}&scope=user:user:email`
+
+
     const googleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
@@ -163,6 +166,7 @@ const Login = () => {
                         <button
                             aria-label="Log in with Google"
                             className="p-3 bg-transparent rounded-sm"
+                            type='button'
                             onClick={googleLogin}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-5 h-5 fill-current">
@@ -174,6 +178,7 @@ const Login = () => {
                         <button
                             aria-label="Log in with GitHub"
                             className="p-3 bg-transparent rounded-sm"
+                            type='button'
                             onClick={() => window.location.href = githubOauthURL}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-5 h-5 fill-current">

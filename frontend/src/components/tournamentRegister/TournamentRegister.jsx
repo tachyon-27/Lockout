@@ -57,7 +57,7 @@ const TournamentRegister = ({ setAddID, tournamentId, setIsRegistered }) => {
         {isLoading ? <ClipLoader color="#FFFFFF" className="m-auto" /> : (
           <>
             <p className="text-sm md:text-sm text-neutral-600 dark:text-neutral-100 font-bold text-left mb-8">
-              Please add the Codeforces ID!
+              Choose a Codeforces ID!
             </p>
             <div className="grid grid-cols-1 gap-y-2 max-h-40 overflow-y-auto px-2 scrollbar-beautiful">
               {cfids.map(

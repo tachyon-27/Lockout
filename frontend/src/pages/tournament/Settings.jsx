@@ -4,6 +4,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
+import { socket } from "@/socket";
 
 function Settings() {
   const [searchParams] = useSearchParams();
@@ -15,9 +16,21 @@ function Settings() {
   const [endDate, setEndDate] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [fixturesGenerated, setFixturesGenerated] = useState(false);
-  const [popup, setPopup] = useState("")
+  const [popup, setPopup] = useState("");
   const [sortOption, setSortOption] = useState("");
+  const [ascordesc, setAscordesc] = useState("");
   const [participants, setParticipants] = useState([]);
+  const [customOrder, setCustomOrder] = useState([]);
+
+  const moveParticipant = (index, direction) => {
+    if (index < 0 || index >= customOrder.length) return;
+    const newOrder = [...customOrder];
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    if (swapIndex < 0 || swapIndex >= newOrder.length) return;
+
+    [newOrder[index], newOrder[swapIndex]] = [newOrder[swapIndex], newOrder[index]];
+    setCustomOrder(newOrder);
+  };
 
   useEffect(() => {
     const fetchTournamentStatus = async () => {
@@ -35,6 +48,25 @@ function Settings() {
     fetchTournamentStatus();
   }, []);
 
+  useEffect(() => {
+    const handleTournamentUpdate = (data) => {
+        setIsShown(data.showDetails);
+        setEndDate(data.endDate);
+        setStartDate(data.startDate);
+    }
+
+
+      socket.on('tournament-start', handleTournamentUpdate);
+      socket.on('tournament-end', handleTournamentUpdate);
+  
+  
+      return () => {
+        socket.off('tournament-start', handleTournamentUpdate);
+        socket.off('tournament-end', handleTournamentUpdate);
+      }
+  
+    }, [])
+
   const handleAction = async (action, successMessage, errorMessage) => {
     if (!tournamentId) {
       toast({ title: "Tournament not Specified!" });
@@ -43,6 +75,12 @@ function Settings() {
     
     setLoading(action);
     try {
+
+      if(action === "end") {
+        const confirmRemove = window.confirm("Are you sure you want to end this tournament?");
+        if (!confirmRemove) return;
+      }
+
       const res = await axios.post(`/api/tournament/${action}-tournament`, { tournamentId });
       toast({ title: res.data.message || successMessage });
 
@@ -83,19 +121,23 @@ function Settings() {
       } else if (sortOption === "sort") {
         const res = await axios.post("/api/tournament/sort-participants", {
           tournamentId,
-          order: sortOption === "ascending" ? "asc" : "desc",
+          order: ascordesc === "ascending" ? "asc" : "desc",
         });
         setParticipants(res.data.data)
       } else if (sortOption === "custom") {
-        const res = await axios.post("/api/tournament/custom-participants", {
+        const res = await axios.post("/api/tournament/assign-participants", {
           tournamentId,
-          participants,
+          participants: customOrder,
         });
       }
   
       const fixturesRes = await axios.post("/api/tournament/generate-fixtures", {tournamentId});
-  
-      toast({ title: fixturesRes.data.message });
+      toast({ title: loading !== "restart" ? fixturesRes.data.message : "Tournament Restarted" });
+
+      
+      if(loading === "restart") {
+        handleAction("restart", "Tournament Restarted", "Error Restarting Tournament")
+      }
   
       setFixturesGenerated(true);
       setPopup("");
@@ -113,13 +155,12 @@ function Settings() {
           <CardTitle className="text-center">Tournament Settings</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col space-y-4">
-          
-          <Button 
+          {new Date() < new Date(startDate) && <Button 
             onClick = {() => setPopup("generate-fixtures")}
             className="bg-orange-500 hover:bg-orange-600 transition-all"
           >
             {loading === "generate-fixtures" ? "Generating..." : "Generate Fixtures"}
-          </Button>
+          </Button>}
 
           {fixturesGenerated && (
             <>
@@ -141,7 +182,7 @@ function Settings() {
                 </Button>
               )}
 
-              {!endDate && new Date() < new Date(startDate) && (
+              {fixturesGenerated && new Date() < new Date(startDate) && (
                 <Button 
                   onClick={() => handleAction("start", "Tournament started!", "Error starting tournament!")}
                   disabled={loading === "start"}
@@ -178,16 +219,16 @@ function Settings() {
             {loading === "delete" ? "Deleting..." : "Delete Tournament"}
           </Button>
 
-          <Button
-            onClick={() => handleAction("restart", "Tournament Restarted", "Error Restarting Tournament")}
+          {!endDate && new Date() >= new Date(startDate) && <Button
+            onClick={() => setPopup("generate-fixtures")}
             disabled={loading === "restart"}
             className="bg-red-800 hover:bg-red-900 transition-all"
           >
             {loading === "restart" ? "Restarting..." : "Restart Tournament!"}
-          </Button>
+          </Button>}
         </CardContent>
       </Card>
-
+      
       {popup === "generate-fixtures" && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-5">
           <div className="bg-gray-900 p-5 rounded-lg shadow-lg text-white w-full max-w-md">
@@ -202,40 +243,46 @@ function Settings() {
               {sortOption === "sort" && (
                 <div className="pl-4 space-y-1">
                   <label className="block">
-                    <input type="radio" value="ascending" checked={sortOption === "ascending"} onChange={() => setSortOption("ascending")} /> Ascending
+                    <input type="radio" value="ascending" checked={ascordesc === "ascending"} onChange={() => setAscordesc("ascending")} /> Ascending
                   </label>
                   <label className="block">
-                    <input type="radio" value="descending" checked={sortOption === "descending"} onChange={() => setSortOption("descending")} /> Descending
+                    <input type="radio" value="descending" checked={ascordesc === "descending"} onChange={() => setAscordesc("descending")} /> Descending
                   </label>
                 </div>
               )}
               <label className="block">
-                <input type="radio" value="custom" checked={sortOption === "custom"} onChange={() => setSortOption("custom")} /> Custom
+                <input type="radio" value="custom" checked={sortOption === "custom"} onChange={() => { setSortOption("custom"); setCustomOrder([...participants]); }} /> Custom
               </label>
             </div>
-            {sortOption === "custom" && (
-              <div className="mt-4">
-                <h4 className="font-bold mb-2">Participants</h4>
-                <table className="w-full text-sm text-white border border-gray-700">
-                  <thead>
-                    <tr className="bg-gray-800">
-                      <th className="border border-gray-700 p-2">Participant</th>
-                      <th className="border border-gray-700 p-2">Max Rating</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {participants.map((p, index) => (
-                      <tr key={index} className="border border-gray-700">
-                        <td className="border border-gray-700 p-2">{p.name}</td>
-                        <td className="border border-gray-700 p-2">{p.maxRating}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
             <div className="flex justify-between mt-4">
               <Button onClick={() => setPopup("")} variant="outline">Cancel</Button>
+              {sortOption === "custom" ? (
+                <Button onClick={() => setPopup("custom-order")}>Next</Button>
+              ) : (
+                <Button onClick={handleGenerateFixtures}>Confirm</Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {popup === "custom-order" && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-5">
+          <div className="bg-gray-900 p-5 rounded-lg shadow-lg text-white w-full max-w-md">
+            <h3 className="text-lg font-bold mb-4">Reorder Participants</h3>
+            <ul className="space-y-2">
+              {customOrder.map((p, index) => (
+                <li key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-lg">
+                  <span>{p.name}</span>
+                  <div className="space-x-2">
+                    <Button size="sm" onClick={() => moveParticipant(index, "up")} disabled={index === 0}>↑</Button>
+                    <Button size="sm" onClick={() => moveParticipant(index, "down")} disabled={index === customOrder.length - 1}>↓</Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-between mt-4">
+              <Button onClick={() => setPopup("generate-fixtures")} variant="outline">Back</Button>
               <Button onClick={handleGenerateFixtures}>Confirm</Button>
             </div>
           </div>
