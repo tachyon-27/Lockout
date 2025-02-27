@@ -4,14 +4,15 @@ import { useToast } from "@/hooks/use-toast"
 import axios from "axios";
 import MatchCard from '@/components/MatchCard'
 import { socket } from '../../socket';
-import {Loader} from '@/components';
- 
-const AllMatches = ({isAdmin = false}) => {
+import { Loader } from '@/components';
+
+const AllMatches = ({ isAdmin = false }) => {
   const [searchParams] = useSearchParams();
   const tournamentId = searchParams.get("id");
   const [matches, setMatches] = useState([])
   const [isLoading, setIsLoading] = useState(false);
   const [show, setShow] = useState(false)
+  const [searchKey, setSearchKey] = useState("");
   const [startDate, setStartDate] = useState(null);
   const { toast } = useToast()
   const navigate = useNavigate()
@@ -70,7 +71,7 @@ const AllMatches = ({isAdmin = false}) => {
     socket.on('tournament-hide', handleMatchShowHide);
     socket.on('tournament-start', handleMatchShowHide);
 
-    
+
     return () => {
       socket.off('match-start', handleMatchesUpdate);
       socket.off('match-end', handleMatchesUpdate);
@@ -83,14 +84,37 @@ const AllMatches = ({isAdmin = false}) => {
   }, [])
 
   const filteredMatches = useMemo(() => {
-    return {
-      upcomingMatches: matches.filter((match) => match.state === "SCHEDULED"),
-      ongoingMatches: matches.filter((match) => match.state === "RUNNING"),
-      pastMatches: matches.filter((match) => match.state === "DONE")
-    };
-  }, [matches]);
+    const lowerSearch = searchKey.toLowerCase();
+    const isNumericSearch = !isNaN(searchKey); // Check if searchKey is a number
 
-  if(isLoading) {
+    const filtered = matches
+      .filter((match) =>
+        match.participants[0].cfid.toLowerCase().includes(lowerSearch) ||
+        match.participants[1].cfid.toLowerCase().includes(lowerSearch) ||
+        match.tournamentRoundText == searchKey
+      )
+      .sort((a, b) => {
+        const aCfidStarts = a.participants[0].cfid.toLowerCase().startsWith(lowerSearch);
+        const bCfidStarts = b.participants[0].cfid.toLowerCase().startsWith(lowerSearch);
+
+        if (aCfidStarts !== bCfidStarts) return aCfidStarts ? -1 : 1;
+
+        if (isNumericSearch) {
+          const aExactRound = a.tournamentRoundText == searchKey;
+          const bExactRound = b.tournamentRoundText == searchKey;
+          if (aExactRound !== bExactRound) return aExactRound ? -1 : 1;
+        }
+
+        return 0;
+      });
+    return {
+      upcomingMatches: filtered.filter((match) => match.state === "SCHEDULED"),
+      ongoingMatches: filtered.filter((match) => match.state === "RUNNING"),
+      pastMatches: filtered.filter((match) => match.state === "DONE")
+    };
+  }, [matches, searchKey]);
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader />
@@ -103,48 +127,59 @@ const AllMatches = ({isAdmin = false}) => {
       No matches available yet.
     </div>
   ) : (
-    <div className='p-2 md:p-5'>
+    <div className='flex flex-col p-2 md:p-5'>
+      <input
+        type="text"
+        placeholder="Search..."
+        onChange={(e) => setSearchKey(e.target.value)}
+        className="w-full md:w-[70%] self-center px-4 py-2 mb-9 text-white 
+             bg-white/10 backdrop-blur-md border border-white/20
+             rounded-lg outline-none transition-all duration-200 
+             hover:bg-white/20 focus:ring-2 focus:ring-purple-500/50 
+             placeholder-gray-300"
+      />
+
       {
-      filteredMatches.ongoingMatches.length !== 0 && 
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Ongoing Matches</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {
-            filteredMatches.ongoingMatches.map((match, idx) => (
-              <div key={idx}>
-                <MatchCard isAdmin={isAdmin} tournamentId={tournamentId} match={match} />
-              </div>
-            ))
-          }
-        </div>
-      </section>
-      }
-      {isAdmin && 
-      filteredMatches.upcomingMatches.length !== 0 && 
+        filteredMatches.ongoingMatches.length !== 0 &&
         <section className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">Upcoming Matches</h2>
+          <h2 className="text-xl font-semibold mb-4">Ongoing Matches</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {  filteredMatches.upcomingMatches.map((match, idx) => (
+            {
+              filteredMatches.ongoingMatches.map((match, idx) => (
                 <div key={idx}>
                   <MatchCard isAdmin={isAdmin} tournamentId={tournamentId} match={match} />
                 </div>
-          ))}
+              ))
+            }
           </div>
         </section>
-          
       }
-    {filteredMatches.pastMatches.length !== 0 && 
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Past Matches</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">           
+      {isAdmin &&
+        filteredMatches.upcomingMatches.length !== 0 &&
+        <section className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Upcoming Matches</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMatches.upcomingMatches.map((match, idx) => (
+              <div key={idx}>
+                <MatchCard isAdmin={isAdmin} tournamentId={tournamentId} match={match} />
+              </div>
+            ))}
+          </div>
+        </section>
+
+      }
+      {filteredMatches.pastMatches.length !== 0 &&
+        <section className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Past Matches</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredMatches.pastMatches.map((match, idx) => (
               <div key={idx}>
                 <MatchCard isAdmin={isAdmin} tournamentId={tournamentId} match={match} />
               </div>
             ))
-          }
-        </div>
-      </section>
+            }
+          </div>
+        </section>
       }
     </div>
   );
