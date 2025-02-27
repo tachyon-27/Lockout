@@ -22,7 +22,11 @@ import {
     tournaments, 
     tournamentUnregister, 
     updateMatchDuration, 
-    updateTournament 
+    updateTournament, 
+    sortParticipants, 
+    randomizeParticipants, 
+    assignParticipants,
+    generateFixtures
 } from "../controllers/tournament.controller.js";
 import { verifyAdmin, verifyUser } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -63,5 +67,10 @@ router.route('/remove-participant').post(verifyAdmin, removeParticipant)
 router.route('/get-tournament-user').post(verifyUser, getTournamentUser)
 router.route('/tournament-register').post(verifyUser, tournamentRegister)
 router.route('/tournament-unregister').post(verifyUser, tournamentUnregister)
+
+router.route('/sort-participants').post(verifyAdmin, sortParticipants);
+router.route('/randomize-participants').post(verifyAdmin, randomizeParticipants);
+router.route('/assign-participants').post(verifyAdmin, assignParticipants);
+router.route('/generate-fixtures').post(verifyAdmin, generateFixtures)
 
 export default router

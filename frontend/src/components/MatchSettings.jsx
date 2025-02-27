@@ -118,7 +118,6 @@ const TieHandlingPopup = ({ tieOption, setTieOption, customTieBreaker, setCustom
     </>
 );
 
-
 const EndMatchPopup = ({ selectedWinner, setSelectedWinner, match, err, setErr, handleMatchAction, loading, setPopupType }) => (
     <>
         <h3 className="text-lg font-bold mb-4">End Match</h3>
