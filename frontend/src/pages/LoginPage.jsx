@@ -37,6 +37,7 @@ const Login = () => {
     const googleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
+                setIsSubmitting(true);
                 const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/user/google`, {
                     method: 'POST',
                     headers: {
@@ -65,6 +66,8 @@ const Login = () => {
                     title: 'Error during login',
                     description: error,
                 });
+            } finally {
+                setIsSubmitting(false);
             }
         },
         onError: () => {

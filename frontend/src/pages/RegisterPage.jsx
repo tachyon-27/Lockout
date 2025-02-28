@@ -50,6 +50,7 @@ const Register = () => {
     const googleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
+                setIsSubmitting(true);
                 const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/user/google`, {
                     method: 'POST',
                     headers: {
@@ -78,7 +79,7 @@ const Register = () => {
                     title: 'Error during login',
                     description: error,
                 })
-            }
+            } setIsSubmitting(false);
         },
         onError: () => {
             toast({
