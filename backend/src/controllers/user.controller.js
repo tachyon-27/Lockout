@@ -355,13 +355,11 @@ export const resetPassword = asyncHandler(async (req, res) => {
 export const githubCallback = asyncHandler(async (req, res) => {
   try {
     const { code } = req.body;
-    console.log(code)
     if (!code) {
       throw new Error('Github OAuth code not found!')
     }
 
     const access_token = await getGithubAcessToken(code)
-    console.log(access_token);
     const user = await getGithubUser(access_token)
 
     if (user && user.isVerified) {
@@ -372,12 +370,9 @@ export const githubCallback = asyncHandler(async (req, res) => {
         secure: true
       }
 
-      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-
       return res
-        .status(201)
         .cookie("token", token, options)
+        .status(201)
         .json(new ApiResponse(201,'User Github Logged in!',user))
     } else {
       res.status(501)

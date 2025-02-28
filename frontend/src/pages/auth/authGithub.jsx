@@ -16,7 +16,6 @@ const AuthGithub = () => {
 
   useEffect(() => {
     if (githubCode) {
-      console.log(githubCode)
       const authenticate = async () => {
         try {
           const response = await axios.post(
@@ -24,6 +23,9 @@ const AuthGithub = () => {
             { code: githubCode },
           );
           
+          const res = await axios.post('/api/user/refresh', {
+            _id: response.data.data._id
+          })
           toast({ title: 'Successfully Logged In' });
           dispatch(loginSuccess({ token: response.data.data._id, role: "verifiedUser" }));
           navigate('/tournaments');

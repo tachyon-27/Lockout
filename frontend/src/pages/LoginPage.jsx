@@ -38,21 +38,22 @@ const Login = () => {
         onSuccess: async (tokenResponse) => {
             try {
                 setIsSubmitting(true);
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/user/google`, {
-                    method: 'POST',
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ token: tokenResponse.access_token }),
-                    credentials: "include"
-                });
-
-                const data = await response.json();
-
+    
+                const { data } = await axios.post(
+                    `${import.meta.env.VITE_BACKEND_URI}/api/user/google`,
+                    { token: tokenResponse.access_token },
+                    { withCredentials: true } 
+                );
+    
                 if (data.success) {
+                    await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/user/refresh`, {
+                        _id: data.data._id,
+                    }, { withCredentials: true });
+    
                     toast({
-                        title: 'Logged in Successfully!'
+                        title: 'Logged in Successfully!',
                     });
+    
                     dispatch(loginSuccess({ token: data.data._id, role: "verifiedUser" }));
                     navigate('/tournaments');
                 } else {
@@ -64,7 +65,7 @@ const Login = () => {
             } catch (error) {
                 toast({
                     title: 'Error during login',
-                    description: error,
+                    description: error.response?.data?.message || error.message,
                 });
             } finally {
                 setIsSubmitting(false);
@@ -76,6 +77,7 @@ const Login = () => {
             });
         }
     });
+    
 
     const submit = async (data) => {
         setIsSubmitting(true);

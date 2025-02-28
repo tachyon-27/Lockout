@@ -18,7 +18,6 @@ export const getGithubAcessToken = async (code) => {
             }
         );
 
-        console.log(response.data)
         const { access_token } = response.data;
     
         return access_token;
@@ -34,19 +33,32 @@ export const getGithubUser = async (access_token) => {
                 'Authorization': `Bearer ${access_token}`,
                 'Accept': 'application/json',
             },
-        })
-        const {name, email} = response.data
-        if(!email) {
-            throw new Error('Email not public on Github!')
+        });
+
+        let { name, email } = response.data;
+
+        if (!email) {
+            const emailResponse = await axios.get('https://api.github.com/user/emails', {
+                headers: {
+                    'Authorization': `Bearer ${access_token}`,
+                    'Accept': 'application/json',
+                },
+            });
+
+            const primaryEmail = emailResponse.data.find(e => e.primary && e.verified);
+            if (!primaryEmail) {
+                throw new Error('No verified primary email found on GitHub!');
+            }
+            email = primaryEmail.email;
         }
-        const userExists = await User.findOne({email})
-        if(userExists) {
+
+        const userExists = await User.findOne({ email });
+        if (userExists) {
             userExists.isVerified = true;
             userExists.githubAccessToken = access_token;
 
             await userExists.save();
-
-            return userExists
+            return userExists;
         }
 
         const user = await User.create({
@@ -54,16 +66,12 @@ export const getGithubUser = async (access_token) => {
             email,
             isVerified: true,
             githubAccessToken: access_token,
-        })
+        });
 
-        if (user) {
-            return user
-        }
+        return user;
 
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        console.error("GitHub Auth Error:", error.response?.data || error.message);
+        throw new Error(error.message || "Failed to authenticate with GitHub.");
     }
-
-
-}
+};
