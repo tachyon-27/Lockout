@@ -361,6 +361,7 @@ export const githubCallback = asyncHandler(async (req, res) => {
     }
 
     const access_token = await getGithubAcessToken(code)
+    console.log(access_token);
     const user = await getGithubUser(access_token)
 
     if (user && user.isVerified) {
