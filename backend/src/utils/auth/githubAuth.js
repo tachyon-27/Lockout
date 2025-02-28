@@ -17,6 +17,8 @@ export const getGithubAcessToken = async (code) => {
                 },
             }
         );
+
+        console.log(response.data)
         const { access_token } = response.data;
     
         return access_token;
