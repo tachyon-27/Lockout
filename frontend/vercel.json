@@ -1,0 +1,9 @@
+{
+    "rewrites": [
+      {
+        "source": "/api/:path*",
+        "destination": "https://lockout-werm.onrender.com/api/:path*"
+      }
+    ]
+  }
+  
