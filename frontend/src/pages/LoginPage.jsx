@@ -41,14 +41,14 @@ const Login = () => {
     
                 const { data } = await axios.post(
                     `${import.meta.env.VITE_BACKEND_URI}/api/user/google`,
-                    { token: tokenResponse.access_token },
-                    { withCredentials: true } 
+                    { token: tokenResponse.access_token } 
                 );
     
                 if (data.success) {
+                    console.log(data)
                     await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/user/refresh`, {
                         _id: data.data._id,
-                    }, { withCredentials: true });
+                    });
     
                     toast({
                         title: 'Logged in Successfully!',

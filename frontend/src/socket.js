@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const SOCKET_URL = `http://localhost:${import.meta.env.VITE_BACKEND_PORT}`;
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URI;
 
 export const socket = io(SOCKET_URL, {
   withCredentials: true,
