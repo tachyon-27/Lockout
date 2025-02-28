@@ -15,6 +15,7 @@ export default defineConfig({
     proxy: {
       '/api': process.env.VITE_BACKEND_URI
     },
+    historyApiFallback: true,
   },
   plugins: [react()],
   resolve: {
