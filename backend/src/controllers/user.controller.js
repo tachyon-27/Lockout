@@ -355,6 +355,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
 export const githubCallback = asyncHandler(async (req, res) => {
   try {
     const { code } = req.body;
+    console.log(code)
     if (!code) {
       throw new Error('Github OAuth code not found!')
     }

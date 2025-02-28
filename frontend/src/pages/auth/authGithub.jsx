@@ -16,12 +16,12 @@ const AuthGithub = () => {
 
   useEffect(() => {
     if (githubCode) {
+      console.log(githubCode)
       const authenticate = async () => {
         try {
           const response = await axios.post(
             `${import.meta.env.VITE_BACKEND_URI}/api/user/github`,
             { code: githubCode },
-            { withCredentials: true }
           );
           
           toast({ title: 'Successfully Logged In' });
