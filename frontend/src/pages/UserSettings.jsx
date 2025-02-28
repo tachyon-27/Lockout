@@ -39,7 +39,7 @@ const UserSettings = () => {
   const navItems = [
     { id: "profile", label: "Profile", component: <ProfileSettings /> },
     { id: "changePassword", label: "Change Password", component: <ChangePassword /> },
-    { id: "cfid", label: "Manage Codeforces ID", component: <Cfid /> },
+    { id: "cfid", label: "Manage Codeforces IDs", component: <Cfid /> },
     { id: "logout", label: "Logout", action: logoutHandler },
   ];
 

@@ -11,7 +11,7 @@ function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const navItems = [
-        { name: 'Home', slug: '#home', active: true },
+        { name: 'Home', slug: '/', active: true },
         { name: 'About', slug: '#about', active: true },
         { name: 'History', slug: '#history', active: true },
         { name: 'Tournaments', slug: '/tournaments', active: true } // Real route
@@ -78,11 +78,14 @@ function Navbar() {
                         className="hover:bg-white/20 hover:backdrop-blur-sm 
                         rounded-lg px-3 transition-all mt-1 md:mt-0">
                         {item.slug.startsWith("#") ? (
-                            <button onClick={() => handleNavigation(item)} className="w-full text-left">
+                            <button onClick={() => {
+                                handleNavigation(item)
+                                setIsMenuOpen(false);    
+                            }} className="w-full text-left">
                                 {item.name}
                             </button>
                         ) : (
-                            <Link to={item.slug}>{item.name}</Link>
+                            <Link onClick={() => setIsMenuOpen(false)} to={item.slug}>{item.name}</Link>
                         )}
                     </li>
                 ))}

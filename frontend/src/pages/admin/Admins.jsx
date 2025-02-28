@@ -150,8 +150,8 @@ const Admins = () => {
                         <div key={index} className="bg-gradient-to-b from-gray-400 w-full via-gray-500 to-gray-700 p-[0.7px] rounded-2xl">
                             <div className={`grid grid-cols-[1fr_5fr_5fr_1fr] p-2 h-fit text-center rounded-2xl bg-black bg-gradient-to-r from-black via-gray-400/10 to-gray-500/25 hover:bg-slate-950 text-white`}>
                                 <span>{index + 1}</span>
-                                <span>{item.name}</span>
-                                <span>{item.email}</span>
+                                <span className='break-all'>{item.name}</span>
+                                <span className='overflow-auto scrollbar-none mx-2'>{item.email}</span>
                                 <button
                                     className={`text-xl px-4 py-2 rounded-lg ${item.isAdmin ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white`}
                                     onClick={() => handleActionClick(item)}

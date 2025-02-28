@@ -148,7 +148,7 @@ export default function Tournament({ isAdmin = false }) {
                     </button>
                     {dropdownOpen === tournament._id && (
                       <div className="absolute right-0 mt-2 w-40 bg-gray-800 rounded-md shadow-lg text-left z-10">
-                        <button onClick={() => navigate(`/tournament/view?id=${tournament._id}`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">View</button>
+                        <button onClick={() => navigate(`${ isAdmin ? `/admin/dashboard` : "" }/tournament/view?id=${tournament._id}`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">View</button>
                         <button onClick={() => navigate(`/admin/dashboard/update-tournament?id=${tournament._id}`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">Edit</button>
                         <button onClick={() => handleDelete(tournament._id)} className="w-full text-left px-4 py-2 bg-red-600 hover:bg-red-700">Delete</button>
                       </div>
@@ -204,7 +204,7 @@ export default function Tournament({ isAdmin = false }) {
                     </button>
                     {dropdownOpen === tournament._id && (
                       <div className="absolute right-0 mt-2 w-40 bg-gray-800 rounded-md shadow-lg text-left z-10">
-                        <button onClick={() => navigate(`/tournament/view?id=${tournament._id}`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">View</button>
+                        <button onClick={() => navigate(`${ isAdmin ? `/admin/dashboard` : "" }/tournament/view?id=${tournament._id}`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">View</button>
                         <button onClick={() => navigate(`/admin/dashboard/update-tournament?id=${tournament._id}`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">Edit</button>
                         <button onClick={() => handleDelete(tournament._id)} className="w-full text-left px-4 py-2 bg-red-600 hover:bg-red-700">Delete</button>
                       </div>

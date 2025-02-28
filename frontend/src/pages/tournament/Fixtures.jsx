@@ -88,7 +88,7 @@ function Fixtures() {
       Fixtures not available yet.
     </div>
   ) : (
-    <div className="overflow-x-auto p-4 rounded-lg">
+    <div className="overflow-x-auto p-4 rounded-lg transform sm:scale-100 xs:scale-80 scale-75">
       <div className="inline-block min-w-max">
         <SingleEliminationBracket
           matches={matches}

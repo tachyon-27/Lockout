@@ -61,9 +61,12 @@ const MatchCard = ({ isAdmin, tournamentId, match }) => {
                 <ShowStatus status={match.state} />
             </div>
 
-            <div className="text-center flex justify-between text-gray-300 font-medium mb-2 p-10">
-                <div>{match.participants[0].cfid}</div> <div>Vs</div> <div>{match.participants[1].cfid}</div>
+            <div className="text-center flex justify-between text-gray-300 font-medium mb-2 py-10 px-2 md:px-10 space-x-1">
+                <div className="truncate min-w-0 w-[40%]">{match.participants[0].cfid}</div> 
+                <div className="font-extrabold w-[20%]">Vs</div> 
+                <div className="truncate min-w-0 w-[40%]">{match.participants[1].cfid}</div>
             </div>
+
 
             <div className="w-full h-[2px] bg-slate-500 my-2"></div>
 

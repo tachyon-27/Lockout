@@ -266,9 +266,9 @@ const Match = ({ isAdmin }) => {
     }
 
     return (
-        <div className="p-4 flex flex-col items-center min-h-full">
+        <div className="p-1 md:p-4 flex flex-col items-center min-h-full">
             {matchData.winner && (
-                <div className="text-white text-2xl font-semibold">
+                <div className="text-white text-center text-2xl font-semibold">
                     {matchData.winner === "DRAW" ? "It is a Tie" : `${matchData.winner} won the Match`}
                 </div>
             )}
@@ -276,8 +276,8 @@ const Match = ({ isAdmin }) => {
             <div className="text-white text-lg font-semibold">{matchData?.state !== "DONE" ? (timeLeft > 0 ? <span>Time: {formatTime(timeLeft)}</span> : <></>) : <span>Match Ended</span>}</div>
 
             <div className="flex justify-between flex-wrap min-w-full order-1 text-white pt-7">
-                <div className="w-[25%] flex flex-col items-center gap-y-3">
-                    <span className="text-4xl">{matchData.participants[0].cfid}</span>
+                <div className="w-[49%] md:w-[25%] flex flex-col items-center justify-between gap-y-3">
+                    <span className="text-lg sm:text-2xl md:text-4xl break-all text-center">{matchData.participants[0].cfid}</span>
                     <span>Total Points: {totalPoints[matchData.participants[0].cfid]}</span>
                 </div>
 
@@ -314,13 +314,13 @@ const Match = ({ isAdmin }) => {
                             </div>
                         }
                         <div className="flex justify-around">
-                            <button
+                            {matchData.state === "RUNNING" && <button
                                 className="w-[30%] self-center mt-2 p-2 font-semibold bg-gray-700 hover:bg-gray-600 disabled:bg-gray-500 text-white rounded-xl"
                                 onClick={handleProblemRefresh}
                                 disabled={!isRefreshActive}
                             >
-                                {isRefreshActive ? <span>Refresh Status</span> : <span>Please Wait...</span>}
-                            </button>
+                                {isRefreshActive ? <span>Refresh</span> : <span>Please Wait...</span>}
+                            </button>}
 
                             {isAdmin && (
                                 <button
@@ -334,8 +334,8 @@ const Match = ({ isAdmin }) => {
                     </div>
                 </div>
 
-                <div className="w-[25%] order-2 md:order-3 flex flex-col items-center gap-y-3">
-                    <span className="text-4xl">{matchData.participants[1].cfid}</span>
+                <div className="w-[49%] md:w-[25%] order-2 md:order-3 flex flex-col items-center justify-between gap-y-3">
+                    <span className="text-lg sm:text-2xl md:text-4xl break-all text-center">{matchData.participants[1].cfid}</span>
                     <span>Total Points: {totalPoints[matchData.participants[1].cfid]}</span>
                 </div>
             </div>

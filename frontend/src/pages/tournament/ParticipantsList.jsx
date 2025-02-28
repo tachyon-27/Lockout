@@ -161,7 +161,7 @@ const ParticipantsList = ({ isAdmin = false }) => {
         </div>
     ) : (
         <div className='flex flex-col items-center justify-center'>
-            <div className="grid gap-y-4 p-3 sm:w-full md:w-[80%]">
+            <div className="grid gap-y-4 p-0 md:p-3 sm:w-full md:w-[80%]">
                 <div className="bg-gradient-to-b from-gray-400 w-full via-gray-500 to-gray-700 p-[0.5px] rounded-2xl">
                     <div className="flex items-center gap-2 h-fit border-none p-2 rounded-2xl bg-black bg-gradient-to-r from-black via-gray-400/10 to-gray-500/25 hover:bg-slate-950 text-white">
                         <input
@@ -191,7 +191,7 @@ const ParticipantsList = ({ isAdmin = false }) => {
                         >
                             <div className={`grid ${isAdmin ? "grid-cols-[5fr_5fr_5fr_1fr]" : "grid-cols-3"} p-2 h-fit text-center rounded-2xl bg-black bg-gradient-to-r from-black via-gray-400/10 to-gray-500/25 hover:bg-slate-950 text-white`}>
                                 <span>{index + 1}</span>
-                                <span>{item.name}</span>
+                                <span className='break-all'>{item.name}</span>
                                 <span>{item.maxRating}</span>
                                 {isAdmin && (
                                     <button
