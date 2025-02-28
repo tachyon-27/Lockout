@@ -13,7 +13,7 @@ export default defineConfig({
   assetsInclude: ["**/*.JPG"],
   server: {
     proxy: {
-      '/api': `http://localhost:${process.env.VITE_BACKEND_PORT}`
+      '/api': process.env.VITE_BACKEND_URI
     },
   },
   plugins: [react()],
