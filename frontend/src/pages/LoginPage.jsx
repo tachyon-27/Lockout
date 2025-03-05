@@ -40,7 +40,7 @@ const Login = () => {
                 setIsSubmitting(true);
 
                 const { data } = await axios.post(
-                    `${import.meta.env.VITE_BACKEND_URI}/api/user/google`,
+                    `/api/user/google`,
                     { token: tokenResponse.access_token },
                     {withCredentials: true},
                 );
