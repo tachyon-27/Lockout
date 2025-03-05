@@ -54,14 +54,13 @@ const Register = () => {
     
                 const { data } = await axios.post(
                     `${import.meta.env.VITE_BACKEND_URI}/api/user/google`,
-                    { token: tokenResponse.access_token },
-                    { withCredentials: true } 
+                    { token: tokenResponse.access_token } 
                 );
     
                 if (data.success) {
                     await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/user/refresh`, {
                         _id: data.data._id,
-                    }, { withCredentials: true });
+                    });
     
                     toast({
                         title: 'Logged in Successfully!',
