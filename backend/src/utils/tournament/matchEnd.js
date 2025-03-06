@@ -54,22 +54,26 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
                         index === self.findIndex((p) => p.cfid === participant.cfid)
                     );
 
+                    const participantData = nextMatch.participants[nextMatch.participants.length - 1];
+
+                    let updateFields = {};
+                    for (const key in participantData) {
+                        updateFields[`matches.$[matchElem].participants.$[partElem].${key}`] = participantData[key];
+                    }
+
+                    updateFields["matches.$[matchElem].participants.$[partElem].updatedAt"] = new Date();
+
                     await Tournament.updateOne(
                         { _id: tournamentId },
-                        {
-                            $set: {
-                                "matches.$[matchElem].participants.$[partElem].cfid": nextMatch.participants[nextMatch.participants.length - 1].cfid,
-                                "matches.$[matchElem].participants.$[partElem].name": nextMatch.participants[nextMatch.participants.length - 1].name,
-                                "matches.$[matchElem].participants.$[partElem].updatedAt": new Date()
-                            }
-                        },
+                        { $set: updateFields },
                         {
                             arrayFilters: [
                                 { "matchElem.id": nextMatch.id }, 
-                                { "partElem.cfid": nextMatch.participants[nextMatch.participants.length - 1].cfid }
+                                { "partElem.cfid": participantData.cfid }
                             ]
                         }
                     );
+
                     
 
                 }
