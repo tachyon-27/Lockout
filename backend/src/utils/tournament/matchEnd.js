@@ -93,7 +93,7 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
                     "matches.$[matchElem].participants.$[partElem1].totalPoints": match.participants[1].totalPoints,
                     "matches.$[matchElem].participants.$[partElem1].resultText": match.participants[1].resultText,
                     "matches.$[matchElem].endTime": Date.now(),
-                    "matches.$[matchElem].state": "DONE",
+                    "matches.$[matchElem].state": winner ? "DONE" : "TIE",
                     "matches.$[matchElem].winner": winner ? winner.cfid : "DRAW"
                 }
             },
