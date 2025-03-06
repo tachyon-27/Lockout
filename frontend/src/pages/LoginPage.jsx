@@ -38,22 +38,18 @@ const Login = () => {
         onSuccess: async (tokenResponse) => {
             try {
                 setIsSubmitting(true);
-    
+
                 const { data } = await axios.post(
-                    `${import.meta.env.VITE_BACKEND_URI}/api/user/google`,
-                    { token: tokenResponse.access_token } 
+                    `/api/user/google`,
+                    { token: tokenResponse.access_token },
+                    {withCredentials: true},
                 );
-    
+
                 if (data.success) {
-                    console.log(data)
-                    await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/user/refresh`, {
-                        _id: data.data._id,
-                    });
-    
                     toast({
                         title: 'Logged in Successfully!',
                     });
-    
+
                     dispatch(loginSuccess({ token: data.data._id, role: "verifiedUser" }));
                     navigate('/tournaments');
                 } else {
@@ -77,7 +73,7 @@ const Login = () => {
             });
         }
     });
-    
+
 
     const submit = async (data) => {
         setIsSubmitting(true);
@@ -112,7 +108,7 @@ const Login = () => {
                         <span className="pl-6 text-center">Login</span>
                     </p>
 
-                    <FormField 
+                    <FormField
                         name="email"
                         control={form.control}
                         render={({ field }) => (
@@ -130,7 +126,7 @@ const Login = () => {
                         )}
                     />
 
-                    <FormField 
+                    <FormField
                         name="password"
                         control={form.control}
                         render={({ field }) => (
@@ -149,7 +145,7 @@ const Login = () => {
                                         onClick={togglePassword}
                                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
                                     >
-                                        {showPassword ? <FaEyeSlash /> : <FaEye />} 
+                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
                                     </button>
                                 </div>
                                 <Link to='/forgot-password' className='hover:underline text-sm text-gray-400'>Forgot password?</Link>
