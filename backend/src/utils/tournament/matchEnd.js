@@ -36,54 +36,49 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
 
         const tournament = await Tournament.findById(tournamentId);
 
-        if (winner) {
-            if (match.nextMatchId) {
-                let nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
-                if (nextMatch) {
-                    nextMatch = nextMatch.toObject();
-                    nextMatch.participants = nextMatch.participants.filter(participant =>
-                        participant.cfid !== match.participants[0].cfid &&
-                        (match.participants.length <= 1 || participant.cfid !== match.participants[1].cfid)
-                    );
+        if (winner && match.nextMatchId) {
+            let nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
+            if (nextMatch) {
+                nextMatch = nextMatch.toObject();
+        
+                nextMatch.participants = nextMatch.participants.filter(participant =>
+                    participant.cfid !== match.participants[0].cfid &&
+                    (match.participants.length <= 1 || participant.cfid !== match.participants[1].cfid)
+                );
+        
+                const winnerData = winner?.toObject ? winner.toObject() : winner;
+        
+                delete winnerData.resultText;
 
-                    if (!nextMatch.participants.some(p => p.cfid === winner.cfid)) {
-                        nextMatch.participants.push(winner?.toObject ? winner.toObject() : winner);
-                    }
-
-                    nextMatch.participants = nextMatch.participants.filter((participant, index, self) =>
-                        index === self.findIndex((p) => p.cfid === participant.cfid)
-                    );
-
-                    const participantData = nextMatch.participants[nextMatch.participants.length - 1];
-
-                    let updateFields = {};
-                    for (const key in participantData) {
-                        updateFields[`matches.$[matchElem].participants.$[partElem].${key}`] = participantData[key];
-                    }
-
-                    updateFields["matches.$[matchElem].participants.$[partElem].updatedAt"] = new Date();
-
-                    await Tournament.updateOne(
-                        { _id: tournamentId },
-                        { $set: updateFields },
-                        {
-                            arrayFilters: [
-                                { "matchElem.id": nextMatch.id }, 
-                                { "partElem.cfid": participantData.cfid }
-                            ]
-                        }
-                    );
-
-                    
-
+                if (!nextMatch.participants.some(p => p.cfid === winnerData.cfid)) {
+                    nextMatch.participants.push(winnerData);
                 }
+        
+                await Tournament.updateOne(
+                    { _id: tournamentId },
+                    {
+                        $addToSet: {
+                            "matches.$[matchElem].participants": winnerData
+                        },
+                        $set: {
+                            "matches.$[matchElem].updatedAt": new Date()
+                        }
+                    },
+                    {
+                        arrayFilters: [{ "matchElem.id": nextMatch.id }]
+                    }
+                );
             }
-
-            match.participants.find(p => p.cfid === winner.cfid).resultText = resultText;
+        }
+        
+        const winningParticipant = match.participants.find(p => p.cfid === winner?.cfid);
+        if (winningParticipant) {
+            winningParticipant.resultText = resultText;
         } else {
             match.participants[0].resultText = "TIE";
             match.participants[1].resultText = "TIE";
         }
+        
 
         match.endTime = Date.now()
         match.state = "DONE";
