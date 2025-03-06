@@ -72,7 +72,7 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
         }
         
         const winningParticipant = match.participants.find(p => p.cfid === winner?.cfid);
-        const losingParticipant = match.participants.find(p => p.cfid === winner?.cfid);
+        const losingParticipant = match.participants.find(p => p.cfid !== winner?.cfid);
         if (winningParticipant) {
             winningParticipant.resultText = resultText;
             losingParticipant.resultText = undefined;
