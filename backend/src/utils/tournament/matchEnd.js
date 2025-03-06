@@ -81,7 +81,7 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
         
 
         match.endTime = Date.now()
-        match.state = "DONE";
+        match.state = winner ? "DONE" : "TIE";
         match.winner = winner ? winner.cfid : "DRAW";
 
         await Tournament.updateOne(
