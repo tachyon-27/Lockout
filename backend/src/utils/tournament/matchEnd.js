@@ -38,7 +38,7 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
 
         if (winner) {
             if (match.nextMatchId) {
-                const nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
+                let nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
                 if (nextMatch) {
                     nextMatch = nextMatch.toObject();
                     nextMatch.participants = nextMatch.participants.filter(participant =>
