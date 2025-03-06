@@ -10,7 +10,7 @@ const MatchSettingsActions = ({ setPopupType, loading, match }) => (
     <CardContent className="flex flex-col space-y-4">
         {match?.state === "SCHEDULED" && <Button onClick={() => setPopupType("start")} disabled={loading}>Start Match</Button>}
         {(match?.state === "RUNNING" || match?.state === "DONE") &&  <Button onClick={() => setPopupType("restart")} disabled={loading} variant="outline">Restart Match</Button>}
-        {match?.state === "RUNNING" && <Button onClick={() => setPopupType("end")} disabled={loading} variant="destructive">End Match</Button>}
+        {(match?.state === "RUNNING" || match.state == "TIE") && <Button onClick={() => setPopupType("end")} disabled={loading} variant="destructive">End Match</Button>}
         {match?.state === "DONE" && (!match?.winner || match.winner === "DRAW") && <Button onClick={() => setPopupType("tie")} disabled={loading} variant="secondary">Tie Handling</Button>}
         {match?.state === "SCHEDULED" && <Button onClick={() => setPopupType("bye")} disabled={loading} variant="outline">Give Bye</Button>}
         {match?.state === "RUNNING" && <Button onClick={() => setPopupType("addDuration")} disabled={loading} variant="outline">Add Duration</Button>}

@@ -109,7 +109,7 @@ const AllMatches = ({ isAdmin = false }) => {
       });
     return {
       upcomingMatches: filtered.filter((match) => match.state === "SCHEDULED"),
-      ongoingMatches: filtered.filter((match) => match.state === "RUNNING"),
+      ongoingMatches: filtered.filter((match) => match.state === "RUNNING" || match.state == "TIE"),
       pastMatches: filtered.filter((match) => match.state === "DONE").reverse()
     };
   }, [matches, searchKey]);
