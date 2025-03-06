@@ -789,6 +789,13 @@ export const startMatch = asyncHandler(async (req, res) => {
         match.endTime = null;
         match.tieBreakers = [];
         match.winner = undefined;
+        let nextMatch = tournament.matches.find(m => m.id == match.nextMatchId);
+        if (nextMatch) {  
+            nextMatch.participants = nextMatch.participants.filter(participant =>
+                participant.cfid !== match.participants[0].cfid &&
+                (match.participants.length <= 1 || participant.cfid !== match.participants[1].cfid)
+            );
+        }
         await tournament.save();
 
 
