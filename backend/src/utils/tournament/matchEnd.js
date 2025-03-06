@@ -58,7 +58,9 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
                         { _id: tournamentId },
                         {
                             $set: {
-                                "matches.$[matchElem].participants.$[partElem]": nextMatch.participants[nextMatch.participants.length - 1],
+                                "matches.$[matchElem].participants.$[partElem].cfid": nextMatch.participants[nextMatch.participants.length - 1].cfid,
+                                "matches.$[matchElem].participants.$[partElem].name": nextMatch.participants[nextMatch.participants.length - 1].name,
+                                "matches.$[matchElem].participants.$[partElem].updatedAt": new Date()
                             }
                         },
                         {
@@ -68,6 +70,7 @@ export const handleMatchEnd = async (tournamentId, match, io, roomId, roomTimers
                             ]
                         }
                     );
+                    
 
                 }
             }
